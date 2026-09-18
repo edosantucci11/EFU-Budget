@@ -1,0 +1,45 @@
+EFU BUDGET - web app per iPhone, versione 1.3
+
+COSA C'È IN QUESTA CARTELLA
+index.html, sw.js, manifest.webmanifest e le icone: sono i file dell'app.
+Vanno caricati tutti insieme, senza cambiarne i nomi.
+
+INSTALLAZIONE (una volta sola, circa 10 minuti)
+Si può fare anche solo dall'iPhone: tocca lo zip nell'app File per estrarlo.
+
+1. Crea un account gratuito su github.com.
+2. Tocca «+» in alto e poi «New repository».
+   Nome: efu-budget. Visibilità: Public. Poi «Create repository».
+   Nel repository c'è solo il codice dell'app: i tuoi dati non ci finiscono mai.
+3. Nella pagina del repository tocca «uploading an existing file»
+   (oppure Add file > Upload files), scegli TUTTI i file di questa cartella
+   e tocca «Commit changes».
+4. Vai su Settings > Pages. In «Build and deployment» scegli
+   Source: Deploy from a branch, Branch: main, cartella: / (root). Tocca Save.
+5. Dopo uno o due minuti, in cima alla stessa pagina compare l'indirizzo,
+   del tipo https://TUONOME.github.io/efu-budget/
+6. Sull'iPhone apri quell'indirizzo con Safari.
+7. Tocca i tre puntini accanto alla barra dell'indirizzo, poi Condividi.
+   Scorri e tocca «Aggiungi alla schermata Home».
+   Lascia attivo «Apri come app web», controlla che il nome sia EFU Budget e tocca Aggiungi.
+   Con iOS precedenti al 26: tasto Condividi in basso, poi «Aggiungi alla schermata Home».
+8. Apri EFU Budget dall'icona: parte a schermo intero con il nome al centro
+   e funziona anche senza connessione.
+
+PRIMO AVVIO
+Scegli «Importa i tuoi dati» per caricare il file Excel del budget,
+oppure «Inizia da zero». Da Impostazioni puoi attivare il codice di blocco.
+
+AGGIORNAMENTI
+Quando ricevi una nuova versione, su GitHub carica i nuovi file sopra i vecchi
+(Add file > Upload files > Commit changes). L'app si aggiorna da sola alla
+riapertura successiva; se non succede, chiudila dal multitasking e riaprila.
+I dati restano.
+
+ATTENZIONE AI DATI
+- I dati stanno solo dentro l'app, su questo iPhone. Fai un backup ogni tanto
+  (Impostazioni > Backup completo) e salvalo in File o su iCloud Drive.
+- Prima di eliminare l'icona dalla schermata Home fai sempre un backup:
+  togliendo l'app puoi perdere anche i dati.
+- Usa sempre l'icona, non il link in Safari: Safari e l'app installata
+  hanno memorie separate.
