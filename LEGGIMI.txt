@@ -1,4 +1,4 @@
-EFU BUDGET - web app per iPhone, versione 1.3
+EFU BUDGET - web app per iPhone, versione 1.5
 
 COSA C'È IN QUESTA CARTELLA
 index.html, sw.js, manifest.webmanifest e le icone: sono i file dell'app.
@@ -35,6 +35,18 @@ Quando ricevi una nuova versione, su GitHub carica i nuovi file sopra i vecchi
 (Add file > Upload files > Commit changes). L'app si aggiorna da sola alla
 riapertura successiva; se non succede, chiudila dal multitasking e riaprila.
 I dati restano.
+
+PREZZI AUTOMATICI (FACOLTATIVO)
+Il file ponte-prezzi.js serve solo per aggiornare da soli i prezzi di ETF e azioni.
+1. Sul PC vai su dash.cloudflare.com e crea un account gratuito.
+2. Apri Workers & Pages, tocca Create e parti da Hello World.
+   Chiamalo efu-prezzi e tocca Deploy.
+3. Tocca Edit code, cancella tutto e incolla il contenuto di ponte-prezzi.js
+   (aprilo con il Blocco note). Poi tocca Deploy.
+4. Copia l'indirizzo del Worker, del tipo https://efu-prezzi.tuonome.workers.dev
+5. Nell'app: Investimenti > Configura i prezzi automatici, incolla l'indirizzo
+   e tocca Prova e salva.
+6. In ogni investimento scrivi il simbolo (per esempio VWCE.DE) e le quote.
 
 ATTENZIONE AI DATI
 - I dati stanno solo dentro l'app, su questo iPhone. Fai un backup ogni tanto

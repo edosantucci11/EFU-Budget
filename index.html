@@ -520,6 +520,43 @@ a.btn{text-decoration:none}
 .onb-brand{margin:0 0 6px;font-size:15px;font-weight:700;letter-spacing:.01em}
 .onb-brand span{color:#FF385C}
 
+/* 1.4 */
+.h-acts{display:flex;align-items:center;gap:2px}
+.cclist{display:flex;flex-direction:column;gap:10px}
+.ccard{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:inherit}
+.cc-m{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:14px;line-height:1.4;color:var(--ink-2)}
+.cc-m>b{font-size:16px;color:var(--ink);font-weight:600}
+.cc-m b.num{color:var(--ink);font-weight:600}
+.cc-now{display:flex;flex-direction:column;gap:4px;margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--surface-2);font-size:14px}
+.two-fld{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inv-card{display:block;width:100%;text-align:left;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:inherit}
+.inv-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:6px}
+.inv-top>span:first-child{display:flex;flex-direction:column;gap:2px}
+.inv-v{font-size:24px;font-weight:700;color:var(--ink)}
+.inv-g{display:flex;flex-direction:column;align-items:flex-end;font-size:14px;text-align:right}
+.inv-due{display:block;margin-top:8px;font-size:13px;font-weight:600;color:#FF385C}
+.inv-sum{margin:2px 0 12px}
+.inv-big{font-size:34px;font-weight:700;margin:2px 0 4px;letter-spacing:-.02em}
+.inv-gl{font-size:15px;margin:0}
+.inv-ch{display:block;width:100%;height:auto;color:var(--ink-2);margin:10px 0 2px;overflow:visible}
+.inv-ch .ax{font-size:10px;fill:var(--ink-2)}
+.inv-nochart{margin:12px 0}
+.inv-leg{display:flex;gap:16px;font-size:12.5px;color:var(--ink-2);margin:4px 0 0}
+.inv-leg span{display:inline-flex;align-items:center;gap:6px}
+.inv-leg i{display:inline-block;width:14px;height:3px;border-radius:2px}
+.inv-leg i.dash{background:repeating-linear-gradient(90deg,var(--ink-2) 0 4px,transparent 4px 7px)}
+.inv-rv{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.inv-rv small{font-size:12.5px}
+.av-e{font-size:20px}
+.upd-card{padding:14px;border:1px solid var(--line);border-radius:16px;margin-top:12px}
+.upd-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sheet-foot .later{display:block;margin:10px auto 0;text-align:center}
+
+/* 1.5 */
+.warn-t{color:#B25E00;font-size:14px;line-height:1.4;margin:8px 0 0}
+.px-found{margin-top:8px}
+.pac-tot{margin:12px 0 0;font-weight:600}
+
 </style>
 </head>
 <body>
@@ -535,7 +572,7 @@ a.btn{text-decoration:none}
    I dati restano sul dispositivo: localStorage per i dati,
    IndexedDB per le foto degli scontrini.
    ========================================================= */
-const APP_VERSION = '1.3';
+const APP_VERSION = '1.5.1';
 const IS_PACKAGE = true; // la build installabile imposta true
 const DATA_KEY = 'budget.iphone.v1';
 
@@ -552,13 +589,15 @@ const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 const NF2 = new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const NF0 = new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 });
 function eur(n, o = {}) {
+  if (HIDE && !o.show) return '•••• ' + baseSym();
   const v = r2(n);
   let s = NF2.format(Math.abs(v)) + ' ' + baseSym();
   if (v < 0) s = '−' + s; else if (o.sign && v > 0) s = '+' + s;
   return s;
 }
-const eur0 = n => (r2(n) < 0 ? '−' : '') + NF0.format(Math.abs(Math.round(n))) + ' ' + baseSym();
+const eur0 = n => HIDE ? '•••• ' + baseSym() : (r2(n) < 0 ? '−' : '') + NF0.format(Math.abs(Math.round(n))) + ' ' + baseSym();
 const pct = x => Math.round(x * 100) + '%';
+let HIDE = false;
 function strToNum(s) {
   if (typeof s === 'number') return s;
   s = String(s || '').trim().replace(/\s/g, '').replace(/€/g, '');
@@ -636,7 +675,7 @@ const baseCur = () => (D && D.settings && D.settings.base) || 'EUR';
 const curSym = c => (ALL_CUR().find(x => x[0] === c) || [c, c])[1];
 const curName = c => (ALL_CUR().find(x => x[0] === c) || [c, c, c])[2];
 const baseSym = () => curSym(baseCur());
-const fmtCur = (n, c) => NF2.format(r2(n)) + ' ' + curSym(c);
+const fmtCur = (n, c) => HIDE ? '•••• ' + curSym(c) : NF2.format(r2(n)) + ' ' + curSym(c);
 const FREQS = [[1, 'Mensile'], [2, 'Bimestrale'], [3, 'Trimestrale'], [6, 'Semestrale'], [12, 'Annuale']];
 const EMOJIS = ['🛒', '🏠', '💡', '⛽', '🚗', '🚆', '💊', '🩺', '🎬', '🍕', '🍝', '☕', '🍷', '👕', '👟', '📺', '📱', '💻', '🎮', '📚', '🎓', '🧸', '🐾', '🎁', '✈️', '🏖️', '🏋️', '⚽', '💇', '🧾', '🛡️', '🏦', '💳', '💶', '💼', '📈', '🐷', '🎯', '🔧', '🧹', '🌱', '🎵', '🏥', '👶', '💍', '🚲', '🅿️', '📦', '🏷️', '❤️', '🛟', '🏔️'];
 const PEOPLE_EMOJI = ['🙂', '😀', '🧔', '👩', '👨', '👧', '👦', '👵', '👴', '🧑', '👱', '🐶'];
@@ -675,7 +714,7 @@ function blankData() {
   return {
     v: 1, created: today(),
     settings: { defaultAccount: null, pin: null, lockAfter: 60, lastBackup: null, rates: {}, demo: false, installHintClosed: false, base: 'EUR', partners: {}, aliases: {}, apSeen: [] },
-    accounts: [], categories: [], movements: [], fixed: [], people: [], inbox: [], deleted: {}
+    accounts: [], categories: [], movements: [], fixed: [], people: [], inbox: [], deleted: {}, invest: []
   };
 }
 function migrate(d) {
@@ -684,6 +723,7 @@ function migrate(d) {
   for (const k of ['accounts', 'categories', 'movements', 'fixed', 'people']) if (!Array.isArray(d[k])) d[k] = [];
   if (!d.settings.rates || typeof d.settings.rates !== 'object') d.settings.rates = {};
   if (!Array.isArray(d.inbox)) d.inbox = [];
+  if (!Array.isArray(d.invest)) d.invest = [];
   if (!d.deleted || typeof d.deleted !== 'object') d.deleted = {};
   return d;
 }
@@ -699,7 +739,7 @@ function load() {
 /* salvataggio, annulla e marcatura delle modifiche (serve al budget di coppia) */
 const UNDO = [];
 let LAST_JSON = null, LAST_ENT = null, UNDO_ARMED = false;
-const SYNC_COLS = ['accounts', 'categories', 'people', 'fixed', 'movements'];
+const SYNC_COLS = ['accounts', 'categories', 'people', 'fixed', 'movements', 'invest'];
 function entIndex(d) {
   const m = new Map();
   for (const c of SYNC_COLS) for (const x of (d[c] || [])) { const { upd, ...rest } = x; m.set(c + ':' + x.id, JSON.stringify(rest)); }
@@ -721,6 +761,7 @@ function stamp() {
 function save(opts = {}) {
   invalidate();
   if (!D) return;
+  if (!opts.noSync && syncAuto()) invalidate();
   if (!opts.noStamp) stamp();
   const json = JSON.stringify(D);
   if (LAST_JSON && LAST_JSON !== json && opts.undo !== false) { UNDO.push(LAST_JSON); if (UNDO.length > 12) UNDO.shift(); UNDO_ARMED = true; }
@@ -742,12 +783,12 @@ const acc = id => accMap().get(id);
 const cat = id => D.categories.find(c => c.id === id);
 const person = id => D.people.find(p => p.id === id);
 const isGoal = a => !!a && a.kind === 'goal';
-const liquidAccounts = () => D.accounts.filter(a => !a.archived && a.kind !== 'goal');
+const liquidAccounts = () => D.accounts.filter(a => !a.archived && (a.kind !== 'goal' && a.kind !== 'invest'));
 const goals = () => D.accounts.filter(a => !a.archived && a.kind === 'goal');
 const activeCats = type => D.categories.filter(c => !c.archived && (!type || c.type === type));
 function defaultAccountId() {
   const a = acc(D.settings.defaultAccount);
-  if (a && !a.archived && !isGoal(a)) return a.id;
+  if (a && !a.archived && (!isGoal(a) && a.kind !== 'invest')) return a.id;
   const l = liquidAccounts()[0];
   return l ? l.id : null;
 }
@@ -868,7 +909,7 @@ function estimateAmount(f) {
 }
 // effetto di una voce fissa sul disponibile (conti non salvadanaio)
 function fixedAvailDelta(f, amt) {
-  const liq = id => { const a = acc(id); return !!a && !isGoal(a); };
+  const liq = id => { const a = acc(id); return !!a && (!isGoal(a) && a.kind !== 'invest'); };
   if (f.type === 'out') return f.sink ? 0 : (liq(f.accountId) ? -amt : 0);
   if (f.type === 'in') return liq(f.accountId) ? amt : 0;
   if (f.type === 'transfer') return (liq(f.accountId) ? -amt : 0) + (liq(f.toAccountId) ? amt : 0);
@@ -1109,7 +1150,7 @@ function sinkOccurrences(f, toK) {
   return res;
 }
 function pendDelta(p) {
-  if (p.sink) { const a = acc(p.f.accountId); return a && !isGoal(a) ? -p.amt : 0; }
+  if (p.sink) { const a = acc(p.f.accountId); return a && (!isGoal(a) && a.kind !== 'invest') ? -p.amt : 0; }
   return fixedAvailDelta(p.f, estimateAmount(p.f));
 }
 function undoLast() {
@@ -1422,6 +1463,7 @@ ACT.lockWipe = () => {
    Schermate principali
    ========================================================= */
 function bigAmount(n) {
+  if (HIDE) return `<span class="big num">••••<span class="big-d"> ${esc(baseSym())}</span></span>`;
   const v = r2(n), [i, d] = NF2.format(Math.abs(v)).split(',');
   return `<span class="big num">${v < 0 ? '−' : ''}${i}<span class="big-d">,${d} ${esc(baseSym())}</span></span>`;
 }
@@ -1448,12 +1490,12 @@ VIEWS.home = () => {
   const gs = goals(), inGoals = sum(gs.map(a => bal[a.id]));
   const ms = monthStats(k);
   const mName = MESI[Number(k.slice(5)) - 1];
-  let h = `<header class="ph home-h">${monthSwitcher()}<button class="icon-btn" data-a="settings" aria-label="Impostazioni">${ic('settings', 22)}</button></header>`;
+  let h = `<header class="ph home-h">${monthSwitcher()}<span class="h-acts"><button class="icon-btn" data-a="hideToggle" aria-label="${HIDE ? 'Mostra gli importi' : 'Nascondi gli importi'}">${ic(HIDE ? 'eyeOff' : 'eye', 22)}</button><button class="icon-btn" data-a="settings" aria-label="Impostazioni">${ic('settings', 22)}</button></span></header>`;
   h += notices();
   h += `<section class="hero">
     <p class="hero-l">${isCur ? 'Disponibile oggi' : k < ck ? 'Disponibile a fine ' + mName : 'Disponibile con i movimenti già inseriti'}</p>
     <p class="hero-n">${bigAmount(avail)}</p>
-    ${gs.length ? `<p class="hero-s">e ${eur(inGoals)} nei salvadanai</p>` : ''}
+    ${heroSub(gs.length, inGoals)}
     ${accountPills(bal)}
     ${spendStrip(ms)}
     <div class="kpis">
@@ -1463,9 +1505,10 @@ VIEWS.home = () => {
     </div>
     ${ms.rate != null ? `<p class="hero-rate">${ms.rate >= 0 ? 'Hai risparmiato il ' + pct(ms.rate) + ' delle entrate' : 'Hai speso più di quanto è entrato'}${ms.saved > 0 ? ', e messo ' + eur(ms.saved) + ' nei salvadanai' : ''}.</p>` : ''}
   </section>`;
-  if (isCur) h += forecastBlock() + alertsBlock() + pendingBlock() + inboxBlock();
+  if (isCur) h += forecastBlock() + alertsBlock() + pendingBlock() + inboxBlock() + cardsBlock();
   h += budgetBlock(k);
   if (gs.length || isCur) h += goalsBlock(bal);
+  if (isCur) h += investBlock();
   if (ms.n) h += recapCard(k);
   h += recentBlock(k);
   h += backupReminder();
@@ -1517,7 +1560,7 @@ function pendingCard(p) {
 }
 function pendingBlock() {
   const lim = addDays(today(), 7);
-  const list = pendingFixed(curMk()).filter(p => p.due <= lim);
+  const list = pendingFixed(curMk()).filter(p => p.due <= lim && !p.f.auto);
   if (!list.length) return '';
   return section('Da registrare', `<div class="pcards">${list.slice(0, 4).map(pendingCard).join('')}</div>`, { label: 'Tutte le voci fisse', a: 'planGo', attrs: 'data-p="fixed"' });
 }
@@ -2142,6 +2185,7 @@ ACT.movSave = async el => {
   } catch (e) { toast('La foto non è stata salvata: memoria non disponibile.'); }
   Object.assign(m, { type: st.type, date: st.date, amount, description: st.description.trim(), note: st.note.trim(), tags: st.tags.slice(), accountId: st.accountId });
   if (st.type === 'transfer') { m.toAccountId = st.toAccountId; delete m.categoryId; } else { m.categoryId = st.categoryId; delete m.toAccountId; }
+  if (!isNew && (m.cardDebit || m.interestOf)) m.manual = true;
   if (isFx) { m.cur = st.cur; m.orig = r2(orig); m.rate = st.rate; D.settings.rates[st.cur] = st.rate; }
   else { delete m.cur; delete m.orig; delete m.rate; }
   if (st.type === 'out' && st.split.on && st.split.people.length) {
@@ -2167,8 +2211,11 @@ ACT.movDelete = el => {
     const m = D.movements.find(x => x.id === id);
     if (!m) return;
     D.movements = D.movements.filter(x => x !== m);
+    if (m.cardDebit) { const ca = acc(m.cardDebit); if (ca) ca.skipDebits = (ca.skipDebits || []).concat(m.cycle); }
+    if (m.pacOf) pacUndo(m);
+    if (m.interestOf) { const ia = acc(m.interestOf); if (ia && ia.interest) ia.interest.skip = (ia.interest.skip || []).concat(m.period); }
     save(); closeSheet(sh); refresh();
-    toast('Movimento eliminato', { label: 'Annulla', fn: () => { D.movements.push(m); save(); refresh(); } });
+    toast('Movimento eliminato', (m.pacOf || m.cardDebit || m.interestOf) ? undefined : { label: 'Annulla', fn: () => { D.movements.push(m); save(); refresh(); } });
     if (m.photoId) setTimeout(() => { if (!D || !D.movements.some(x => x.photoId === m.photoId)) PhotoDB.del(m.photoId).catch(() => { }); }, 8000);
   });
 };
@@ -2354,6 +2401,8 @@ ACT.accSave = el => {
   if (!name) return toast('Dai un nome al conto');
   const a = st.id ? acc(st.id) : { id: uid(), archived: false };
   Object.assign(a, { name, emoji: st.emoji, kind: st.kind, initial: r2(strToNum(st.initial)), initialDate: st.initialDate || today() });
+  applyCardSettings(a, st);
+  applyInterestSettings(a, st);
   if (!st.id) D.accounts.push(a);
   if (st.isDefault || !acc(D.settings.defaultAccount)) D.settings.defaultAccount = a.id;
   save(); closeSheet(sh); refresh(); toast(st.id ? 'Conto aggiornato' : 'Conto aggiunto');
@@ -3039,7 +3088,7 @@ function seedDemo() {
   const ck = curMk(), t = today(), s0 = addM(ck, -3), start = s0 + '-01';
   const bank = { id: uid(), name: 'Conto principale', emoji: '🏦', kind: 'bank', initial: 1850, initialDate: start, archived: false };
   const cash = { id: uid(), name: 'Contanti', emoji: '💶', kind: 'cash', initial: 120, initialDate: start, archived: false };
-  const card = { id: uid(), name: 'Carta di credito', emoji: '💳', kind: 'card', initial: 0, initialDate: start, archived: false };
+  const card = { id: uid(), name: 'Carta di credito', emoji: '💳', kind: 'card', initial: 0, initialDate: start, archived: false, credit: true, closeDay: 15, payDay: 10, payFrom: bank.id, autoFrom: start };
   const vac = { id: uid(), name: 'Vacanze', emoji: '🏖️', kind: 'goal', initial: 450, initialDate: start, target: 1500, deadline: (Number(ck.slice(0, 4)) + 1) + '-06', color: '#00A699', archived: false };
   const emg = { id: uid(), name: 'Fondo emergenze', emoji: '🛟', kind: 'goal', initial: 1200, initialDate: start, target: 3000, deadline: '', color: '#2F6FED', archived: false };
   const sinkAcc = { id: uid(), name: 'Accantonamenti', emoji: '🗓️', kind: 'goal', sys: 'sink', initial: 0, initialDate: start, target: 0, deadline: '', color: '#7A8B99', archived: false };
@@ -3096,6 +3145,8 @@ function seedDemo() {
     d.movements.push(m);
   }
   for (const f of d.fixed) for (const s of sinkOccurrences(f, ck)) if (s.due <= lim) d.movements.push({ id: uid(), ts: dateOf(s.due).getTime() + (n++), type: 'transfer', date: s.due, amount: s.amt, description: 'Quota per ' + f.name, accountId: f.accountId, toAccountId: sinkAcc.id, tags: [], note: '', sinkOf: f.id, sinkKey: s.k });
+  d.invest = demoInvest();
+  demoPac(d, bank.id);
   return d;
 }
 
@@ -3550,7 +3601,7 @@ CHG.syncFile = async el => {
     const r = mergeSync(pkg);
     invalidate();
     const da = acc(D.settings.defaultAccount);
-    if (!da || isGoal(da) || da.archived) { const l = D.accounts.find(a => !a.archived && a.kind !== 'goal'); D.settings.defaultAccount = l ? l.id : null; }
+    if (!da || isGoal(da) || da.archived) { const l = D.accounts.find(a => !a.archived && (a.kind !== 'goal' && a.kind !== 'invest')); D.settings.defaultAccount = l ? l.id : null; }
     save({ noStamp: true, undo: false });
     UNDO.length = 0;
     UI.sheets.slice().forEach(s => { if (s.type !== 'settings') closeSheet(s); });
@@ -3658,9 +3709,9 @@ SETTINGS.main = function () {
   let h = sheetHead('Impostazioni', { grab: false }) + '<div class="sheet-body">';
   h += `<div class="set-hero"><span class="app-ic">${appIconSVG(52)}</span><div><b>EFU Budget</b><span class="muted">I tuoi dati restano su questo dispositivo</span></div></div>`;
   if (UNDO.length) h += `<button class="notice undo-n" data-a="undoLast">${ic('undo', 20)}<div><b>Annulla l'ultima modifica</b><span>Torna indietro di un passo, anche se il messaggio è già sparito.</span></div></button>`;
-  h += `<h3 class="set-h">Il tuo denaro</h3><div class="list">${setRow('wallet', 'Conti', liquidAccounts().length, 'data-a="setPage" data-p="accounts"')}${setRow('tag', 'Categorie', activeCats().length, 'data-a="setPage" data-p="categories"')}${setRow('people', 'Persone e spese divise', D.people.length || '', 'data-a="setPage" data-p="people"')}${setRow('globe', 'Valuta principale', esc(curName(baseCur()) + ' (' + baseSym() + ')'), 'data-a="openBaseCur"')}</div>`;
+  h += `<h3 class="set-h">Il tuo denaro</h3><div class="list">${setRow('wallet', 'Conti', liquidAccounts().length, 'data-a="setPage" data-p="accounts"')}${setRow('tag', 'Categorie', activeCats().length, 'data-a="setPage" data-p="categories"')}${setRow('people', 'Persone e spese divise', D.people.length || '', 'data-a="setPage" data-p="people"')}${setRow('globe', 'Valuta principale', esc(curName(baseCur()) + ' (' + baseSym() + ')'), 'data-a="openBaseCur"')}${setRow('trend', 'Investimenti', D.invest.length || '', 'data-a="invOpen"')}</div>`;
   h += `<h3 class="set-h">Insieme e in automatico</h3><div class="list">${setRow('people', 'Budget di coppia', ps.length ? esc('Con ' + ps.join(', ')) : 'Non attivo', 'data-a="setPage" data-p="share"')}${setRow('wallet', 'Pagamenti con Apple Pay', nIn ? nIn + ' da controllare' : '', 'data-a="setPage" data-p="applepay"')}</div>`;
-  h += `<h3 class="set-h">Sicurezza</h3><div class="list">${setRow('lock', 'Codice di blocco', D.settings.pin ? 'Attivo' : 'Non attivo', 'data-a="setPage" data-p="security"')}</div>`;
+  h += `<h3 class="set-h">Sicurezza</h3><div class="list">${setRow('lock', 'Codice di blocco', D.settings.pin ? 'Attivo' : 'Non attivo', 'data-a="setPage" data-p="security"')}</div>${swRow("Nascondi gli importi all'apertura", 'hideOnOpen', !!D.settings.hideOnOpen, "Ogni volta che apri l'app gli importi sono coperti: per vederli tocca l'occhio in alto nella Home.", 'hideOpenToggle')}`;
   h += `<h3 class="set-h">Dati</h3><div class="list">${setRow('upload', 'Importa dati<small>Excel del budget, altre app, estratto conto</small>', '', 'data-a="openImportAny"')}${setRow('download', 'Esporta in Excel o CSV', '', 'data-a="openExport"')}${setRow('file', 'Backup completo', D.settings.lastBackup ? 'Ultimo il ' + shortDate(D.settings.lastBackup) : 'Mai fatto', 'data-a="backup"')}<label class="row"><span class="row-ic">${ic('upload', 21)}</span><span class="rt">Ripristina da backup</span><span class="rv"></span>${ic('right', 18)}<input type="file" class="vh" accept="application/json,.json" data-ch="restoreFile"></label></div>`;
   h += `<p class="foot-note">Versione ${APP_VERSION}. I dati sono salvati solo in questa app, su questo dispositivo: fai un backup ogni tanto e conservalo su File o iCloud Drive.</p>`;
   return h + '<div class="danger-z"><button class="link danger" data-a="wipe">Cancella tutti i dati</button></div></div>';
@@ -3759,6 +3810,775 @@ ACT.fxToggle = el => { D.settings.fxAuto = !fxOn(); save({ undo: false }); drawS
 }
 
 /* =========================================================
+   Versione 1.4
+   Carte di credito con chiusura contabile e addebito automatico,
+   importi nascosti, investimenti con grafico e promemoria
+   ========================================================= */
+ICONS.eye = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>';
+ICONS.eyeOff = '<path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c6.5 0 10 8 10 8a17.4 17.4 0 0 1-2.2 3.2"/><path d="M6.6 6.6C3.9 8.4 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m2 2 20 20"/>';
+ICONS.trend = '<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>';
+const dayDiff = (a, b) => Math.round((dateOf(b) - dateOf(a)) / 864e5);
+const pctDec = x => (Math.round(x * 1000) / 10).toLocaleString('it-IT') + '%';
+
+/* ---------- carte di credito: ciclo contabile e addebito automatico ---------- */
+const isCredit = a => !!a && !a.archived && a.kind === 'card' && !!a.credit && a.closeDay >= 1 && a.payDay >= 1 && !!a.payFrom && a.payFrom !== a.id;
+const dayIn = (k, d) => k + '-' + pad(Math.min(Number(d), dim(k)));
+const cardClose = (a, k) => dayIn(k, a.closeDay);
+function cardDebitDate(a, k) { const c = cardClose(a, k); let d = dayIn(k, a.payDay); if (d <= c) d = dayIn(addM(k, 1), a.payDay); return d; }
+const cardCycle = (a, date) => { const k = mk(date); return date <= cardClose(a, k) ? k : addM(k, 1); };
+/* quanto è stato speso con la carta nel ciclo che chiude nel mese k, al netto di rimborsi e pagamenti fatti a mano */
+function cardSpent(a, k) {
+  const from = cardClose(a, addM(k, -1)), to = cardClose(a, k);
+  let t = 0;
+  for (const m of D.movements) {
+    if (m.cardDebit === a.id || m.date <= from || m.date > to) continue;
+    for (const [id, d] of effects(m)) if (id === a.id) t -= d;
+  }
+  return r2(t);
+}
+const cardDebitId = (a, k) => 'cd-' + a.id + '-' + k;
+function syncCardDebits() {
+  if (!D || !D.accounts) return false;
+  let changed = false;
+  const t = today();
+  for (const a of D.accounts) {
+    if (!isCredit(a)) continue;
+    const from = a.autoFrom || t, last = cardCycle(a, t);
+    for (let k = addM(cardCycle(a, from), -1); k <= last; k = addM(k, 1)) {
+      const dd = cardDebitDate(a, k);
+      if (dd < from || dd > t || (a.skipDebits || []).includes(k)) continue;
+      const id = cardDebitId(a, k), cur = D.movements.find(m => m.id === id);
+      if (cur && cur.manual) continue;
+      const amt = cardSpent(a, k);
+      if (amt > 0.004) {
+        const want = { type: 'transfer', date: dd, amount: amt, accountId: a.payFrom, toAccountId: a.id, description: 'Addebito ' + a.name, note: 'Estratto chiuso il ' + shortDate(cardClose(a, k)), cardDebit: a.id, cycle: k, tags: [] };
+        if (!cur) { D.movements.push(Object.assign({ id, ts: dateOf(dd).getTime() }, want)); changed = true; }
+        else if (cur.amount !== amt || cur.accountId !== a.payFrom || cur.date !== dd || cur.description !== want.description) { Object.assign(cur, want); changed = true; }
+      } else if (cur) { D.movements = D.movements.filter(m => m !== cur); changed = true; }
+    }
+  }
+  return changed;
+}
+function cardNext(a, t = today()) {
+  const k = cardCycle(a, t), pk = addM(k, -1), nk = cardDebitDate(a, pk) > t ? pk : k;
+  return { k, spent: cardSpent(a, k), nk, amt: cardSpent(a, nk), date: cardDebitDate(a, nk) };
+}
+function cardsBlock() {
+  const cards = D.accounts.filter(isCredit);
+  if (!cards.length) return '';
+  return section(cards.length === 1 ? 'Carta di credito' : 'Carte di credito', `<div class="cclist">${cards.map(a => {
+    const n = cardNext(a), from = acc(a.payFrom);
+    return `<button class="ccard" data-a="accEdit" data-id="${a.id}">${avatar(a.emoji || '💳')}<span class="cc-m"><b>${esc(a.name)}</b><span>Speso in questo ciclo <b class="num">${eur(n.spent)}</b>, chiude il ${esc(shortDate(cardClose(a, n.k)))}</span><span>${n.amt > 0.004 ? `Addebito di <b class="num">${eur(n.amt)}</b> il ${esc(shortDate(n.date))}${from ? ' su ' + esc(from.name) : ''}` : 'Nessun addebito in arrivo'}</span></span></button>`;
+  }).join('')}</div>`);
+}
+function cardExample(st) {
+  const c = parseInt(st.closeDay, 10), p = parseInt(st.payDay, 10);
+  if (!(c >= 1 && c <= 31 && p >= 1 && p <= 31)) return 'Esempio: con chiusura il 15 e addebito il 10, le spese fino al 15 settembre vengono scalate il 10 ottobre; quelle dal 16 settembre passano al ciclo dopo.';
+  const f = { closeDay: c, payDay: p }, k = mk(today()), cd = cardClose(f, k);
+  return `Le spese fino al ${shortDate(cd)} verranno scalate il ${shortDate(cardDebitDate(f, k))}; quelle dal ${shortDate(addDays(cd, 1))} passano al ciclo successivo. Ci penso io in automatico.`;
+}
+function applyCardSettings(a, st) {
+  if (st.kind === 'card' && st.credit) {
+    const was = isCredit(a);
+    Object.assign(a, { credit: true, closeDay: parseInt(st.closeDay, 10), payDay: parseInt(st.payDay, 10), payFrom: st.payFrom });
+    if (!was || !a.autoFrom) a.autoFrom = today();
+  } else if (a.credit) a.credit = false;
+}
+{
+  const S = SHEETS.account, init0 = S.init, render0 = S.render, save0 = ACT.accSave;
+  S.init = p => {
+    const st = init0(p), a = p.id ? acc(p.id) : null, others = liquidAccounts().filter(x => (!a || x.id !== a.id) && x.kind !== 'card');
+    const def = (a && a.payFrom) || ((others.find(x => x.kind === 'bank') || others[0] || {}).id) || null;
+    return Object.assign(st, { credit: !!(a && a.credit), closeDay: a && a.closeDay ? String(a.closeDay) : '', payDay: a && a.payDay ? String(a.payDay) : '', payFrom: def });
+  };
+  S.render = (st, sh) => {
+    const h = render0(st, sh);
+    if (st.kind !== 'card') return h;
+    let c = swRow('Carta di credito con addebito mensile', 'credit', st.credit, 'Le spese si accumulano e una volta al mese il totale viene scalato da un altro conto.');
+    if (st.credit) {
+      const others = liquidAccounts().filter(x => x.id !== st.id && x.kind !== 'card');
+      c += `<div class="two-fld"><label class="fld"><span>Giorno di chiusura</span><input inputmode="numeric" data-in="set" data-f="closeDay" value="${esc(st.closeDay)}" placeholder="Es. 15"></label><label class="fld"><span>Giorno di addebito</span><input inputmode="numeric" data-in="set" data-f="payDay" value="${esc(st.payDay)}" placeholder="Es. 10"></label></div>`;
+      c += fieldLabel('Addebitata sul conto') + (others.length ? `<div class="chips wrap">${others.map(x => `<button class="chip ${st.payFrom === x.id ? 'on' : ''}" data-a="pick" data-f="payFrom" data-v="${x.id}">${esc(x.emoji || '🏦')} ${esc(x.name)}</button>`).join('')}</div>` : '<p class="muted sm">Aggiungi prima il conto corrente da cui viene addebitata.</p>');
+      c += `<p class="muted sm gap-t">${esc(cardExample(st))}</p>`;
+      const a = st.id && acc(st.id);
+      if (a && isCredit(a)) { const n = cardNext(a); c += `<div class="cc-now"><span>Ciclo in corso: <b class="num">${eur(n.spent)}</b>, chiude il ${esc(shortDate(cardClose(a, n.k)))}</span><span>Prossimo addebito: <b class="num">${eur(n.amt)}</b> il ${esc(shortDate(n.date))}</span></div>`; }
+    }
+    const i = h.indexOf('<div class="danger-z">') >= 0 ? h.indexOf('<div class="danger-z">') : h.lastIndexOf('</div><footer');
+    return h.slice(0, i) + c + h.slice(i);
+  };
+  ACT.accSave = el => {
+    const st = sheetOf(el).st;
+    if (st.kind === 'card' && st.credit) {
+      const c = parseInt(st.closeDay, 10), p = parseInt(st.payDay, 10);
+      if (!(c >= 1 && c <= 31)) return toast('Scrivi il giorno di chiusura, da 1 a 31');
+      if (!(p >= 1 && p <= 31)) return toast('Scrivi il giorno di addebito, da 1 a 31');
+      if (!st.payFrom || !acc(st.payFrom) || st.payFrom === st.id) return toast('Scegli il conto da cui viene addebitata');
+    }
+    save0(el);
+  };
+}
+
+/* ---------- importi nascosti ---------- */
+const HIDE_KEY = 'budget.iphone.hide';
+ACT.hideToggle = () => { HIDE = !HIDE; try { localStorage.setItem(HIDE_KEY, HIDE ? '1' : '0'); } catch (e) { } refresh(); };
+ACT.hideOpenToggle = el => { D.settings.hideOnOpen = !D.settings.hideOnOpen; save({ undo: false }); drawSheet(sheetOf(el)); };
+function heroSub(nG, inGoals) {
+  const parts = [];
+  if (nG) parts.push(eur(inGoals) + ' nei salvadanai');
+  const iv = D.invest && D.invest.length ? invTotals().v : 0;
+  if (iv > 0) parts.push(eur(iv) + ' investiti');
+  return parts.length ? `<p class="hero-s">e ${parts.join(', ')}</p>` : '';
+}
+
+/* ---------- investimenti ---------- */
+const INV_KINDS = [['etf', 'ETF', '📈'], ['stock', 'Azioni', '🏢'], ['fund', 'Fondo', '🧺'], ['bond', 'Obbligazioni', '📜'], ['crypto', 'Cripto', '🪙'], ['other', 'Altro', '💼']];
+const invKind = k => INV_KINDS.find(x => x[0] === k) || INV_KINDS[5];
+const invById = id => D.invest.find(p => p.id === id);
+const invLast = p => (p.hist && p.hist.length ? p.hist[p.hist.length - 1] : { d: p.created || today(), v: p.invested || 0, i: p.invested || 0 });
+const invValue = p => invLast(p).v;
+function invTotals(list = D.invest) { let v = 0, i = 0; for (const p of list) { v += invValue(p); i += p.invested || 0; } return { v: r2(v), i: r2(i), g: r2(v - i), pct: i > 0 ? (v - i) / i : null }; }
+function invSeries(list = D.invest) {
+  const dates = Array.from(new Set(list.flatMap(p => (p.hist || []).map(h => h.d)))).sort();
+  return dates.map(d => {
+    let v = 0, i = 0;
+    for (const p of list) { let last = null; for (const h of (p.hist || [])) { if (h.d <= d) last = h; else break; } if (last) { v += last.v; i += last.i; } }
+    return { d, v: r2(v), i: r2(i) };
+  });
+}
+function invPoint(p, d, v, i) {
+  p.hist = (p.hist || []).filter(h => h.d !== d);
+  p.hist.push({ d, v: r2(v), i: r2(i != null ? i : p.invested || 0) });
+  p.hist.sort((a, b) => a.d.localeCompare(b.d));
+}
+const invGainHTML = (g, pc) => `<b class="num">${eur(g, { sign: true })}</b>${pc != null ? `<span> ${g >= 0 ? '+' : '−'}${pctDec(Math.abs(pc))}</span>` : ''}`;
+function invRange(s, r) {
+  if (r === 'all' || s.length < 3) return s;
+  const from = addDays(today(), r === '3m' ? -92 : -366), inside = s.filter(x => x.d >= from), before = s.filter(x => x.d < from).pop();
+  return before ? [Object.assign({}, before, { d: from })].concat(inside) : inside;
+}
+function invChart(series, h = 150) {
+  if (series.length < 2) return '<p class="muted sm inv-nochart">Il grafico compare dal secondo aggiornamento del valore.</p>';
+  const W = 340, H = h, pl = 2, pr = 2, pt = 8, pb = 20;
+  const t0 = dateOf(series[0].d).getTime(), t1 = dateOf(series[series.length - 1].d).getTime(), span = Math.max(1, t1 - t0);
+  const vals = series.flatMap(s => [s.v, s.i]);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const padV = (hi - lo) * 0.12 || Math.abs(hi) * 0.05 || 1; lo -= padV; hi += padV;
+  const X = d => (pl + (dateOf(d).getTime() - t0) / span * (W - pl - pr)).toFixed(1), Y = v => (pt + (hi - v) / (hi - lo) * (H - pt - pb)).toFixed(1);
+  const line = series.map((s, j) => (j ? 'L' : 'M') + X(s.d) + ' ' + Y(s.v)).join(' ');
+  const step = series.map((s, j) => (j ? `H${X(s.d)} V${Y(s.i)}` : `M${X(s.d)} ${Y(s.i)}`)).join(' ');
+  const area = line + ` L${X(series[series.length - 1].d)} ${H - pb} L${X(series[0].d)} ${H - pb} Z`;
+  const last = series[series.length - 1], col = last.v >= last.i ? 'var(--pos,#0A8A4A)' : '#FF385C';
+  return `<svg class="inv-ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Andamento del valore rispetto al capitale investito"><path d="${area}" style="fill:${col};opacity:.1"/><path d="${step}" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="1.4" stroke-dasharray="4 4"/><path d="${line}" fill="none" style="stroke:${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/><text x="${pl}" y="${H - 5}" class="ax">${esc(shortDate(series[0].d))}</text><text x="${W - pr}" y="${H - 5}" text-anchor="end" class="ax">${esc(shortDate(last.d))}</text></svg><p class="inv-leg"><span><i style="background:${col}"></i>Valore</span><span><i class="dash"></i>Investito</span></p>`;
+}
+function investBlock() {
+  if (!D.invest.length) return section('Investimenti', `<button class="empty-row" data-a="invOpen">${ic('plus', 18)} Aggiungi i tuoi investimenti e segui come vanno</button>`);
+  const t = invTotals();
+  return section('Investimenti', `<button class="inv-card" data-a="invOpen"><span class="inv-top"><span><span class="muted sm">Valore attuale</span><b class="num inv-v">${eur(t.v)}</b></span><span class="inv-g ${t.g >= 0 ? 'pos' : 'neg'}">${invGainHTML(t.g, t.pct)}</span></span>${invChart(invRange(invSeries(), '1y'), 110)}${invDue() ? '<span class="inv-due">È ora di aggiornare i valori</span>' : ''}</button>`);
+}
+function invRow(p) {
+  const k = invKind(p.kind), v = invValue(p), g = v - (p.invested || 0), pc = p.invested > 0 ? g / p.invested : null;
+  return `<button class="row" data-a="invView" data-id="${p.id}"><span class="row-ic av-e">${k[2]}</span><span class="rt">${esc(p.name)}<small>${esc([p.code, k[1], 'aggiornato il ' + shortDate(invLast(p).d)].filter(Boolean).join(', '))}</small></span><span class="rv num inv-rv"><b>${eur(v)}</b>${pc != null ? `<small class="${g >= 0 ? 'pos' : 'neg'}">${g >= 0 ? '+' : '−'}${pctDec(Math.abs(pc))}</small>` : ''}</span></button>`;
+}
+const invFreq = () => (D.settings.invRemind == null ? 7 : Number(D.settings.invRemind));
+function invDue() {
+  const f = invFreq();
+  if (!D || !D.invest.length || !f) return false;
+  const oldest = D.invest.filter(p => !invFresh(p)).reduce((m, p) => { const d = p.seen && p.seen > invLast(p).d ? p.seen : invLast(p).d; return !m || d < m ? d : m; }, null);
+  if (!oldest) return false;
+  return dayDiff(oldest, today()) >= f;
+}
+function redrawInvest() { for (const s of UI.sheets) if (s.type === 'invest' || s.type === 'invView' || s.type === 'pac') drawSheet(s); }
+SHEETS.invest = {
+  cls: 'tall',
+  init: () => ({ range: 'all' }),
+  render(st) {
+    let h = sheetHead('Investimenti') + '<div class="sheet-body">';
+    if (!D.invest.length) return h + `<p class="lead sm">Segna quanto hai investito in ETF, azioni, fondi o altro e aggiorna il valore quando vuoi: vedrai guadagno o perdita e il grafico dell'andamento. Una volta a settimana te lo ricordo io.</p><button class="btn primary w gap-t" data-a="invNew">${ic('plus', 18)} Aggiungi il primo investimento</button></div>`;
+    const t = invTotals(), due = invDue();
+    h += `<div class="inv-sum"><p class="muted sm">Valore attuale</p><p class="inv-big num">${eur(t.v)}</p><p class="inv-gl ${t.g >= 0 ? 'pos' : 'neg'}">${invGainHTML(t.g, t.pct)} <span class="muted">su ${eur(t.i)} investiti</span></p></div>`;
+    h += `<div class="chips">${[['3m', '3 mesi'], ['1y', '1 anno'], ['all', 'Tutto']].map(([k, l]) => `<button class="chip ${st.range === k ? 'on' : ''}" data-a="pick" data-f="range" data-v="${k}">${l}</button>`).join('')}</div>`;
+    h += invChart(invRange(invSeries(), st.range), 170);
+    h += `<button class="btn ${due ? 'primary' : 'dark'} w gap-t" data-a="invUpdateOpen">${ic('trend', 18)} Aggiorna i valori</button>`;
+    h += fieldLabel('Le tue posizioni') + `<div class="list">${D.invest.slice().sort((a, b) => invValue(b) - invValue(a)).map(invRow).join('')}</div>`;
+    h += `<button class="btn outline w gap-t" data-a="invNew">${ic('plus', 18)} Aggiungi investimento</button>`;
+    h += pacSection() + pxSection();
+    h += fieldLabel('Promemoria per aggiornare') + `<div class="chips wrap">${[[7, 'Ogni settimana'], [14, 'Ogni 2 settimane'], [30, 'Ogni mese'], [0, 'Mai']].map(([v, l]) => `<button class="chip ${invFreq() === v ? 'on' : ''}" data-a="invFreq" data-v="${v}">${l}</button>`).join('')}</div>`;
+    return h + `<p class="muted sm gap-t">Quando è il momento, all'apertura dell'app ti chiedo i nuovi valori.</p></div>`;
+  }
+};
+SHEETS.invPos = {
+  cls: 'tall',
+  init(p) {
+    if (p.id) { const x = invById(p.id); return { id: x.id, name: x.name, code: x.code || '', kind: x.kind || 'etf', qty: x.qty ? numStr(x.qty, 6) : '', invested: numStr(x.invested || 0), value: numStr(invValue(x)), sym: x.sym || '', found: null }; }
+    return { id: null, name: '', code: '', kind: 'etf', qty: '', invested: '', value: '', sym: '', found: null };
+  },
+  render(st) {
+    let h = sheetHead(st.id ? 'Modifica investimento' : 'Nuovo investimento') + '<div class="sheet-body">';
+    h += `<label class="fld"><span>Nome</span><input data-in="set" data-f="name" value="${esc(st.name)}" placeholder="Es. Vanguard FTSE All-World" autocomplete="off"></label>`;
+    h += `<label class="fld"><span>Codice, ISIN o ticker (facoltativo)</span><input data-in="set" data-f="code" value="${esc(st.code)}" placeholder="Es. IE00BK5BQT80 oppure VWCE" autocapitalize="characters" autocomplete="off"></label>`;
+    h += pxSymField(st);
+    h += fieldLabel('Tipo') + `<div class="chips wrap">${INV_KINDS.map(([k, l, e]) => `<button class="chip ${st.kind === k ? 'on' : ''}" data-a="pick" data-f="kind" data-v="${k}">${e} ${l}</button>`).join('')}</div>`;
+    h += `<label class="fld"><span>Quanto hai investito in totale</span><input inputmode="decimal" data-in="set" data-f="invested" value="${esc(st.invested)}" placeholder="0,00"></label>`;
+    h += `<label class="fld"><span>${st.id ? 'Valore attuale' : 'Quanto vale oggi'}</span><input inputmode="decimal" data-in="set" data-f="value" value="${esc(st.value)}" placeholder="0,00"></label>`;
+    h += `<label class="fld"><span>Quote possedute (facoltativo)</span><input inputmode="decimal" data-in="set" data-f="qty" value="${esc(st.qty)}" placeholder="Es. 42"></label>`;
+    h += '<p class="muted sm">Con le quote, quando aggiorni puoi scrivere solo il prezzo di una quota: il totale lo calcolo io.</p>';
+    if (st.id) h += '<div class="danger-z"><button class="link danger" data-a="invDelete">Elimina investimento</button></div>';
+    return h + `</div><footer class="sheet-foot"><button class="btn primary w" data-a="invSave">${st.id ? 'Salva modifiche' : 'Aggiungi'}</button></footer>`;
+  }
+};
+SHEETS.invView = {
+  cls: 'tall',
+  render(st, sh) {
+    const p = invById(sh.props.id);
+    if (!p) return sheetHead('Investimento') + '<div class="sheet-body"><p class="muted">Questo investimento è stato eliminato.</p></div>';
+    const k = invKind(p.kind), v = invValue(p), g = v - (p.invested || 0), pc = p.invested > 0 ? g / p.invested : null;
+    let h = sheetHead(p.name) + '<div class="sheet-body">';
+    h += `<p class="muted sm">${esc([k[2] + ' ' + k[1], p.code, p.qty ? numStr(p.qty, 6) + ' quote' : ''].filter(Boolean).join(', '))}</p>`;
+    h += `<div class="inv-sum"><p class="inv-big num">${eur(v)}</p><p class="inv-gl ${g >= 0 ? 'pos' : 'neg'}">${invGainHTML(g, pc)} <span class="muted">su ${eur(p.invested || 0)} investiti</span></p></div>`;
+    h += invChart(invSeries([p]), 150);
+    h += invViewExtra(p);
+    h += `<div class="two-btn gap-t"><button class="btn dark" data-a="invUpdateOne" data-id="${p.id}">Aggiorna valore</button><button class="btn outline" data-a="invMoveOpen" data-id="${p.id}">Compra o vendi</button></div>`;
+    const rows = (p.hist || []).slice().reverse();
+    h += fieldLabel('Storico dei valori') + `<div class="list">${rows.map((x, j) => {
+      const prev = rows[j + 1], d = prev ? x.v - prev.v - (x.i - prev.i) : null;
+      return `<div class="row static"><span class="rt">${esc(shortDate(x.d))}<small>Investito ${eur(x.i)}</small></span><span class="rv num inv-rv"><b>${eur(x.v)}</b>${d != null ? `<small class="${d >= 0 ? 'pos' : 'neg'}">${eur(d, { sign: true })}</small>` : ''}</span>${rows.length > 1 ? `<button class="icon-btn ghost sm" data-a="invPtDel" data-id="${p.id}" data-d="${x.d}" aria-label="Elimina questo valore">${ic('close', 16)}</button>` : ''}</div>`;
+    }).join('')}</div>`;
+    return h + `<button class="btn outline w gap-t" data-a="invEdit" data-id="${p.id}">Modifica</button></div>`;
+  }
+};
+SHEETS.invMove = {
+  init: p => ({ id: p.id, dir: 'buy', amt: '' }),
+  render(st) {
+    const p = invById(st.id);
+    let h = sheetHead('Compra o vendi') + '<div class="sheet-body">';
+    h += `<p class="muted sm">${esc(p ? p.name : '')}</p><div class="chips">${[['buy', 'Acquisto'], ['sell', 'Vendita']].map(([k, l]) => `<button class="chip ${st.dir === k ? 'on' : ''}" data-a="pick" data-f="dir" data-v="${k}">${l}</button>`).join('')}</div>`;
+    h += `<label class="fld gap-t"><span>Importo</span><input inputmode="decimal" data-in="set" data-f="amt" value="${esc(st.amt)}" placeholder="0,00"></label>`;
+    h += '<p class="muted sm">Un acquisto aumenta sia il capitale investito sia il valore; una vendita li riduce. Il guadagno maturato non cambia.</p>';
+    return h + '</div><footer class="sheet-foot"><button class="btn primary w" data-a="invMoveSave">Salva</button></footer>';
+  }
+};
+SHEETS.invUpdate = {
+  cls: 'tall',
+  init: p => ({ only: p.id || null, vals: {}, mode: {} }),
+  render(st) {
+    const list = D.invest.filter(p => (st.only ? p.id === st.only : !invFresh(p)));
+    let h = sheetHead(st.only ? 'Aggiorna valore' : 'Aggiorna i tuoi investimenti') + '<div class="sheet-body">';
+    if (!st.only) h += '<p class="lead sm">Scrivi quanto valgono oggi. Se lasci un campo vuoto, quell\'investimento resta com\'è.</p>';
+    for (const p of list) {
+      const last = invLast(p), unit = p.qty > 0 && st.mode[p.id] === 'unit';
+      h += `<div class="upd-card"><div class="upd-h"><span class="av-e">${invKind(p.kind)[2]}</span><b>${esc(p.name)}</b></div>`;
+      h += `<label class="fld"><span>${unit ? 'Prezzo di una quota oggi' : 'Valore totale oggi'}</span><input inputmode="decimal" data-in="invVal" data-id="${p.id}" value="${esc(st.vals[p.id] || '')}" placeholder="${esc(numStr(unit ? last.v / p.qty : last.v))}"></label>`;
+      h += `<p class="muted sm">L'ultima volta ${eur(last.v)}, il ${esc(shortDate(last.d))}.${p.qty > 0 ? ` <button class="link" data-a="invUnit" data-id="${p.id}">${unit ? 'Scrivi il valore totale' : 'Scrivi il prezzo di una quota'}</button>` : ''}</p></div>`;
+    }
+    return h + `</div><footer class="sheet-foot"><button class="btn primary w" data-a="invUpdSave">Salva</button>${st.only ? '' : '<button class="link w later" data-a="invLater">Ricordamelo domani</button>'}</footer>`;
+  }
+};
+ACT.invOpen = () => openSheet('invest', {});
+ACT.invNew = () => openSheet('invPos', {});
+ACT.invView = el => openSheet('invView', { id: el.dataset.id });
+ACT.invEdit = el => openSheet('invPos', { id: el.dataset.id });
+ACT.invUpdateOpen = () => openSheet('invUpdate', {});
+ACT.invUpdateOne = el => openSheet('invUpdate', { id: el.dataset.id });
+ACT.invMoveOpen = el => openSheet('invMove', { id: el.dataset.id });
+ACT.invFreq = el => { D.settings.invRemind = Number(el.dataset.v); save({ undo: false }); drawSheet(sheetOf(el)); };
+INP.invVal = el => { sheetOf(el).st.vals[el.dataset.id] = el.value; };
+ACT.invUnit = el => { const sh = sheetOf(el), id = el.dataset.id; sh.st.mode[id] = sh.st.mode[id] === 'unit' ? 'tot' : 'unit'; sh.st.vals[id] = ''; drawSheet(sh); };
+ACT.invSave = el => {
+  const sh = sheetOf(el), st = sh.st, name = st.name.trim();
+  if (!name) return toast("Scrivi il nome dell'investimento");
+  const inv = strToNum(st.invested), val = strToNum(st.value), qty = strToNum(st.qty);
+  if (!(inv > 0)) return toast('Scrivi quanto hai investito');
+  const p = st.id ? invById(st.id) : { id: uid(), created: today(), hist: [] };
+  if (!p) return closeSheet(sh);
+  const oldInv = p.invested, oldVal = st.id ? invValue(p) : null;
+  Object.assign(p, { name, code: st.code.trim().toUpperCase(), kind: st.kind, qty: qty > 0 ? qty : null, invested: r2(inv), sym: String(st.sym || '').trim().toUpperCase() || null });
+  const v = st.value.trim() === '' || isNaN(val) ? (st.id ? oldVal : r2(inv)) : r2(val);
+  if (!st.id) { invPoint(p, today(), v, p.invested); D.invest.push(p); }
+  else if (Math.abs(v - oldVal) > 0.004 || Math.abs(p.invested - oldInv) > 0.004) invPoint(p, today(), v, p.invested);
+  save(); closeSheet(sh); redrawInvest(); refresh();
+  toast(st.id ? 'Investimento aggiornato' : 'Investimento aggiunto');
+  if (pxAuto(p)) autoPrices(true);
+};
+ACT.invDelete = el => {
+  const sh = sheetOf(el), p = invById(sh.st.id);
+  if (!p) return;
+  confirmBox(`Eliminare «${esc(p.name)}»?`, 'Sparisce anche lo storico dei valori. Potrai annullare subito dopo.', 'Elimina', () => {
+    D.invest = D.invest.filter(x => x !== p);
+    pacDropPos(p.id);
+    save();
+    UI.sheets.slice().forEach(s => { if (s.type === 'invPos' || (s.type === 'invView' && s.props.id === p.id)) closeSheet(s); });
+    redrawInvest(); refresh(); toast('Investimento eliminato');
+  });
+};
+ACT.invPtDel = el => {
+  const p = invById(el.dataset.id);
+  if (!p || (p.hist || []).length < 2) return;
+  p.hist = p.hist.filter(h => h.d !== el.dataset.d);
+  p.invested = invLast(p).i;
+  save(); redrawInvest(); refresh(); toast('Valore eliminato');
+};
+ACT.invMoveSave = el => {
+  const sh = sheetOf(el), st = sh.st, p = invById(st.id), amt = strToNum(st.amt);
+  if (!p) return closeSheet(sh);
+  if (!(amt > 0)) return toast("Scrivi l'importo");
+  const s = st.dir === 'sell' ? -1 : 1, v = invValue(p);
+  if (s < 0 && amt > v + 0.004) return toast('La vendita supera il valore attuale');
+  p.invested = r2(Math.max(0, (p.invested || 0) + s * amt));
+  invPoint(p, today(), Math.max(0, v + s * amt), p.invested);
+  save(); closeSheet(sh); redrawInvest(); refresh();
+  toast(s > 0 ? 'Acquisto registrato' : 'Vendita registrata');
+};
+ACT.invUpdSave = el => {
+  const sh = sheetOf(el), st = sh.st, t = today();
+  let n = 0;
+  for (const p of D.invest) {
+    if (st.only && p.id !== st.only) continue;
+    const raw = String(st.vals[p.id] || '').trim();
+    if (!raw) { p.seen = t; continue; }
+    let v = strToNum(raw);
+    if (!(v >= 0)) continue;
+    if (p.qty > 0 && st.mode[p.id] === 'unit') v *= p.qty;
+    invPoint(p, t, v, p.invested || 0); n++;
+  }
+  if (!n && st.only) return toast('Scrivi il nuovo valore');
+  D.settings.invSnooze = null;
+  save(); closeSheet(sh); redrawInvest(); refresh();
+  toast(!n ? 'Valori confermati' : n === 1 ? 'Valore aggiornato' : `Aggiornati ${n} investimenti`);
+};
+ACT.invLater = el => { D.settings.invSnooze = today(); save({ undo: false }); closeSheet(sheetOf(el)); };
+let INV_ASKED = false;
+function invReminderCheck(tries = 0) {
+  if (!D || INV_ASKED || D.settings.demo) return;
+  if (UI.locked || UI.sheets.length) { if (tries < 40) setTimeout(() => invReminderCheck(tries + 1), 1500); return; }
+  if (!invDue() || D.settings.invSnooze === today()) return;
+  INV_ASKED = true;
+  openSheet('invUpdate', {});
+}
+function demoInvest() {
+  const start = addDays(today(), -7 * 26);
+  const mkP = (name, code, kind, inv0, drift, vol, seed) => {
+    let s = seed;
+    const r = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+    const p = { id: uid(), name, code, kind, qty: null, created: start, hist: [] };
+    let v = inv0, inv = inv0;
+    for (let w = 0; w <= 26; w++) {
+      if (w && w % 4 === 0) { inv += 200; v += 200; }
+      if (w) v *= 1 + drift + (r() - 0.5) * vol;
+      p.hist.push({ d: addDays(start, w * 7), v: r2(v), i: inv });
+    }
+    p.invested = inv;
+    return p;
+  };
+  return [mkP('Vanguard FTSE All-World', 'VWCE', 'etf', 6000, 0.0025, 0.035, 12345), mkP('iShares Core MSCI EM IMI', 'EIMI', 'etf', 1500, 0.0012, 0.05, 777)];
+}
+
+/* ---------- avvio ---------- */
+function bootExtras() {
+  try { HIDE = !!(D && D.settings.hideOnOpen) || localStorage.getItem(HIDE_KEY) === '1'; } catch (e) { }
+  if (D && syncAuto()) save({ undo: false });
+}
+
+/* =========================================================
+   Versione 1.5
+   Prezzi automatici tramite il ponte Cloudflare, piani di accumulo (PAC)
+   automatici, interessi sulla liquidità dei conti
+   ========================================================= */
+const PONTE_CODE = "// EFU Budget - ponte dei prezzi (Cloudflare Worker)\n// Incolla tutto questo codice in un Worker di Cloudflare e premi Deploy.\n// Chiede i prezzi a Yahoo Finance e li passa all'app, aggiungendo i permessi\n// che servono a una web app per leggerli. Non salva niente.\n// Facoltativo: in Settings > Variables and Secrets aggiungi KEY con una parola\n// segreta e scrivila anche nell'app, cos\u00ec solo tu puoi usare il ponte.\n\nconst UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';\nconst HOSTS = ['https://query1.finance.yahoo.com', 'https://query2.finance.yahoo.com'];\nconst CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': '*' };\n\nfunction json(obj, status = 200) {\n  return new Response(JSON.stringify(obj), { status, headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });\n}\n\nasync function yahoo(path) {\n  let last = null;\n  for (const host of HOSTS) {\n    try {\n      const r = await fetch(host + path, { headers: { 'User-Agent': UA, 'Accept': 'application/json' }, cf: { cacheTtl: 600, cacheEverything: true } });\n      if (r.ok) return await r.json();\n      last = new Error('Yahoo ha risposto ' + r.status);\n    } catch (e) { last = e; }\n  }\n  throw last || new Error('Yahoo non raggiungibile');\n}\n\nasync function quote(symbol) {\n  try {\n    const j = await yahoo('/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=5d&interval=1d');\n    const r = j && j.chart && j.chart.result && j.chart.result[0];\n    const m = r && r.meta;\n    if (!m) return { error: 'simbolo non trovato' };\n    let price = m.regularMarketPrice;\n    if (!(price > 0) && r.indicators && r.indicators.quote && r.indicators.quote[0]) {\n      const closes = (r.indicators.quote[0].close || []).filter(x => x > 0);\n      price = closes[closes.length - 1];\n    }\n    if (!(price > 0)) return { error: 'prezzo non disponibile' };\n    return {\n      price,\n      currency: m.currency || null,\n      time: m.regularMarketTime ? new Date(m.regularMarketTime * 1000).toISOString() : null,\n      name: m.longName || m.shortName || null,\n      exchange: m.fullExchangeName || m.exchangeName || null\n    };\n  } catch (e) { return { error: String((e && e.message) || e) }; }\n}\n\nexport default {\n  async fetch(request, env) {\n    if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });\n    const url = new URL(request.url);\n    if (env && env.KEY && url.searchParams.get('key') !== env.KEY) return json({ error: 'chiave non valida' }, 401);\n    if (url.pathname.replace(/\\/+$/, '').endsWith('/search')) {\n      const q = (url.searchParams.get('q') || '').trim();\n      if (!q) return json({ ok: true, results: [] });\n      try {\n        const j = await yahoo('/v1/finance/search?q=' + encodeURIComponent(q) + '&quotesCount=10&newsCount=0&listsCount=0');\n        const results = (j.quotes || []).filter(x => x.symbol).map(x => ({ symbol: x.symbol, name: x.longname || x.shortname || x.symbol, exchange: x.exchDisp || x.exchange || '', type: x.quoteType || '' }));\n        return json({ ok: true, results });\n      } catch (e) { return json({ error: String((e && e.message) || e) }, 502); }\n    }\n    const symbols = [...new Set((url.searchParams.get('s') || '').split(',').map(s => s.trim()).filter(Boolean))].slice(0, 40);\n    if (!symbols.length) return json({ ok: true, service: 'EFU Budget prezzi', version: 1 });\n    const quotes = {};\n    await Promise.all(symbols.map(async s => { quotes[s] = await quote(s); }));\n    return json({ ok: true, quotes });\n  }\n};\n";
+function syncAuto() {
+  let ch = false;
+  if (syncPAC()) { ch = true; invalidate(); }
+  if (syncCardDebits()) { ch = true; invalidate(); }
+  if (syncInterest()) { ch = true; invalidate(); }
+  return ch;
+}
+
+/* ---------- prezzi automatici tramite il ponte ---------- */
+const PX_DEFAULT = 'https://efu-prezzi.edo-santucci.workers.dev';
+const pxUrl = () => { if (!D) return ''; const u = D.settings.pxUrl; return u === undefined || u === null ? PX_DEFAULT : u; };
+function pxEndpoint(path, params) {
+  const u = new URL(pxUrl().replace(/\/+$/, '') + path);
+  for (const k in params) u.searchParams.set(k, params[k]);
+  if (D.settings.pxKey) u.searchParams.set('key', D.settings.pxKey);
+  return u.toString();
+}
+const pxAuto = p => !!(pxUrl() && p.sym && p.qty > 0);
+let PX_BUSY = false;
+async function autoPrices(force) {
+  if (!D || !pxUrl() || PX_BUSY) return null;
+  const list = D.invest.filter(pxAuto);
+  if (!list.length) return { n: 0, errs: [] };
+  if (!force && Date.now() - (D.settings.pxLast || 0) < 3 * 3600e3) return null;
+  PX_BUSY = true;
+  try {
+    const syms = Array.from(new Set(list.map(p => p.sym)));
+    const j = await getJSON(pxEndpoint('', { s: syms.join(',') }), 12000);
+    if (!j || !j.quotes) throw new Error((j && j.error) || 'risposta non valida');
+    let n = 0;
+    const errs = [], t = today();
+    for (const p of list) {
+      const q = j.quotes[p.sym];
+      if (!q || !(q.price > 0)) { errs.push(p.sym); continue; }
+      let price = q.price, cur = String(q.currency || baseCur());
+      if (cur === 'GBp' || cur === 'GBX') { price /= 100; cur = 'GBP'; }
+      cur = cur.toUpperCase();
+      let rate = 1;
+      if (cur !== baseCur()) { const r = await fxRate(cur, baseCur(), t); if (!r) { errs.push(p.sym); continue; } rate = r.rate; }
+      const unit = price * rate;
+      p.px = { price: q.price, cur: q.currency || cur, unit: Math.round(unit * 1e6) / 1e6, at: q.time || new Date().toISOString() };
+      invPoint(p, t, p.qty * unit, p.invested || 0);
+      n++;
+    }
+    D.settings.pxLast = Date.now();
+    D.settings.pxErr = errs.length ? 'Nessun prezzo per ' + errs.join(', ') + ': controlla il simbolo.' : '';
+    save({ undo: false });
+    return { n, errs };
+  } catch (e) {
+    D.settings.pxErr = 'Il ponte non risponde: ' + ((e && e.message) || e);
+    save({ undo: false });
+    return null;
+  } finally {
+    PX_BUSY = false;
+    redrawInvest();
+    const ae = document.activeElement;
+    if (!ae || !/INPUT|TEXTAREA|SELECT/.test(ae.tagName)) refresh();
+  }
+}
+function pxSymField(st) {
+  let h = `<label class="fld"><span>Simbolo per i prezzi automatici (facoltativo)</span><input data-in="set" data-f="sym" value="${esc(st.sym || '')}" placeholder="Es. VWCE.DE oppure ENEL.MI" autocapitalize="characters" autocomplete="off"></label>`;
+  if (!pxUrl()) return h + '<p class="muted sm">Per aggiornare il valore da solo serve il ponte dei prezzi: <button class="link" data-a="pxSetupOpen">configuralo</button>.</p>';
+  h += '<button class="link" data-a="pxFind">Trova il simbolo dal nome o dall\'ISIN</button>';
+  if (st.findBusy) h += '<p class="muted sm">Cerco…</p>';
+  else if (st.found) h += st.found.length ? `<div class="list px-found">${st.found.map(r => `<button class="row" data-a="pxPick" data-s="${esc(r.symbol)}"><span class="rt">${esc(r.symbol)}<small>${esc([r.name, r.exchange].filter(Boolean).join(', '))}</small></span>${st.sym === r.symbol ? ic('check', 18) : ''}</button>`).join('')}</div>` : '<p class="muted sm">Nessun risultato: prova con l\'ISIN o con un altro nome.</p>';
+  return h + '<p class="muted sm">Con simbolo e numero di quote il valore si aggiorna da solo quando apri l\'app.</p>';
+}
+ACT.pxFind = async el => {
+  const sh = sheetOf(el), st = sh.st, q = String(st.code || st.name || '').trim();
+  if (!q) return toast("Scrivi prima il nome o l'ISIN");
+  st.findBusy = true; drawSheet(sh);
+  try { const j = await getJSON(pxEndpoint('/search', { q }), 10000); st.found = (j && j.results) || []; }
+  catch (e) { st.found = null; toast('Il ponte non risponde'); }
+  st.findBusy = false;
+  if (sheetOpen(sh)) drawSheet(sh);
+};
+ACT.pxPick = el => { const sh = sheetOf(el); sh.st.sym = el.dataset.s; drawSheet(sh); };
+function pxSection() {
+  let h = fieldLabel('Prezzi automatici');
+  if (!pxUrl()) return h + `<p class="muted sm">Collega il ponte gratuito e il valore di ETF e azioni si aggiorna da solo quando apri l'app.</p><button class="btn outline w gap-t" data-a="pxSetupOpen">Configura i prezzi automatici</button>`;
+  const n = D.invest.filter(pxAuto).length, last = D.settings.pxLast ? new Date(D.settings.pxLast) : null;
+  h += `<p class="muted sm">${n ? `${n} ${n === 1 ? 'investimento si aggiorna' : 'investimenti si aggiornano'} da soli.` : 'Aggiungi simbolo e quote a un investimento per aggiornarlo da solo.'}${last ? ' Ultimo aggiornamento: ' + esc(last.toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })) + '.' : ''}</p>`;
+  if (D.settings.pxErr) h += `<p class="warn-t">${esc(D.settings.pxErr)}</p>`;
+  return h + '<div class="two-btn gap-t"><button class="btn dark" data-a="pxNow">Aggiorna ora</button><button class="btn outline" data-a="pxSetupOpen">Impostazioni</button></div>';
+}
+ACT.pxNow = async el => {
+  const sh = sheetOf(el);
+  toast('Aggiorno i prezzi…', null);
+  const r = await autoPrices(true);
+  if (r && r.n) toast(`Prezzi aggiornati: ${r.n}${r.errs.length ? ', ' + r.errs.length + ' non trovati' : ''}`, null);
+  else if (r) toast(r.errs.length ? D.settings.pxErr : 'Nessun investimento con simbolo e quote', null);
+  else toast(D.settings.pxErr || 'Prezzi non aggiornati', null);
+  if (sh && sheetOpen(sh)) drawSheet(sh);
+};
+SHEETS.pxSetup = {
+  cls: 'tall',
+  init: () => ({ url: pxUrl(), key: D.settings.pxKey || '', test: null, busy: false }),
+  render(st) {
+    let h = sheetHead('Prezzi automatici') + '<div class="sheet-body">';
+    h += "<p class=\"lead sm\">Il ponte è un piccolo programma gratuito che metti sul tuo account Cloudflare: chiede i prezzi a Yahoo Finance e li passa all'app. Si configura una volta sola, meglio dal PC.</p>";
+    h += fieldLabel('Crea il ponte') + `<ol class="steps">
+      <li>Vai su <b>dash.cloudflare.com</b>, crea un account gratuito ed entra.</li>
+      <li>Apri <b>Workers &amp; Pages</b>, tocca <b>Create</b> e scegli di partire da <b>Hello World</b>.</li>
+      <li>Chiamalo <b>efu-prezzi</b> e tocca <b>Deploy</b>.</li>
+      <li>Tocca <b>Edit code</b>, cancella tutto e incolla il codice del ponte: è nel file <b>ponte-prezzi.js</b> dentro lo zip, oppure lo copi con il pulsante qui sotto. Poi tocca <b>Deploy</b>.</li>
+      <li>Copia l'indirizzo del Worker, del tipo <b>https://efu-prezzi.tuonome.workers.dev</b>, e incollalo qui sotto.</li></ol>`;
+    h += `<button class="btn outline w gap-t" data-a="pxCopy">${ic('file', 18)} Copia il codice del ponte</button>`;
+    h += fieldLabel("Collega l'app") + `<label class="fld"><span>Indirizzo del ponte</span><input data-in="set" data-f="url" value="${esc(st.url)}" placeholder="https://efu-prezzi.tuonome.workers.dev" inputmode="url" autocapitalize="off" autocomplete="off"></label>`;
+    h += `<label class="fld"><span>Parola segreta (facoltativa)</span><input data-in="set" data-f="key" value="${esc(st.key)}" placeholder="Solo se l'hai impostata su Cloudflare" autocapitalize="off" autocomplete="off"></label>`;
+    if (st.busy) h += '<p class="muted sm">Provo il collegamento…</p>';
+    else if (st.test) h += `<p class="sm ${st.test.ok ? 'pos' : 'neg'}">${esc(st.test.msg)}</p>`;
+    h += "<p class=\"foot-note\">I prezzi arrivano da Yahoo Finance attraverso un servizio non ufficiale: di solito hanno circa 15 minuti di ritardo e in futuro potrebbero smettere di funzionare. L'app li aggiorna al massimo ogni 3 ore, quando la apri. Al ponte arrivano solo i simboli dei titoli, nessun tuo dato.</p>";
+    return h + `</div><footer class="sheet-foot"><button class="btn primary w" data-a="pxTest">Prova e salva</button>${pxUrl() ? '<button class="link w later" data-a="pxOff">Scollega il ponte</button>' : ''}</footer>`;
+  }
+};
+ACT.pxSetupOpen = () => openSheet('pxSetup', {});
+ACT.pxCopy = async () => {
+  try { await navigator.clipboard.writeText(PONTE_CODE); toast('Codice copiato: incollalo su Cloudflare', null); }
+  catch (e) { toast('Non riesco a copiarlo: usa il file ponte-prezzi.js dello zip', null); }
+};
+ACT.pxTest = async el => {
+  const sh = sheetOf(el), st = sh.st;
+  let url = String(st.url || '').trim();
+  if (!/^https:\/\/\S+$/i.test(url)) return toast("Incolla l'indirizzo completo, che inizia con https://");
+  url = url.replace(/\/+$/, '');
+  st.busy = true; st.test = null; drawSheet(sh);
+  const prevU = D.settings.pxUrl, prevK = D.settings.pxKey;
+  D.settings.pxUrl = url; D.settings.pxKey = String(st.key || '').trim() || null;
+  let ok = false, msg = '';
+  try {
+    const j = await getJSON(pxEndpoint('', {}), 10000);
+    if (j && j.ok && j.service) { ok = true; msg = 'Collegato: il ponte funziona.'; }
+    else msg = j && j.error ? 'Il ponte risponde con un errore: ' + j.error : "A quell'indirizzo non trovo il ponte di EFU Budget.";
+  } catch (e) { msg = "Non riesco a raggiungere il ponte: controlla l'indirizzo e la parola segreta."; }
+  if (ok) {
+    const sample = (D.invest.find(p => p.sym) || {}).sym || 'VWCE.DE';
+    try {
+      const j = await getJSON(pxEndpoint('', { s: sample }), 12000), q = j && j.quotes && j.quotes[sample];
+      msg += q && q.price > 0 ? ` Prova: ${sample} vale ${numStr(q.price, 4)} ${q.currency || ''}.` : ` Però non ho ricevuto il prezzo di ${sample}${q && q.error ? ': ' + q.error : ''}.`;
+    } catch (e) { }
+  }
+  if (!ok) { D.settings.pxUrl = prevU; D.settings.pxKey = prevK; }
+  save({ undo: false });
+  st.busy = false; st.test = { ok, msg };
+  if (sheetOpen(sh)) drawSheet(sh);
+  if (ok) autoPrices(true);
+};
+ACT.pxOff = el => { D.settings.pxUrl = ''; D.settings.pxKey = null; D.settings.pxErr = ''; save({ undo: false }); closeSheet(sheetOf(el)); redrawInvest(); toast('Ponte scollegato', null); };
+
+/* ---------- piani di accumulo (PAC) ---------- */
+function investAccount() {
+  let a = D.accounts.find(x => x.kind === 'invest' && !x.archived);
+  if (!a) { a = { id: 'inv-acc', name: 'Investimenti', emoji: '📈', kind: 'invest', initial: 0, initialDate: today(), archived: false }; D.accounts.push(a); }
+  return a;
+}
+/* acquisto (amt > 0) o annullamento (amt < 0) alla data d: aggiorna capitale, valore, storico e quote */
+function invBuy(p, d, amt, dq) {
+  const hist = p.hist || (p.hist = []);
+  let prev = null;
+  for (const h of hist) { if (h.d <= d) prev = h; else break; }
+  for (const h of hist) if (h.d > d) { h.v = r2(Math.max(0, h.v + amt)); h.i = r2(Math.max(0, h.i + amt)); }
+  if (prev && prev.d === d) { prev.v = r2(Math.max(0, prev.v + amt)); prev.i = r2(Math.max(0, prev.i + amt)); }
+  else { hist.push({ d, v: r2(Math.max(0, (prev ? prev.v : 0) + amt)), i: r2(Math.max(0, (prev ? prev.i : 0) + amt)) }); hist.sort((a, b) => a.d.localeCompare(b.d)); }
+  p.invested = r2(Math.max(0, (p.invested || 0) + amt));
+  if (dq == null) dq = p.qty > 0 && p.px && p.px.unit > 0 ? Math.round(amt / p.px.unit * 1e6) / 1e6 : 0;
+  if (dq && p.qty > 0) p.qty = Math.max(0, Math.round((p.qty + dq) * 1e6) / 1e6);
+  return { invId: p.id, amt, qty: dq };
+}
+function syncPAC() {
+  if (!D || !D.fixed) return false;
+  let ch = false;
+  const t = today();
+  for (const f of D.fixed) {
+    if (!f.pac || f.paused) continue;
+    const log = f.pac.log || (f.pac.log = {});
+    for (const o of occurrences(f, trackStart(f), curMk())) {
+      if (o.due > t || (f.pac.from && o.due < f.pac.from) || log[o.k] || (f.skipped || []).includes(o.k)) continue;
+      const id = 'pac-' + f.id + '-' + o.k;
+      if (!D.movements.some(m => m.id === id)) D.movements.push({ id, ts: dateOf(o.due).getTime(), type: 'transfer', date: o.due, amount: f.amount, accountId: f.accountId, toAccountId: investAccount().id, description: f.name, note: '', tags: [], fixedId: f.id, fixedKey: o.k, pacOf: f.id });
+      log[o.k] = (f.pac.alloc || []).filter(a => a.amt > 0 && invById(a.invId)).map(a => invBuy(invById(a.invId), o.due, a.amt));
+      ch = true;
+    }
+  }
+  return ch;
+}
+function pacUndo(m) {
+  const f = D.fixed.find(x => x.id === m.pacOf);
+  if (!f || !f.pac) return;
+  for (const e of ((f.pac.log || {})[m.fixedKey] || [])) { const p = invById(e.invId); if (p) invBuy(p, m.date, -e.amt, -(e.qty || 0)); }
+  if (f.pac.log) delete f.pac.log[m.fixedKey];
+  f.skipped = (f.skipped || []).concat(m.fixedKey);
+}
+function pacDropPos(invId) {
+  for (const f of D.fixed) {
+    if (!f.pac) continue;
+    f.pac.alloc = (f.pac.alloc || []).filter(a => a.invId !== invId);
+    f.amount = r2(f.pac.alloc.reduce((s, a) => s + a.amt, 0));
+    if (!f.pac.alloc.length) f.paused = true;
+  }
+}
+function pacNext(f) {
+  const t = today(), o = occurrences(f, curMk(), addM(curMk(), 13)).find(x => x.due >= t && (!f.pac.from || x.due >= f.pac.from));
+  return o ? o.due : null;
+}
+const pacFreqLabel = f => ({ 1: 'ogni mese', 2: 'ogni 2 mesi', 3: 'ogni 3 mesi' }[f.freq] || 'ogni ' + f.freq + ' mesi');
+function pacSection() {
+  const list = D.fixed.filter(f => f.pac);
+  let h = fieldLabel('Piani di accumulo (PAC)');
+  if (list.length) h += `<div class="list">${list.map(f => {
+    const n = pacNext(f), from = acc(f.accountId);
+    return `<button class="row" data-a="pacEdit" data-id="${f.id}"><span class="row-ic av-e">🔁</span><span class="rt">${esc(f.name)}<small>${esc((f.paused ? 'In pausa' : n ? 'Prossimo acquisto il ' + shortDate(n) : 'Nessun acquisto in programma') + (from ? ', da ' + from.name : ''))}</small></span><span class="rv num inv-rv"><b>${eur(f.amount)}</b><small>${pacFreqLabel(f)}</small></span></button>`;
+  }).join('')}</div>`;
+  else h += "<p class=\"muted sm\">Con un PAC l'app sposta i soldi dal conto agli investimenti alla data giusta e aggiorna da sola quanto hai investito.</p>";
+  return h + `<button class="btn outline w gap-t" data-a="pacNew">${ic('plus', 18)} Nuovo PAC</button>`;
+}
+function invViewExtra(p) {
+  let h = '';
+  for (const f of D.fixed.filter(x => x.pac && !x.paused)) { const a = (f.pac.alloc || []).find(x => x.invId === p.id); if (a) h += `<p class="muted sm">🔁 Nel ${esc(f.name)}: ${eur(a.amt)} ${pacFreqLabel(f)}.</p>`; }
+  if (p.sym) h += `<p class="muted sm">${pxAuto(p) ? 'Prezzo automatico' : 'Simbolo'}: ${esc(p.sym)}${p.px ? `, ultimo prezzo ${esc(numStr(p.px.price, 4))} ${esc(p.px.cur || '')}` : ''}.</p>`;
+  return h;
+}
+SHEETS.pac = {
+  cls: 'tall',
+  init(p) {
+    const f = p.id ? D.fixed.find(x => x.id === p.id) : null, alloc = {};
+    if (f) for (const a of (f.pac.alloc || [])) alloc[a.invId] = numStr(a.amt);
+    const first = f ? (pacNext(f) || dayIn(f.start, f.day)) : addM(curMk(), 1) + '-01';
+    return { id: f ? f.id : null, name: f ? f.name : 'PAC', accountId: f ? f.accountId : ((liquidAccounts().find(a => a.kind === 'bank') || liquidAccounts()[0] || {}).id || null), freq: String(f ? f.freq : 1), first, alloc, paused: f ? !!f.paused : false };
+  },
+  render(st) {
+    let h = sheetHead(st.id ? 'Modifica PAC' : 'Nuovo PAC') + '<div class="sheet-body">';
+    h += '<p class="lead sm">Alla data di ogni acquisto i soldi escono dal conto scelto e vengono aggiunti agli investimenti indicati: non devi registrare niente.</p>';
+    h += `<label class="fld"><span>Nome</span><input data-in="set" data-f="name" value="${esc(st.name)}" placeholder="Es. PAC Trade Republic" autocomplete="off"></label>`;
+    h += fieldLabel('Preleva dal conto') + `<div class="chips wrap">${liquidAccounts().filter(a => !isCredit(a)).map(a => `<button class="chip ${st.accountId === a.id ? 'on' : ''}" data-a="pick" data-f="accountId" data-v="${a.id}">${esc(a.emoji || '🏦')} ${esc(a.name)}</button>`).join('')}</div>`;
+    h += fieldLabel('Ogni quanto') + `<div class="chips wrap">${[['1', 'Ogni mese'], ['2', 'Ogni 2 mesi'], ['3', 'Ogni 3 mesi']].map(([v, l]) => `<button class="chip ${String(st.freq) === v ? 'on' : ''}" data-a="pick" data-f="freq" data-v="${v}">${l}</button>`).join('')}</div>`;
+    h += `<label class="fld gap-t"><span>${st.id ? 'Prossimo acquisto' : 'Primo acquisto'}</span><input type="date" value="${esc(st.first)}" data-ch="date" data-f="first"></label>`;
+    h += fieldLabel('Quanto in ogni titolo');
+    if (!D.invest.length) h += '<p class="muted sm">Prima aggiungi almeno un investimento.</p>';
+    else h += D.invest.map(p => `<label class="fld"><span>${esc(invKind(p.kind)[2] + ' ' + p.name)}</span><input inputmode="decimal" data-in="pacAmt" data-id="${p.id}" value="${esc(st.alloc[p.id] || '')}" placeholder="0,00"></label>`).join('');
+    h += `<button class="link" data-a="invNew">+ Aggiungi un altro titolo</button><p class="pac-tot">${esc(pacTotText(st))}</p>`;
+    if (st.id) h += swRow('In pausa', 'paused', st.paused, 'Finché è in pausa non viene fatto nessun acquisto.');
+    h += "<p class=\"muted sm gap-t\">Gli acquisti prima di questa data non vengono aggiunti: se ne hai già fatti, sono compresi in quanto hai investito. Se cancelli un acquisto dai movimenti, l'app lo toglie anche dall'investimento.</p>";
+    if (st.id) h += '<div class="danger-z"><button class="link danger" data-a="pacDelete">Elimina PAC</button></div>';
+    return h + `</div><footer class="sheet-foot"><button class="btn primary w" data-a="pacSave">${st.id ? 'Salva modifiche' : 'Crea PAC'}</button></footer>`;
+  }
+};
+function pacTotText(st) {
+  const tot = Object.values(st.alloc).reduce((s, v) => s + (strToNum(v) || 0), 0);
+  return `Totale ${eur(tot)} ${{ 1: 'al mese', 2: 'ogni 2 mesi', 3: 'ogni 3 mesi' }[String(st.freq)] || ''}`;
+}
+INP.pacAmt = el => { const sh = sheetOf(el); sh.st.alloc[el.dataset.id] = el.value; const t = $('.pac-tot', sheetEl(sh)); if (t) t.textContent = pacTotText(sh.st); };
+ACT.pacNew = () => openSheet('pac', {});
+ACT.pacEdit = el => openSheet('pac', { id: el.dataset.id });
+ACT.pacSave = el => {
+  const sh = sheetOf(el), st = sh.st;
+  const alloc = Object.entries(st.alloc).map(([invId, v]) => ({ invId, amt: r2(strToNum(v) || 0) })).filter(a => a.amt > 0 && invById(a.invId));
+  if (!alloc.length) return toast('Scrivi quanto investire in almeno un titolo');
+  if (!acc(st.accountId)) return toast('Scegli il conto da cui prelevare');
+  if (!st.first) return toast('Scegli la data del primo acquisto');
+  const start = mk(st.first), day = Number(st.first.slice(8)), freq = Number(st.freq) || 1;
+  let f = st.id ? D.fixed.find(x => x.id === st.id) : null;
+  const isNew = !f;
+  if (!f) { f = { id: uid(), skipped: [], created: today(), pac: { alloc: [], log: {} } }; D.fixed.push(f); }
+  const moved = isNew || f.start !== start || f.day !== day || Number(f.freq) !== freq;
+  Object.assign(f, { name: st.name.trim() || 'PAC', type: 'transfer', amount: r2(alloc.reduce((s, a) => s + a.amt, 0)), variable: false, accountId: st.accountId, toAccountId: investAccount().id, freq, start, day, note: '', paused: !!st.paused, count: null, end: null, auto: true });
+  delete f.categoryId;
+  f.pac.alloc = alloc;
+  if (moved) { f.trackFrom = start; f.pac.from = st.first; }
+  save(); closeSheet(sh); redrawInvest(); refresh();
+  toast(isNew ? 'PAC creato' : 'PAC aggiornato');
+};
+ACT.pacDelete = el => {
+  const sh = sheetOf(el), f = D.fixed.find(x => x.id === sh.st.id);
+  if (!f) return;
+  confirmBox(`Eliminare «${esc(f.name)}»?`, 'Gli acquisti già fatti restano negli investimenti e nei movimenti.', 'Elimina', () => {
+    D.fixed = D.fixed.filter(x => x !== f);
+    save(); closeSheet(sh); redrawInvest(); refresh(); toast('PAC eliminato');
+  });
+};
+{
+  const fxEdit0 = ACT.fxEdit;
+  ACT.fxEdit = el => { const f = D.fixed.find(x => x.id === el.dataset.id); if (f && f.pac) return openSheet('pac', { id: f.id }); fxEdit0(el); };
+}
+function demoPac(d, bankId) {
+  if (!d.invest || d.invest.length < 2) return;
+  if (!d.accounts.some(a => a.kind === 'invest')) d.accounts.push({ id: 'inv-acc', name: 'Investimenti', emoji: '📈', kind: 'invest', initial: 0, initialDate: today(), archived: false });
+  const k = addM(curMk(), 1);
+  d.fixed.push({ id: uid(), skipped: [], created: today(), trackFrom: k, name: 'PAC mensile', type: 'transfer', amount: 200, variable: false, accountId: bankId, toAccountId: 'inv-acc', freq: 1, start: k, day: 5, note: '', paused: false, count: null, end: null, auto: true, pac: { alloc: [{ invId: d.invest[0].id, amt: 150 }, { invId: d.invest[1].id, amt: 50 }], log: {}, from: k + '-05' } });
+}
+
+/* ---------- interessi sulla liquidità ---------- */
+function intPeriod(i, date) {
+  if (i.freq === 12) return date.slice(0, 4);
+  if (i.freq === 3) return date.slice(0, 4) + '-Q' + (Math.floor((Number(date.slice(5, 7)) - 1) / 3) + 1);
+  return date.slice(0, 7);
+}
+function intRange(i, key) {
+  if (i.freq === 12) return [key + '-01-01', key + '-12-31', dayIn((Number(key) + 1) + '-01', i.day)];
+  if (i.freq === 3) { const k1 = key.slice(0, 4) + '-' + pad((Number(key.slice(6)) - 1) * 3 + 1), k3 = addM(k1, 2); return [k1 + '-01', endOf(k3), dayIn(addM(k3, 1), i.day)]; }
+  return [key + '-01', endOf(key), dayIn(addM(key, 1), i.day)];
+}
+function intGross(a, from, to, excludeId) {
+  const i = a.interest, deltas = {};
+  let bal = balancesAt(addDays(from, -1))[a.id] || 0, sum = 0;
+  for (const m of D.movements) {
+    if (m.date < from || m.date > to || m.id === excludeId || (a.initialDate && m.date < a.initialDate)) continue;
+    for (const [id, d] of effects(m)) if (id === a.id) deltas[m.date] = (deltas[m.date] || 0) + d;
+  }
+  if (a.initialDate && a.initialDate >= from && a.initialDate <= to && a.initial) deltas[a.initialDate] = (deltas[a.initialDate] || 0) + a.initial;
+  for (let d = from; d <= to; d = addDays(d, 1)) {
+    bal += deltas[d] || 0;
+    const b = i.cap ? Math.min(bal, i.cap) : bal;
+    if (b > 0) sum += b * i.rate / 100 / 365;
+  }
+  return sum;
+}
+function interestCat() {
+  let c = D.categories.find(x => !x.archived && x.type === 'in' && x.name === 'Interessi');
+  if (!c) { c = newCategory('Interessi', 'in', 0, '💶'); D.categories.push(c); }
+  return c;
+}
+const hasInterest = a => !!(a && a.interest && a.interest.rate > 0 && !a.archived && a.kind !== 'goal' && a.kind !== 'card' && a.kind !== 'invest');
+function syncInterest() {
+  if (!D || !D.accounts) return false;
+  let ch = false;
+  const t = today();
+  for (const a of D.accounts) {
+    if (!hasInterest(a)) continue;
+    const i = a.interest, start = [i.from || t, a.initialDate || i.from || t].sort().pop();
+    for (let key = intPeriod(i, start), guard = 0; guard < 400; key = intPeriod(i, addDays(intRange(i, key)[1], 1)), guard++) {
+      const [p0, p1, pay] = intRange(i, key);
+      if (pay > t) break;
+      if ((i.skip || []).includes(key)) continue;
+      const id = 'int-' + a.id + '-' + key, cur = D.movements.find(m => m.id === id);
+      if (cur && cur.manual) continue;
+      const from = p0 < start ? start : p0, net = r2(intGross(a, from, p1, id) * (1 - (i.tax || 0) / 100));
+      if (net >= 0.01) {
+        const want = { type: 'in', date: pay, amount: net, accountId: a.id, categoryId: interestCat().id, description: 'Interessi ' + a.name, note: `Tasso ${numStr(i.rate, 3)}% lordo${i.tax ? ', tasse ' + numStr(i.tax, 2) + '%' : ''}, dal ${shortDate(from)} al ${shortDate(p1)}`, interestOf: a.id, period: key, tags: [] };
+        if (!cur) { D.movements.push(Object.assign({ id, ts: dateOf(pay).getTime() }, want)); ch = true; invalidate(); }
+        else if (Math.abs(cur.amount - net) > 0.004 || cur.date !== pay || cur.accountId !== a.id) { Object.assign(cur, want); ch = true; invalidate(); }
+      } else if (cur) { D.movements = D.movements.filter(m => m !== cur); ch = true; invalidate(); }
+    }
+  }
+  return ch;
+}
+function interestNow(a) {
+  const i = a.interest, t = today(), start = [i.from || t, a.initialDate || t].sort().pop();
+  const key = intPeriod(i, t), [p0, p1, pay] = intRange(i, key), from = p0 < start ? start : p0;
+  const gross = from <= t ? intGross(a, from, t < p1 ? t : p1) : 0;
+  return { gross: r2(gross), net: r2(gross * (1 - (i.tax || 0) / 100)), pay };
+}
+function applyInterestSettings(a, st) {
+  if (st.kind !== 'card' && st.intOn) {
+    const prev = a.interest || {};
+    const next = { rate: strToNum(st.intRate), freq: Number(st.intFreq) || 1, day: parseInt(st.intDay, 10) || 1, tax: strToNum(st.intTax) || 0, cap: strToNum(st.intCap) > 0 ? strToNum(st.intCap) : null, from: prev.from || today(), skip: prev.skip || [] };
+    if (a.interest && ['rate', 'freq', 'day', 'tax', 'cap'].some(k => (prev[k] || null) !== (next[k] || null))) for (const m of D.movements) if (m.interestOf === a.id) m.manual = true;
+    a.interest = next;
+  } else if (a.interest) a.interest = null;
+}
+{
+  const S = SHEETS.account, init0 = S.init, render0 = S.render, save0 = ACT.accSave;
+  S.init = p => {
+    const st = init0(p), a = p.id ? acc(p.id) : null, i = a && a.interest;
+    return Object.assign(st, { intOn: !!(i && i.rate > 0), intRate: i ? numStr(i.rate, 3) : '', intFreq: String(i ? i.freq : 1), intDay: String(i ? i.day : 1), intTax: i ? numStr(i.tax || 0, 2) : '26', intCap: i && i.cap ? numStr(i.cap) : '' });
+  };
+  S.render = (st, sh) => {
+    const h = render0(st, sh);
+    if (st.kind === 'card') return h;
+    let c = swRow('Interessi sulla liquidità', 'intOn', st.intOn, "Per i conti che remunerano il saldo, come Trade Republic: calcolo gli interessi giorno per giorno e li accredito da solo.");
+    if (st.intOn) {
+      c += `<div class="two-fld"><label class="fld"><span>Tasso annuo lordo %</span><input inputmode="decimal" data-in="set" data-f="intRate" value="${esc(st.intRate)}" placeholder="Es. 2,25"></label><label class="fld"><span>Tasse sugli interessi %</span><input inputmode="decimal" data-in="set" data-f="intTax" value="${esc(st.intTax)}" placeholder="26"></label></div>`;
+      c += fieldLabel('Accredito') + `<div class="chips wrap">${[['1', 'Ogni mese'], ['3', 'Ogni 3 mesi'], ['12', 'Ogni anno']].map(([v, l]) => `<button class="chip ${st.intFreq === v ? 'on' : ''}" data-a="pick" data-f="intFreq" data-v="${v}">${l}</button>`).join('')}</div>`;
+      c += `<div class="two-fld gap-t"><label class="fld"><span>Giorno di accredito</span><input inputmode="numeric" data-in="set" data-f="intDay" value="${esc(st.intDay)}" placeholder="1"></label><label class="fld"><span>Interessi fino a € (facoltativo)</span><input inputmode="decimal" data-in="set" data-f="intCap" value="${esc(st.intCap)}" placeholder="Es. 50000"></label></div>`;
+      c += "<p class=\"muted sm\">Gli interessi del periodo vengono accreditati il giorno indicato del mese successivo, al netto delle tasse. In Italia sugli interessi si paga il 26%: se la banca te li accredita lordi, scrivi 0.</p>";
+      const a = st.id && acc(st.id);
+      if (a && hasInterest(a)) { const n = interestNow(a); c += `<div class="cc-now"><span>Maturati finora in questo periodo: <b class="num">${eur(n.gross)}</b> lordi, <b class="num">${eur(n.net)}</b> netti</span><span>Accredito il ${esc(shortDate(n.pay))}</span></div>`; }
+    }
+    const i = h.indexOf('<div class="danger-z">') >= 0 ? h.indexOf('<div class="danger-z">') : h.lastIndexOf('</div><footer');
+    return h.slice(0, i) + c + h.slice(i);
+  };
+  ACT.accSave = el => {
+    const st = sheetOf(el).st;
+    if (st.kind !== 'card' && st.intOn) {
+      const r = strToNum(st.intRate), tx = strToNum(st.intTax || '0'), d = parseInt(st.intDay, 10);
+      if (!(r > 0 && r < 100)) return toast('Scrivi il tasso annuo, per esempio 2,25');
+      if (!(tx >= 0 && tx < 100)) return toast('Le tasse vanno da 0 a 99%');
+      if (!(d >= 1 && d <= 31)) return toast('Il giorno di accredito va da 1 a 31');
+    }
+    save0(el);
+  };
+}
+
+const invFresh = p => pxAuto(p) && dayDiff(invLast(p).d, today()) < 3;
+
+/* =========================================================
    Avvio
    ========================================================= */
 let HIDDEN_AT = 0;
@@ -3766,12 +4586,13 @@ function onVis() {
   if (document.hidden) { HIDDEN_AT = Date.now(); return; }
   if (D && D.settings.pin && !UI.locked && HIDDEN_AT && (Date.now() - HIDDEN_AT) / 1000 >= (D.settings.lockAfter || 0)) showLock();
   HIDDEN_AT = 0;
+  if (D) autoPrices(false);
   if (UI.day !== today()) {
     const old = mk(UI.day);
     UI.day = today();
     invalidate();
     if (UI.month === old) UI.month = curMk();
-    if (D) refresh();
+    if (D) { if (syncAuto()) save({ undo: false }); INV_ASKED = false; refresh(); setTimeout(invReminderCheck, 800); }
   }
 }
 const SPLASH_T0 = Date.now();
@@ -3785,6 +4606,7 @@ function hideSplash(now) {
 setTimeout(() => hideSplash(true), 5000);
 function boot() {
   D = load();
+  bootExtras();
   initCapabilities();
   document.addEventListener('click', onClick);
   document.addEventListener('input', onInput);
@@ -3795,6 +4617,8 @@ function boot() {
   if (D && D.settings.pin) showLock();
   render();
   hideSplash();
+  setTimeout(invReminderCheck, 1800);
+  setTimeout(() => autoPrices(false), 2600);
   if (IS_PACKAGE && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => { });
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => { }); } catch (e) { }
 }
