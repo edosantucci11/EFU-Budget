@@ -557,6 +557,19 @@ a.btn{text-decoration:none}
 .px-found{margin-top:8px}
 .pac-tot{margin:12px 0 0;font-weight:600}
 
+/* 1.6 guida */
+.guide-q{margin-bottom:6px}
+.guide details{border-bottom:1px solid var(--line)}
+.guide summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;font-size:16px;font-weight:600;cursor:pointer;list-style:none}
+.guide summary::-webkit-details-marker{display:none}
+.guide summary svg{flex:none;color:var(--ink-2);transition:transform .2s}
+.guide details[open] summary svg{transform:rotate(90deg)}
+.guide .g-b{padding:0 0 16px;font-size:15px;line-height:1.55}
+.guide .g-b p{margin:0 0 10px}
+.guide .g-b ul{margin:4px 0 10px;padding-left:20px}
+.guide .g-b li+li{margin-top:4px}
+.guide .g-go{font-size:15px;font-weight:600}
+
 </style>
 </head>
 <body>
@@ -572,7 +585,7 @@ a.btn{text-decoration:none}
    I dati restano sul dispositivo: localStorage per i dati,
    IndexedDB per le foto degli scontrini.
    ========================================================= */
-const APP_VERSION = '1.5.1';
+const APP_VERSION = '1.6.1';
 const IS_PACKAGE = true; // la build installabile imposta true
 const DATA_KEY = 'budget.iphone.v1';
 
@@ -1895,7 +1908,7 @@ VIEWS.onboarding = () => `<div class="onb">
   <div class="onb-a">
     <button class="btn primary w" data-a="onbStart">Inizia da zero</button>
     <button class="btn outline w" data-a="onbImport">Importa i tuoi dati</button>
-    <div class="onb-links"><button class="link" data-a="onbDemo">Prova con dati di esempio</button><label class="link">Ripristina un backup<input type="file" class="vh" accept="application/json,.json" data-ch="restoreFile"></label><label class="link">Apri un budget condiviso<input type="file" class="vh" accept="application/json,.json" data-ch="syncFile"></label></div>
+    <div class="onb-links"><button class="link" data-a="onbDemo">Prova con dati di esempio</button><label class="link">Ripristina un backup<input type="file" class="vh" accept="application/json,.json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-ch="restoreFile"></label><label class="link">Apri un budget condiviso<input type="file" class="vh" accept="application/json,.json" data-ch="syncFile"></label></div>
   </div>
 </div>`;
 
@@ -2787,9 +2800,10 @@ ACT.fileSave = async el => {
   const sh = sheetOf(el), p = sh.props;
   const ok = await deliverFile(p.name, p.blob);
   if (!ok) return;
-  if (p.kind === 'backup') { D.settings.lastBackup = today(); save({ undo: false }); }
+  if (p.kind === 'backup' || p.kind === 'export' || p.kind === 'safe') { D.settings.lastBackup = today(); save({ undo: false }); }
   closeSheet(sh); refresh();
   toast(p.kind === 'backup' ? 'Backup salvato' : p.kind === 'sync' ? "Fatto: ora va aperto sull'altro telefono" : 'File salvato', null);
+  if (p.kind === 'safe' && AFTER_SAVE) { const next = AFTER_SAVE; AFTER_SAVE = null; setTimeout(next, 350); }
 };
 
 /* ---------- export Excel e CSV ---------- */
@@ -2852,6 +2866,7 @@ async function buildXlsx(period) {
   fmt(ws, 2, r4.length, EUR); fmt(ws, 6, r4.length, 'dd/mm/yyyy', true);
   ws['!cols'] = [26, 11, 12, 16, 12, 7, 14, 14, 22, 18, 11].map(w => ({ wch: w }));
   XLSX.utils.book_append_sheet(wb, ws, 'Spese fisse');
+  await addFullData(XLSX, wb);
   const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   return { blob: new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), name: `EFU_Budget_${fileSuffix(period)}.xlsx` };
 }
@@ -2871,7 +2886,7 @@ SHEETS.export = {
     const n = periodMovs(st.period).length;
     let h = sheetHead('Esporta') + '<div class="sheet-body">';
     h += fieldLabel('Periodo') + `<div class="chips wrap">${opts.map(([v, l]) => `<button class="chip ${st.period === v ? 'on' : ''}" data-a="pick" data-f="period" data-v="${v}">${esc(l)}</button>`).join('')}</div><p class="muted sm">${n} ${n === 1 ? 'movimento' : 'movimenti'} nel periodo.</p>`;
-    h += fieldLabel('Formato') + `<div class="opts">${[['xlsx', 'Excel', 'Fogli Movimenti, Riepilogo, Categorie e Spese fisse. Le prime quattro colonne dei movimenti sono come nel tuo file originale.'], ['csv', 'CSV', 'Solo i movimenti, separati da punto e virgola. Si apre con Excel, Numbers e Google Fogli.']].map(([k, l, d]) => `<button class="opt ${st.fmt === k ? 'on' : ''}" data-a="pick" data-f="fmt" data-v="${k}"><b>${l}</b><span>${d}</span></button>`).join('')}</div>`;
+    h += fieldLabel('Formato') + `<div class="opts">${[['xlsx', 'Excel', 'Tutti i dati, anche conti, investimenti, impostazioni e foto: si legge con Excel e si reimporta in EFU Budget su qualsiasi telefono. Il periodo vale solo per i fogli da leggere.'], ['csv', 'CSV', 'Solo i movimenti del periodo, per usarli in altre app. Non basta per reimportare tutto.']].map(([k, l, d]) => `<button class="opt ${st.fmt === k ? 'on' : ''}" data-a="pick" data-f="fmt" data-v="${k}"><b>${l}</b><span>${d}</span></button>`).join('')}</div>`;
     return h + `</div><footer class="sheet-foot"><button class="btn primary w" data-a="expGo" ${st.busy || !n ? 'disabled' : ''}>${st.busy ? 'Preparo il file…' : 'Prepara il file'}</button></footer>`;
   }
 };
@@ -2891,6 +2906,7 @@ function b64ToBuf(b64) { const s = atob(b64), b = new Uint8Array(s.length); for 
 async function buildBackup(withPhotos) {
   const data = JSON.parse(JSON.stringify(D));
   data.settings.pin = null;
+  data.settings.lastBackup = today();
   const out = { app: 'budget-iphone', v: 1, at: new Date().toISOString(), data, photos: {} };
   if (withPhotos) for (const k of await PhotoDB.keys()) { const r = await PhotoDB.get(k); if (r) out.photos[k] = { type: r.type, b64: bufToB64(r.buf) }; }
   return new Blob([JSON.stringify(out)], { type: 'application/json' });
@@ -3413,11 +3429,12 @@ function catGroups(recs) {
 }
 function importPickHTML(st) {
   return sheetHead('Importa i tuoi dati') + `<div class="sheet-body"><p class="lead sm">Scegli uno di questi file:</p><div class="list">
+    <div class="row static"><span class="row-ic">${ic('download', 21)}</span><span class="rt">Un file esportato da EFU Budget<small>L'Excel di Esporta oppure il backup: reimporta tutti i dati</small></span></div>
     <div class="row static"><span class="row-ic">${ic('file', 21)}</span><span class="rt">Il file Excel del tuo budget<small>Movimenti, categorie con il budget e saldo iniziale</small></span></div>
     <div class="row static"><span class="row-ic">${ic('upload', 21)}</span><span class="rt">L'esportazione di un'altra app<small>Money Lover, Wallet, Spendee, Monefy, Money Manager, YNAB e simili, in CSV o Excel</small></span></div>
     <div class="row static"><span class="row-ic">${ic('wallet', 21)}</span><span class="rt">L'estratto conto della banca<small>Il file CSV o Excel che scarichi dall'home banking</small></span></div></div>
     <p class="muted sm gap-t">Le colonne le riconosco da solo e prima di importare puoi controllarle. Il file viene letto solo su questo dispositivo.</p>${st.err ? `<p class="err">${esc(st.err)}</p>` : ''}</div>
-    <footer class="sheet-foot"><label class="btn primary w ${st.busy ? 'is-busy' : ''}">${st.busy ? 'Leggo il file…' : 'Scegli il file'}<input type="file" class="vh" accept=".csv,.txt,.tsv,.xlsx,.xls,.xlsm,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" data-ch="anyFile" ${st.busy ? 'disabled' : ''}></label></footer>`;
+    <footer class="sheet-foot"><label class="btn primary w ${st.busy ? 'is-busy' : ''}">${st.busy ? 'Leggo il file…' : 'Scegli il file'}<input type="file" class="vh" accept=".json,application/json,.csv,.txt,.tsv,.xlsx,.xls,.xlsm,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" data-ch="anyFile" ${st.busy ? 'disabled' : ''}></label></footer>`;
 }
 function importMapHTML(st) {
   const recs = csvRecords(st), ok = recs.filter(r => r.type !== 'skip'), skipped = recs.length - ok.length;
@@ -3427,6 +3444,7 @@ function importMapHTML(st) {
   const chips = (f, opts) => `<div class="chips wrap">${opts.map(([v, l]) => `<button class="chip ${st[f] === v ? 'on' : ''}" data-a="pick" data-f="${f}" data-v="${v}">${l}</button>`).join('')}</div>`;
   let h = sheetHead('Controlla e importa') + '<div class="sheet-body">';
   h += `<p class="lead sm">${esc(st.name)}: ${ok.length} ${ok.length === 1 ? 'movimento' : 'movimenti'}${dates.length ? ` dal ${shortDate(dates[0])} al ${shortDate(dates[dates.length - 1])}` : ''}.</p>`;
+  if (st.note) h += `<p class="warn-t">${esc(st.note)}</p>`;
   if (st.warn && !ok.length) h += `<p class="warn-t">${esc(st.warn)}</p>`;
   h += `<div class="kgrid two"><div class="k"><span>Entrate</span><b class="num pos">${eur(inc)}</b></div><div class="k"><span>Uscite</span><b class="num neg">${eur(out)}</b></div></div>`;
   if (skipped) h += `<p class="muted sm gap-t">${skipped} trasferimenti tra conti verranno saltati.</p>`;
@@ -3457,12 +3475,23 @@ CHG.anyFile = async el => {
   if (!f || !sh) return;
   sh.st.busy = true; sh.st.err = ''; drawSheet(sh);
   try {
-    let rows;
+    let rows, note = '';
+    if (/\.json$/i.test(f.name) || /json/i.test(f.type)) {
+      let obj = null;
+      try { obj = JSON.parse(await f.text()); } catch (e) { }
+      if (obj && obj.type === 'budget-sync') throw new Error('Questo è un file del budget di coppia: aprilo da Budget di coppia → Ricevi.');
+      if (!obj || !obj.data) throw new Error('Il file scelto non è un backup di EFU Budget.');
+      closeSheet(sh); await restoreBackupObj(obj); return;
+    }
     if (/\.(xlsx|xlsm|xls)$/i.test(f.name) || /spreadsheet|excel/i.test(f.type)) {
       const XLSX = await loadXLSX();
       const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
-      if (wb.Sheets.Movimenti && wb.Sheets.Categorie) { const res = parseBudgetWorkbook(XLSX, wb); closeSheet(sh); openSheet('import', { res }); return; }
-      for (const n of wb.SheetNames) { const r = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: '' }); if (!rows || r.length > rows.length) rows = r; }
+      const full = readFullData(XLSX, wb);
+      if (full) { closeSheet(sh); await restoreBackupObj(full); return; }
+      const mv = wb.Sheets.Movimenti, cellv = a => String(mv && mv[a] ? mv[a].v : '').trim().toLowerCase();
+      if (mv && wb.Sheets.Categorie && cellv('B7') === 'data') { const res = parseBudgetWorkbook(XLSX, wb); closeSheet(sh); openSheet('import', { res }); return; }
+      if (mv && cellv('A1') === 'data' && cellv('E1') === 'tipo') { rows = XLSX.utils.sheet_to_json(mv, { header: 1, raw: true, defval: '' }); note = 'Questo file è stato esportato da una versione precedente di EFU Budget e contiene solo i movimenti: i trasferimenti tra conti verranno saltati. Per trasferire tutto, esporta di nuovo con la versione attuale.'; }
+      else for (const n of wb.SheetNames) { const r = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: '' }); if (!rows || r.length > rows.length) rows = r; }
     } else {
       let text = await f.text();
       if (text.includes('\ufffd')) text = new TextDecoder('windows-1252').decode(await f.arrayBuffer());
@@ -3470,6 +3499,7 @@ CHG.anyFile = async el => {
       rows = parseDelimited(text, detectDelim(text));
     }
     Object.assign(sh.st, prepareImport(rows || [], f.name));
+    if (note) sh.st.note = note;
   } catch (e) { sh.st.err = e.message || 'Non riesco a leggere il file.'; }
   sh.st.busy = false;
   drawSheet(sh);
@@ -3709,10 +3739,11 @@ SETTINGS.main = function () {
   let h = sheetHead('Impostazioni', { grab: false }) + '<div class="sheet-body">';
   h += `<div class="set-hero"><span class="app-ic">${appIconSVG(52)}</span><div><b>EFU Budget</b><span class="muted">I tuoi dati restano su questo dispositivo</span></div></div>`;
   if (UNDO.length) h += `<button class="notice undo-n" data-a="undoLast">${ic('undo', 20)}<div><b>Annulla l'ultima modifica</b><span>Torna indietro di un passo, anche se il messaggio è già sparito.</span></div></button>`;
+  h += `<h3 class="set-h">Aiuto</h3><div class="list">${setRow('help', 'Guida e soluzioni<small>Tutte le funzioni spiegate e i problemi più comuni</small>', '', 'data-a="setPage" data-p="guide"')}</div>`;
   h += `<h3 class="set-h">Il tuo denaro</h3><div class="list">${setRow('wallet', 'Conti', liquidAccounts().length, 'data-a="setPage" data-p="accounts"')}${setRow('tag', 'Categorie', activeCats().length, 'data-a="setPage" data-p="categories"')}${setRow('people', 'Persone e spese divise', D.people.length || '', 'data-a="setPage" data-p="people"')}${setRow('globe', 'Valuta principale', esc(curName(baseCur()) + ' (' + baseSym() + ')'), 'data-a="openBaseCur"')}${setRow('trend', 'Investimenti', D.invest.length || '', 'data-a="invOpen"')}</div>`;
   h += `<h3 class="set-h">Insieme e in automatico</h3><div class="list">${setRow('people', 'Budget di coppia', ps.length ? esc('Con ' + ps.join(', ')) : 'Non attivo', 'data-a="setPage" data-p="share"')}${setRow('wallet', 'Pagamenti con Apple Pay', nIn ? nIn + ' da controllare' : '', 'data-a="setPage" data-p="applepay"')}</div>`;
   h += `<h3 class="set-h">Sicurezza</h3><div class="list">${setRow('lock', 'Codice di blocco', D.settings.pin ? 'Attivo' : 'Non attivo', 'data-a="setPage" data-p="security"')}</div>${swRow("Nascondi gli importi all'apertura", 'hideOnOpen', !!D.settings.hideOnOpen, "Ogni volta che apri l'app gli importi sono coperti: per vederli tocca l'occhio in alto nella Home.", 'hideOpenToggle')}`;
-  h += `<h3 class="set-h">Dati</h3><div class="list">${setRow('upload', 'Importa dati<small>Excel del budget, altre app, estratto conto</small>', '', 'data-a="openImportAny"')}${setRow('download', 'Esporta in Excel o CSV', '', 'data-a="openExport"')}${setRow('file', 'Backup completo', D.settings.lastBackup ? 'Ultimo il ' + shortDate(D.settings.lastBackup) : 'Mai fatto', 'data-a="backup"')}<label class="row"><span class="row-ic">${ic('upload', 21)}</span><span class="rt">Ripristina da backup</span><span class="rv"></span>${ic('right', 18)}<input type="file" class="vh" accept="application/json,.json" data-ch="restoreFile"></label></div>`;
+  h += `<h3 class="set-h">Dati</h3><div class="list">${setRow('upload', 'Importa dati<small>Excel del budget, altre app, estratto conto</small>', '', 'data-a="openImportAny"')}${setRow('download', 'Esporta i dati<small>Excel con tutto, da reimportare anche su un altro telefono</small>', '', 'data-a="openExport"')}${setRow('file', 'Backup completo', D.settings.lastBackup ? 'Ultimo il ' + shortDate(D.settings.lastBackup) : 'Mai fatto', 'data-a="backup"')}<label class="row"><span class="row-ic">${ic('upload', 21)}</span><span class="rt">Ripristina tutto da un file<small>Esportazione Excel o backup</small></span><span class="rv"></span>${ic('right', 18)}<input type="file" class="vh" accept="application/json,.json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-ch="restoreFile"></label></div>`;
   h += `<p class="foot-note">Versione ${APP_VERSION}. I dati sono salvati solo in questa app, su questo dispositivo: fai un backup ogni tanto e conservalo su File o iCloud Drive.</p>`;
   return h + '<div class="danger-z"><button class="link danger" data-a="wipe">Cancella tutti i dati</button></div></div>';
 };
@@ -4577,6 +4608,185 @@ function applyInterestSettings(a, st) {
 }
 
 const invFresh = p => pxAuto(p) && dayDiff(invLast(p).d, today()) < 3;
+
+/* =========================================================
+   Versione 1.6
+   Esportazione Excel completa e reimportabile, un solo punto
+   per importare tutto, guida e soluzioni nelle impostazioni
+   ========================================================= */
+ICONS.help = '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>';
+const FULL_MARK = 'EFU-BUDGET-DATI-v1', FULL_SHEET = 'Dati app';
+
+/* ---------- esportazione: fogli leggibili in più e dati completi nascosti ---------- */
+const KIND_NAMES = { bank: 'Conto corrente', card: 'Carta', cash: 'Contanti', other: 'Altro', goal: 'Salvadanaio', invest: 'Investimenti (PAC)' };
+async function addFullData(XLSX, wb) {
+  const EUR = '#,##0.00 "' + baseSym() + '"';
+  const money = (ws, cols, n) => { for (let r = 1; r < n; r++) for (const c of cols) { const cell = ws[XLSX.utils.encode_cell({ r, c })]; if (cell && typeof cell.v === 'number') cell.z = EUR; } };
+  const bal = balancesAt(today());
+  const rc = [['Conto', 'Tipo', 'Saldo oggi', 'Saldo iniziale', 'Dal', 'Dettagli']];
+  for (const a of D.accounts.filter(x => !x.archived)) {
+    const det = [];
+    if (isCredit(a)) det.push(`Carta di credito: chiusura il ${a.closeDay}, addebito il ${a.payDay} su ${(acc(a.payFrom) || {}).name || '?'}`);
+    if (hasInterest(a)) det.push(`Interessi ${numStr(a.interest.rate, 3)}% lordi, tasse ${numStr(a.interest.tax || 0, 2)}%, accredito ogni ${a.interest.freq === 1 ? 'mese' : a.interest.freq + ' mesi'} il giorno ${a.interest.day}`);
+    if (a.kind === 'goal' && a.target) det.push('Obiettivo ' + numStr(a.target));
+    rc.push([a.name, KIND_NAMES[a.kind] || a.kind, r2(bal[a.id] || 0), a.initial || 0, a.initialDate || '', det.join('; ')]);
+  }
+  let ws = XLSX.utils.aoa_to_sheet(rc); money(ws, [2, 3], rc.length);
+  ws['!cols'] = [24, 18, 14, 14, 12, 60].map(w => ({ wch: w }));
+  XLSX.utils.book_append_sheet(wb, ws, 'Conti');
+  if (D.invest.length) {
+    const ri = [['Investimento', 'Codice', 'Simbolo', 'Tipo', 'Quote', 'Investito', 'Valore', 'Guadagno', 'Aggiornato il']];
+    for (const p of D.invest) { const v = invValue(p); ri.push([p.name, p.code || '', p.sym || '', invKind(p.kind)[1], p.qty || '', p.invested || 0, v, r2(v - (p.invested || 0)), invLast(p).d]); }
+    ws = XLSX.utils.aoa_to_sheet(ri); money(ws, [5, 6, 7], ri.length);
+    ws['!cols'] = [30, 16, 12, 12, 10, 14, 14, 14, 13].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws, 'Investimenti');
+  }
+  const text = await (await buildBackup(true)).text(), size = 30000, rows = [["EFU Budget: dati completi per reimportare questo file nell'app. Non modificare questo foglio."], [FULL_MARK], [Math.ceil(text.length / size)]];
+  for (let i = 0; i < text.length; i += size) rows.push([text.slice(i, i + size)]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), FULL_SHEET);
+  wb.Workbook = wb.Workbook || {};
+  wb.Workbook.Sheets = wb.SheetNames.map(n => ({ name: n, Hidden: n === FULL_SHEET ? 1 : 0 }));
+}
+function readFullData(XLSX, wb) {
+  const ws = wb.Sheets[FULL_SHEET];
+  if (!ws) return null;
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+  if (String(rows[1] && rows[1][0]) !== FULL_MARK) return null;
+  const n = Number(rows[2] && rows[2][0]) || 0;
+  try { return JSON.parse(rows.slice(3, 3 + n).map(r => String(r[0] == null ? '' : r[0])).join('')); } catch (e) { return null; }
+}
+
+/* ---------- ripristino da esportazione o backup ---------- */
+async function restoreBackupObj(obj) {
+  const data = obj && obj.data;
+  if (!data || !Array.isArray(data.movements) || !Array.isArray(data.accounts)) { toast('Il file non contiene dati di EFU Budget.', null); return false; }
+  const when = obj.at ? shortDate(isoOf(new Date(obj.at))) : '';
+  const go = async () => {
+    const pin = D ? D.settings.pin : null;
+    D = migrate(JSON.parse(JSON.stringify(data)));
+    D.settings.pin = pin;
+    save({ noStamp: true, undo: false });
+    UNDO.length = 0;
+    try {
+      await PhotoDB.clear();
+      for (const [k, p] of Object.entries(obj.photos || {})) await PhotoDB.put(k, { type: p.type, buf: b64ToBuf(p.b64) });
+    } catch (e) { toast('Dati importati, ma le foto no: memoria non disponibile.', null); }
+    PHOTO_URLS.clear();
+    UI.sheets.slice().forEach(s => closeSheet(s));
+    UI.tab = 'home'; UI.month = curMk(); UI.filters = blankFilters();
+    render();
+    toast(`Importati ${data.movements.length} movimenti e tutti gli altri dati`, null);
+  };
+  if (!D) { await go(); return true; }
+  if (!D.settings.demo && (D.movements.length || D.invest.length)) { AFTER_SAVE = null; openSheet('safeFirst', { mode: 'replace', then: go }); return true; }
+  confirmBox('Sostituire i dati?', `Il file${when ? ' del ' + esc(when) : ''} contiene ${data.movements.length} movimenti, con conti, categorie, spese fisse, investimenti e impostazioni. I dati attuali su questo telefono verranno sostituiti.`, 'Importa tutto', go);
+  return true;
+}
+CHG.restoreFile = async el => {
+  const f = el.files && el.files[0];
+  if (!f) return;
+  let obj = null;
+  try {
+    if (/\.(xlsx|xls|xlsm)$/i.test(f.name)) { const XLSX = await loadXLSX(); obj = readFullData(XLSX, XLSX.read(await f.arrayBuffer(), { type: 'array' })); }
+    else obj = JSON.parse(await f.text());
+  } catch (e) { obj = null; }
+  el.value = '';
+  if (obj && obj.type === 'budget-sync') return toast('Questo è un file del budget di coppia: aprilo da Budget di coppia → Ricevi.', null);
+  if (!obj) return toast('Il file scelto non è un backup o un\'esportazione di EFU Budget.', null);
+  await restoreBackupObj(obj);
+};
+
+/* ---------- guida e soluzioni ---------- */
+const GUIDE = [
+  ['Come funziona EFU Budget', `<p>EFU Budget è un'app web: la installi dalla schermata Home e funziona anche senza connessione. Non serve nessun account.</p><p>Tutti i dati restano solo su questo telefono, dentro l'app. Per questo è importante esportarli ogni tanto e salvare il file in File o su iCloud Drive.</p><p>In basso ci sono quattro sezioni: <b>Home</b> con saldo, previsione e cose da fare; <b>Movimenti</b> con elenco, ricerca e filtri; <b>Pianifica</b> con spese fisse, budget e salvadanai; <b>Statistiche</b>. Il <b>+</b> rosso al centro serve per registrare.</p>`],
+  ['Registrare un movimento', `<p>Tocca il <b>+</b>, scrivi l'importo con il tastierino e tocca <b>Avanti</b>. In alto scegli uscita, entrata o trasferimento.</p><p>La categoria viene suggerita dalla descrizione e da quello che hai fatto in passato: puoi cambiarla con un tocco. Nei dettagli scegli data, conto, note, #tag e, se vuoi, una foto dello scontrino.</p><p>Per modificare o eliminare un movimento toccalo nell'elenco. Dopo ogni modifica compare <b>Annulla</b>.</p>`],
+  ['Spese in valuta estera', `<p>Nel tastierino tocca la valuta e scegli quella della spesa: l'app scarica da sola il cambio ufficiale BCE del giorno, oppure quello della data della spesa se è passata.</p><p>La banca di solito applica un cambio un po' diverso e una commissione: se l'estratto conto mostra un'altra cifra, correggi il cambio a mano e l'app terrà il tuo.</p><p>Senza connessione usa l'ultimo cambio salvato. I cambi da internet si spengono in Impostazioni → Valuta principale.</p>`],
+  ['Spese fisse e rate', `<p>In <b>Pianifica → Spese fisse</b> aggiungi affitto, bollette, abbonamenti, stipendio o rate: scegli ogni quanto si ripetono e la prossima scadenza. Per le rate indica quante sono o la data di fine.</p><p>Quando arriva la scadenza la voce compare nella Home in <b>Da registrare</b>: tocca <b>Registra</b> e diventa un movimento. Con <b>Importo variabile</b>, per esempio per le bollette, scrivi la cifra giusta; l'app ti propone la media delle ultime volte.</p><p>Puoi saltare un mese, mettere in pausa o modificare la voce quando vuoi. Le spese fisse entrano nella <b>previsione di fine mese</b>.</p>`],
+  ['Spese non mensili e accantonamenti', `<p>Per assicurazioni, tasse o abbonamenti ogni 3, 6 o 12 mesi attiva <b>Accantona ogni mese</b> nella spesa fissa. Ogni mese l'app ti propone di mettere da parte una quota nel salvadanaio <b>Accantonamenti</b>.</p><p>Quando arriva la spesa viene pagata da lì, così il mese della scadenza non ha scossoni.</p>`],
+  ['Budget per categoria e avvisi', `<p>In <b>Pianifica → Budget</b> dai a ogni categoria un tetto mensile. Nella Home vedi quanto hai speso e quanto resta.</p><p>Quando ti avvicini al budget o lo superi compare un avviso nell'app. Nella Home trovi anche il riepilogo del mese, con entrate, uscite e qualche curiosità.</p><p>Le categorie si creano e si modificano in Impostazioni → Categorie.</p>`],
+  ['Conti e trasferimenti', `<p>In Impostazioni → Conti aggiungi conto corrente, carte, contanti o altro, con il saldo a una certa data. Il <b>conto predefinito</b> è quello proposto per le nuove spese.</p><p>Per spostare soldi tra due conti usa <b>Trasferimento</b>: non conta né come spesa né come entrata.</p><p>Il saldo iniziale è quello all'inizio del giorno indicato: se un saldo non torna, controlla quella data.</p>`, ['Apri i conti', 'data-a="setPage" data-p="accounts"']],
+  ['Carta di credito', `<p>Apri la carta in Impostazioni → Conti e attiva <b>Carta di credito con addebito mensile</b>: indica il giorno di chiusura, il giorno di addebito e il conto da cui vengono presi i soldi.</p><p>Le spese fino al giorno di chiusura vanno nell'estratto del mese, quelle dopo nel ciclo successivo. Il giorno dell'addebito l'app registra da sola il trasferimento dal conto alla carta. Nella Home vedi quanto hai speso nel ciclo e il prossimo addebito.</p><p>Se la banca addebita una cifra diversa, correggi il movimento dell'addebito: non verrà più ricalcolato. Se importi l'estratto conto, elimina le righe «addebito carta», altrimenti la spesa risulta due volte.</p>`],
+  ['Interessi sulla liquidità', `<p>Per i conti remunerati, come Trade Republic, apri il conto e attiva <b>Interessi sulla liquidità</b>: tasso annuo lordo, tasse (in Italia il 26%, oppure 0 se li ricevi lordi), ogni quanto vengono accreditati, in che giorno e, se c'è, il tetto del saldo remunerato.</p><p>L'app calcola gli interessi giorno per giorno e li accredita da sola come entrata nella categoria <b>Interessi</b>. Nel conto vedi anche quanto hai già maturato.</p><p>Se la banca cambia il tasso aggiornalo: gli interessi già accreditati restano com'erano.</p>`],
+  ['Salvadanai e obiettivi', `<p>I salvadanai sono soldi messi da parte per un obiettivo, con una cifra e una data se vuoi. Li trovi in <b>Pianifica → Salvadanai</b> e nella Home.</p><p>Per versare o prelevare apri il salvadanaio. Per un versamento automatico ogni mese crea una spesa fissa di tipo <b>Risparmio</b>.</p><p>I soldi nei salvadanai non contano nel <b>Disponibile</b>.</p>`],
+  ['Investimenti', `<p>In Home → <b>Investimenti</b> aggiungi ETF, azioni, fondi o altro: quanto hai investito, quanto vale oggi e, se vuoi, le quote. Vedi valore, guadagno o perdita e il grafico rispetto al capitale investito.</p><p>Una volta a settimana, all'apertura, l'app ti chiede i nuovi valori; con le quote basta il prezzo di una quota. La frequenza si cambia, anche su <b>Mai</b>. Con <b>Compra o vendi</b> registri acquisti e vendite senza falsare il guadagno.</p>`, ['Apri gli investimenti', 'data-a="invOpen"']],
+  ['Prezzi automatici', `<p>Il ponte dei prezzi è già collegato. Perché un investimento si aggiorni da solo servono il <b>simbolo</b> e le <b>quote</b>: aprilo, tocca <b>Modifica</b> e usa «Trova il simbolo dal nome o dall'ISIN».</p><p>I simboli di solito finiscono con <b>.MI</b> per Milano, <b>.DE</b> per Xetra e <b>.L</b> per Londra. I prezzi si aggiornano quando apri l'app, al massimo ogni 3 ore, oppure con <b>Aggiorna ora</b>, e hanno circa 15 minuti di ritardo.</p><p>Se compare «Nessun prezzo per…», il simbolo è sbagliato: cercalo di nuovo.</p>`],
+  ['PAC, piani di accumulo', `<p>In Investimenti → <b>Nuovo PAC</b> scegli il conto, ogni quanto, la data del primo acquisto e quanto mettere in ogni titolo.</p><p>Alla data giusta l'app sposta i soldi dal conto agli investimenti e aggiorna capitale, valore e quote: non devi registrare niente. Gli acquisti in arrivo entrano nella previsione di fine mese.</p><p>Per cambiare l'importo modifica il PAC: vale dal prossimo acquisto. Se cancelli un acquisto dai movimenti, viene tolto anche dall'investimento.</p>`],
+  ['Spese divise e persone', `<p>Nei dettagli di una spesa puoi dividerla con altre persone, oppure indicare che l'ha pagata qualcun altro: l'app tiene il conto di chi deve cosa.</p><p>In Impostazioni → Persone vedi i saldi; quando qualcuno ti restituisce i soldi registra un <b>rimborso</b>.</p>`, ['Apri le persone', 'data-a="setPage" data-p="people"']],
+  ['Budget di coppia', `<p>In Impostazioni → <b>Budget di coppia</b> scrivi il tuo nome. Ognuno registra le spese sul proprio telefono; ogni tanto toccate <b>Invia</b> e mandate il file all'altra persona, che lo apre con <b>Ricevi</b>.</p><p>L'app unisce i movimenti senza doppioni, fa arrivare anche le cancellazioni e mostra chi ha inserito cosa. Se modificate entrambi la stessa voce vale la modifica più recente. Foto, codice di blocco e impostazioni restano personali.</p>`, ['Apri Budget di coppia', 'data-a="setPage" data-p="share"']],
+  ['Pagamenti con Apple Pay', `<p>Un'automazione di Comandi Rapidi scrive ogni pagamento contactless in un file su iCloud Drive; nell'app lo importi e i pagamenti compaiono nella Home in <b>Pagamenti da controllare</b>, con la categoria suggerita.</p><p>Le istruzioni passo passo sono nella pagina dedicata. Funziona con i pagamenti nei negozi, non con quelli online.</p>`, ['Apri le istruzioni', 'data-a="setPage" data-p="applepay"']],
+  ['Importare dati', `<p>In Impostazioni → <b>Importa dati</b> puoi scegliere:</p><ul><li>un file <b>esportato da EFU Budget</b> o un <b>backup</b>: reimporta tutto, anche su un altro telefono;</li><li>il file <b>Excel del tuo budget</b>;</li><li>l'esportazione di <b>un'altra app</b>, come Money Lover, Wallet o Spendee, oppure l'<b>estratto conto</b> della banca, in CSV o Excel.</li></ul><p>Negli ultimi due casi l'app riconosce le colonne e ti fa controllare tutto prima di importare; i movimenti già presenti non vengono duplicati.</p>`, ['Importa dati', 'data-a="openImportAny"']],
+  ['Esportare e fare il backup', `<p><b>Esporta in Excel</b> crea un file con tutti i dati: movimenti, conti, categorie, spese fisse, salvadanai, investimenti, PAC, impostazioni e foto. Puoi leggerlo con Excel e reimportarlo in EFU Budget su qualsiasi telefono. Il periodo che scegli vale solo per i fogli da leggere: i dati per reimportare sono sempre completi.</p><p>Il <b>CSV</b> contiene solo i movimenti del periodo, per usarli in altre app. Il <b>Backup completo</b> è un file .json con tutto, alternativo all'Excel.</p><p>Prima di cancellare tutti i dati, o di sostituirli importando un file, l'app ti propone di esportarli: basta salvare il file e poi confermare.</p><p>Esporta almeno una volta al mese e salva il file in File o su iCloud Drive.</p>`, ['Esporta', 'data-a="openExport"']],
+  ['Privacy e sicurezza', `<p>Con il <b>codice di blocco</b> l'app chiede un codice a ogni apertura, o dopo il tempo che scegli.</p><p>L'<b>occhio</b> in alto nella Home nasconde tutti gli importi; con <b>Nascondi gli importi all'apertura</b> l'app parte sempre coperta.</p><p>I tuoi dati non escono mai dal telefono: a internet vengono chiesti solo i cambi delle valute e i prezzi dei titoli, senza informazioni personali.</p>`, ['Codice di blocco', 'data-a="setPage" data-p="security"']],
+  ['Valuta principale', `<p>È la valuta di saldi, budget e statistiche. Si cambia in Impostazioni → Valuta principale: puoi convertire tutti gli importi al cambio di oggi, proposto in automatico, oppure cambiare solo il simbolo se all'inizio avevi scelto la valuta sbagliata.</p>`, ['Valuta principale', 'data-a="openBaseCur"']],
+  ['Annullare un errore', `<p>Dopo ogni modifica compare un messaggio con <b>Annulla</b>. Se è già sparito, in Impostazioni c'è <b>Annulla l'ultima modifica</b>, che torna indietro fino a 12 passi.</p><p>Quando chiudi l'app la cronologia degli annullamenti si azzera.</p>`],
+  ["Aggiornare l'app", `<p>Dal PC estrai il nuovo zip, apri il repository su GitHub, fai clic su Add file → Upload files e trascina i file, non la cartella, sopra quelli vecchi; poi Commit changes.</p><p>Dopo un paio di minuti riapri l'app: si aggiorna da sola e i dati restano. Se non vedi le novità, chiudila dal multitasking e riaprila.</p>`],
+  ['Cambiare telefono o reinstallare', `<p>Prima esporta tutto in Excel e salva il file su iCloud Drive. Sul nuovo telefono installa l'app da Safari, poi nella schermata di benvenuto tocca <b>Importa i tuoi dati</b> e scegli il file: torna tutto com'era.</p><p>Non eliminare mai l'icona senza aver salvato prima i dati: togliendo l'app si possono perdere.</p>`],
+  ['Problemi frequenti', `<p><b>L'app non mostra le novità.</b> Aspetta due minuti dopo il caricamento su GitHub, poi chiudi l'app dal multitasking e riaprila. Controlla che index.html sia nella radice del repository, non in una cartella.</p><p><b>In Safari vedo dati diversi.</b> Safari e l'app installata hanno memorie separate: usa sempre l'icona.</p><p><b>Ho perso i dati.</b> Ripristinali con Importa dati, scegliendo l'ultimo file esportato o il backup.</p><p><b>Il file esportato non si reimporta.</b> I file esportati prima della versione 1.6 contengono solo i movimenti: esporta di nuovo con la versione attuale.</p><p><b>Il cambio non si scarica.</b> Controlla la connessione; la BCE pubblica i cambi nei giorni lavorativi. Intanto scrivilo a mano.</p><p><b>I prezzi non si aggiornano.</b> Servono simbolo e quote: tocca Aggiorna ora in Investimenti e leggi il messaggio.</p><p><b>L'addebito della carta non torna.</b> Controlla i giorni di chiusura e di addebito, poi correggi il movimento dell'addebito.</p><p><b>Il promemoria degli investimenti ricompare.</b> Salva i valori oppure tocca Ricordamelo domani; puoi cambiarne la frequenza o sceglierne Mai.</p><p><b>L'import non riconosce le colonne.</b> Scegli tu quale colonna contiene la data e quale l'importo, poi controlla formato delle date e segno degli importi.</p><p><b>Ho dimenticato il codice di blocco.</b> Nella schermata di blocco puoi cancellare i dati e ripartire: per questo è importante esportarli ogni tanto.</p>`]
+];
+const guideNorm = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+SETTINGS.guide = () => {
+  let h = sheetHead('Guida e soluzioni', { back: true, grab: false }) + '<div class="sheet-body">';
+  h += '<label class="fld guide-q"><span>Cerca nella guida</span><input data-in="guideFind" placeholder="Es. carta, PAC, backup" autocomplete="off"></label>';
+  h += `<div class="guide">${GUIDE.map(([t, body, act]) => `<details><summary>${esc(t)}${ic('right', 16)}</summary><div class="g-b">${body}${act ? `<button class="link g-go" ${act[1]}>${esc(act[0])}</button>` : ''}</div></details>`).join('')}<p class="muted sm guide-none" hidden>Nessun argomento trovato: prova con un'altra parola.</p></div>`;
+  return h + `<p class="foot-note">EFU Budget versione ${APP_VERSION}.</p></div>`;
+};
+INP.guideFind = el => {
+  const q = guideNorm(el.value.trim()), box = el.closest('.sheet-body');
+  let shown = 0;
+  for (const d of box.querySelectorAll('.guide details')) {
+    const hit = !q || guideNorm(d.textContent).includes(q);
+    d.hidden = !hit;
+    d.open = hit && q.length >= 3;
+    if (hit) shown++;
+  }
+  const none = box.querySelector('.guide-none');
+  if (none) none.hidden = shown > 0;
+};
+
+/* =========================================================
+   Versione 1.6.1
+   Prima di cancellare tutti i dati, o di sostituirli con un file,
+   l'app propone di esportarli
+   ========================================================= */
+let AFTER_SAVE = null;
+function wipeAll() {
+  wipeStorage(); D = null;
+  UI.sheets.slice().forEach(s => closeSheet(s));
+  UI.tab = 'home'; UI.month = curMk(); UI.filters = blankFilters();
+  render(); toast('Dati cancellati', null);
+}
+SHEETS.safeFirst = {
+  init: () => ({ busy: false }),
+  render(st, sh) {
+    const wipe = sh.props.mode === 'wipe', n = D ? D.movements.length : 0, last = D && D.settings.lastBackup;
+    let h = sheetHead(wipe ? 'Cancellare tutti i dati?' : 'Sostituire i dati?') + '<div class="sheet-body">';
+    h += `<p class="lead sm">${wipe ? 'Stai per cancellare da questo telefono' : 'Il file che hai scelto prenderà il posto, su questo telefono, di'} ${n} ${n === 1 ? 'movimento' : 'movimenti'}, con conti, spese fisse, investimenti e impostazioni.</p>`;
+    h += "<p class=\"lead sm\">Prima ti conviene esportarli: con il file potrai rimettere tutto com'era, anche su un altro telefono.</p>";
+    h += last ? `<p class="muted sm">Ultima esportazione o backup: ${esc(shortDate(last))}.</p>` : '<p class="warn-t">Non hai ancora mai esportato i tuoi dati.</p>';
+    return h + `</div><footer class="sheet-foot"><button class="btn primary w" data-a="safeExport" ${st.busy ? 'disabled' : ''}>${st.busy ? 'Preparo il file…' : wipe ? 'Esporta e poi cancella' : 'Esporta e poi importa'}</button><button class="link w later${wipe ? ' danger' : ''}" data-a="safeSkip">${wipe ? 'Cancella senza esportare' : 'Importa senza esportare'}</button></footer>`;
+  }
+};
+ACT.safeExport = async el => {
+  const sh = sheetOf(el), st = sh.st, { mode, then } = sh.props;
+  st.busy = true; drawSheet(sh);
+  try {
+    const out = await buildXlsx('all');
+    closeSheet(sh);
+    AFTER_SAVE = () => confirmBox(mode === 'wipe' ? 'File salvato: cancello i dati?' : 'File salvato: importo il nuovo file?', 'Prima controlla di averlo salvato in File o su iCloud Drive.', mode === 'wipe' ? 'Cancella tutto' : 'Importa tutto', then, mode === 'wipe');
+    openSheet('fileReady', Object.assign(out, { kind: 'safe' }));
+  } catch (e) { st.busy = false; drawSheet(sh); toast('Esportazione non riuscita: ' + (e.message || e), null); }
+};
+ACT.safeSkip = el => {
+  const sh = sheetOf(el), { mode, then } = sh.props;
+  if (mode !== 'wipe') { closeSheet(sh); return then(); }
+  confirmBox('Cancellare senza una copia?', 'I dati verranno eliminati da questo telefono e non si potranno più recuperare.', 'Cancella tutto', () => { closeSheet(sh); then(); });
+};
+ACT.wipe = () => {
+  if (!D) return;
+  AFTER_SAVE = null;
+  if (D.settings.demo) return confirmBox('Cancellare i dati di esempio?', 'Sono solo dati di prova: non serve esportarli.', 'Cancella', wipeAll);
+  openSheet('safeFirst', { mode: 'wipe', then: wipeAll });
+};
 
 /* =========================================================
    Avvio
