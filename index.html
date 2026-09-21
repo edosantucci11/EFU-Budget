@@ -591,6 +591,20 @@ a.btn{text-decoration:none}
 .fx-tot p.muted{margin:8px 0 0}
 .rt small.wrap{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35}
 
+/* 1.8 barra flottante */
+:root{--glass:rgba(255,255,255,.74);--glass-line:rgba(0,0,0,.07);--accent-soft:rgba(255,56,92,.12)}
+@media (prefers-color-scheme:dark){:root{--glass:rgba(44,44,48,.74);--glass-line:rgba(255,255,255,.09);--accent-soft:rgba(255,56,92,.22)}}
+#tabbar{background:none;border-top:0;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0 12px calc(var(--sab) + 10px);pointer-events:none}
+#tabbar .fbar{display:flex;align-items:center;gap:10px;max-width:520px;margin:0 auto;pointer-events:auto}
+.fpill{flex:1;min-width:0;display:flex;align-items:center;height:62px;padding:0 6px;border-radius:31px;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);border:1px solid var(--glass-line);box-shadow:0 10px 30px rgba(0,0,0,.14),0 1px 3px rgba(0,0,0,.06)}
+.ftab{position:relative;flex:1;min-width:0;height:50px;border-radius:25px;display:grid;place-items:center;color:var(--ink);transition:background .2s,color .2s,transform .12s}
+.ftab.on{color:var(--accent);background:var(--accent-soft)}
+.ftab:active{transform:scale(.92)}
+.ftab .badge{position:absolute;top:5px;left:calc(50% + 4px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;font-style:normal;font-weight:700;display:grid;place-items:center;border:2px solid var(--surface)}
+.ftab .fdot{position:absolute;top:10px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--accent);border:2px solid var(--surface)}
+.ffab{flex:none;width:62px;height:62px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px rgba(227,28,95,.38);transition:transform .12s}
+.ffab:active{transform:scale(.92)}
+
 </style>
 </head>
 <body>
@@ -606,7 +620,7 @@ a.btn{text-decoration:none}
    I dati restano sul dispositivo: localStorage per i dati,
    IndexedDB per le foto degli scontrini.
    ========================================================= */
-const APP_VERSION = '1.7.1';
+const APP_VERSION = '1.8';
 const IS_PACKAGE = true; // la build installabile imposta true
 const DATA_KEY = 'budget.iphone.v1';
 
@@ -1258,7 +1272,7 @@ function render() {
   renderTabbar();
   hydrate(view);
 }
-function renderTabbar() {
+function renderTabbarOld() {
   const n = dueBadge();
   const tab = (t, icon, label) => `<button class="tab ${UI.tab === t ? 'on' : ''}" data-a="tab" data-t="${t}" aria-label="${label}"${UI.tab === t ? ' aria-current="page"' : ''}>${ic(icon, 25)}<span>${label}</span>${t === 'plan' && n ? `<i class="badge">${n}</i>` : ''}</button>`;
   $('#tabbar').innerHTML = `<div class="tabs">${tab('home', 'home', 'Home')}${tab('movs', 'list', 'Movimenti')}<div class="fab-slot"><button class="fab" data-a="add" aria-label="Aggiungi movimento">${ic('plus', 28)}</button></div>${tab('plan', 'plan', 'Pianifica')}${tab('stats', 'chart', 'Statistiche')}</div>`;
@@ -4039,7 +4053,7 @@ function invDue() {
   if (!oldest) return false;
   return dayDiff(oldest, today()) >= f;
 }
-function redrawInvest() { for (const s of UI.sheets) if (s.type === 'invest' || s.type === 'invView' || s.type === 'pac') drawSheet(s); }
+function redrawInvest() { for (const s of UI.sheets) if (s.type === 'invest' || s.type === 'invView' || s.type === 'pac') drawSheet(s); if (UI.tab === 'invest' && D) render(); }
 SHEETS.invest = {
   cls: 'tall',
   init: () => ({ range: 'all' }),
@@ -4743,7 +4757,7 @@ CHG.restoreFile = async el => {
 
 /* ---------- guida e soluzioni ---------- */
 const GUIDE = [
-  ['Come funziona EFU Budget', `<p>EFU Budget è un'app web: la installi dalla schermata Home e funziona anche senza connessione. Non serve nessun account.</p><p>Tutti i dati restano solo su questo telefono, dentro l'app. Per questo è importante esportarli ogni tanto e salvare il file in File o su iCloud Drive.</p><p>In basso ci sono quattro sezioni: <b>Home</b> con saldo, previsione e cose da fare; <b>Movimenti</b> con elenco, ricerca e filtri; <b>Pianifica</b> con spese fisse, budget e salvadanai; <b>Statistiche</b>. Il <b>+</b> rosso al centro serve per registrare.</p>`],
+  ['Come funziona EFU Budget', `<p>EFU Budget è un'app web: la installi dalla schermata Home e funziona anche senza connessione. Non serve nessun account.</p><p>Tutti i dati restano solo su questo telefono, dentro l'app. Per questo è importante esportarli ogni tanto e salvare il file in File o su iCloud Drive.</p><p>In basso c'è la barra con cinque sezioni: <b>Home</b> con saldo, previsione e cose da fare; <b>Movimenti</b> con elenco, ricerca e filtri; <b>Investimenti</b>, l'icona con la freccia che sale; <b>Pianifica</b> con spese fisse, budget e salvadanai; <b>Statistiche</b>. Il <b>+</b> rosso accanto serve per registrare.</p>`],
   ['Registrare un movimento', `<p>Tocca il <b>+</b>, scrivi l'importo con il tastierino e tocca <b>Avanti</b>. In alto scegli uscita, entrata o trasferimento.</p><p>La categoria viene suggerita dalla descrizione e da quello che hai fatto in passato: puoi cambiarla con un tocco. Nei dettagli scegli data, conto, note, #tag e, se vuoi, una foto dello scontrino.</p><p>Per modificare o eliminare un movimento toccalo nell'elenco. Dopo ogni modifica compare <b>Annulla</b>.</p>`],
   ['Spese in valuta estera', `<p>Nel tastierino tocca la valuta e scegli quella della spesa: l'app scarica da sola il cambio ufficiale BCE del giorno, oppure quello della data della spesa se è passata.</p><p>La banca di solito applica un cambio un po' diverso e una commissione: se l'estratto conto mostra un'altra cifra, correggi il cambio a mano e l'app terrà il tuo.</p><p>Senza connessione usa l'ultimo cambio salvato. I cambi da internet si spengono in Impostazioni → Valuta principale.</p>`],
   ['Spese fisse e rate', `<p>In <b>Pianifica → Spese fisse</b> aggiungi affitto, bollette, abbonamenti, stipendio o rate: scegli ogni quanto si ripetono e la prossima scadenza. Per le rate indica quante sono o la data di fine.</p><p>Quando arriva la scadenza la voce compare nella Home in <b>Da registrare</b>: tocca <b>Registra</b> e diventa un movimento. Con <b>Importo variabile</b>, per esempio per le bollette, scrivi la cifra giusta; l'app ti propone la media delle ultime volte.</p><p>In alto scorri i mesi con le frecce: per ogni mese vedi le voci registrate, quelle da registrare e, in fondo, il totale di entrate, uscite e risparmi fissi. Se paghi qualcosa in anticipo, vai al mese successivo e tocca <b>Registra ora</b>.</p><p>Puoi saltare un mese, ripristinarlo, mettere in pausa o modificare la voce quando vuoi. Le spese fisse entrano nella <b>previsione di fine mese</b>.</p>`],
@@ -4753,7 +4767,7 @@ const GUIDE = [
   ['Carta di credito', `<p>Apri la carta in Impostazioni → Conti e attiva <b>Carta di credito con addebito mensile</b>: indica il giorno di chiusura, il giorno di addebito e il conto da cui vengono presi i soldi.</p><p>Le spese fino al giorno di chiusura vanno nell'estratto del mese, quelle dopo nel ciclo successivo. Il giorno dell'addebito l'app registra da sola il trasferimento dal conto alla carta. Nella Home vedi quanto hai speso nel ciclo e il prossimo addebito.</p><p>Se la banca addebita una cifra diversa, correggi il movimento dell'addebito: non verrà più ricalcolato. Se importi l'estratto conto, elimina le righe «addebito carta», altrimenti la spesa risulta due volte.</p>`],
   ['Interessi sulla liquidità', `<p>Per i conti remunerati, come Trade Republic, apri il conto e attiva <b>Interessi sulla liquidità</b>: tasso annuo lordo, tasse (in Italia il 26%, oppure 0 se li ricevi lordi), ogni quanto vengono accreditati, in che giorno e, se c'è, il tetto del saldo remunerato.</p><p>L'app calcola gli interessi giorno per giorno e li accredita da sola come entrata nella categoria <b>Interessi</b>. Nel conto vedi anche quanto hai già maturato.</p><p>Se la banca cambia il tasso aggiornalo: gli interessi già accreditati restano com'erano.</p>`],
   ['Salvadanai e obiettivi', `<p>I salvadanai sono soldi messi da parte per un obiettivo, con una cifra e una data se vuoi. Li trovi in <b>Pianifica → Salvadanai</b> e nella Home.</p><p>Per versare o prelevare apri il salvadanaio. Per un versamento automatico ogni mese crea una spesa fissa di tipo <b>Risparmio</b>.</p><p>I soldi nei salvadanai non contano nel <b>Disponibile</b>.</p>`],
-  ['Investimenti', `<p>In Home → <b>Investimenti</b> aggiungi ETF, azioni, fondi o altro: quanto hai investito, quanto vale oggi e, se vuoi, le quote. Vedi valore, guadagno o perdita e il grafico rispetto al capitale investito.</p><p>Una volta a settimana, all'apertura, l'app ti chiede i nuovi valori; con le quote basta il prezzo di una quota. La frequenza si cambia, anche su <b>Mai</b>. Con <b>Compra o vendi</b> registri acquisti e vendite senza falsare il guadagno.</p>`, ['Apri gli investimenti', 'data-a="invOpen"']],
+  ['Investimenti', `<p>Nella sezione <b>Investimenti</b> della barra in basso aggiungi ETF, azioni, fondi o altro: quanto hai investito, quanto vale oggi e, se vuoi, le quote. Vedi valore, guadagno o perdita e il grafico rispetto al capitale investito.</p><p>Una volta a settimana, all'apertura, l'app ti chiede i nuovi valori; con le quote basta il prezzo di una quota. La frequenza si cambia, anche su <b>Mai</b>. Con <b>Compra o vendi</b> registri acquisti e vendite senza falsare il guadagno.</p>`, ['Apri gli investimenti', 'data-a="invOpen"']],
   ['Prezzi automatici', `<p>Il ponte dei prezzi è già collegato. Perché un investimento si aggiorni da solo servono il <b>simbolo</b> e le <b>quote</b>: aprilo, tocca <b>Modifica</b> e usa «Trova il simbolo dal nome o dall'ISIN».</p><p>I simboli di solito finiscono con <b>.MI</b> per Milano, <b>.DE</b> per Xetra e <b>.L</b> per Londra. I prezzi si aggiornano quando apri l'app, al massimo ogni 3 ore, oppure con <b>Aggiorna ora</b>, e hanno circa 15 minuti di ritardo.</p><p>Se compare «Nessun prezzo per…», il simbolo è sbagliato: cercalo di nuovo.</p>`],
   ['PAC, piani di accumulo', `<p>In Investimenti → <b>Nuovo PAC</b> scegli il conto, ogni quanto, la data del primo acquisto e quanto mettere in ogni titolo.</p><p>Alla data giusta l'app sposta i soldi dal conto agli investimenti e aggiorna capitale, valore e quote: non devi registrare niente. Gli acquisti in arrivo entrano nella previsione di fine mese.</p><p>Per cambiare l'importo modifica il PAC: vale dal prossimo acquisto. Se cancelli un acquisto dai movimenti, viene tolto anche dall'investimento.</p>`],
   ['Spese divise e persone', `<p>Nei dettagli di una spesa puoi dividerla con altre persone, oppure indicare che l'ha pagata qualcun altro: l'app tiene il conto di chi deve cosa.</p><p>In Impostazioni → Persone vedi i saldi; quando qualcuno ti restituisce i soldi registra un <b>rimborso</b>.</p>`, ['Apri le persone', 'data-a="setPage" data-p="people"']],
@@ -4923,6 +4937,33 @@ ACT.fxUnskip = el => {
   else f.skipped = (f.skipped || []).filter(x => x !== k);
   save(); refresh(); toast('Voce ripristinata');
 };
+
+/* =========================================================
+   Versione 1.8
+   Pagina Investimenti nella barra in basso e barra flottante
+   ========================================================= */
+function renderTabbar() {
+  const n = dueBadge(), due = D && D.invest && invDue();
+  const tab = (t, icon, label) => `<button class="ftab ${UI.tab === t ? 'on' : ''}" data-a="tab" data-t="${t}" aria-label="${label}" title="${label}"${UI.tab === t ? ' aria-current="page"' : ''}>${ic(icon, 24)}${t === 'plan' && n ? `<i class="badge">${n}</i>` : ''}${t === 'invest' && due ? '<i class="fdot"></i>' : ''}</button>`;
+  $('#tabbar').innerHTML = `<div class="fbar"><nav class="fpill">${tab('home', 'home', 'Home')}${tab('movs', 'list', 'Movimenti')}${tab('invest', 'trend', 'Investimenti')}${tab('plan', 'plan', 'Pianifica')}${tab('stats', 'chart', 'Statistiche')}</nav><button class="ffab" data-a="add" aria-label="Aggiungi movimento">${ic('plus', 28)}</button></div>`;
+}
+if (!UI.invRange) UI.invRange = 'all';
+VIEWS.invest = () => {
+  let h = '<header class="ph"><h1>Investimenti</h1></header>';
+  if (!D.invest.length) return h + `<div class="empty"><div class="empty-art">${ic('trend', 30)}</div><h3>Nessun investimento</h3><p>Segna quanto hai investito in ETF, azioni, fondi o altro e segui come vanno: guadagno o perdita, grafico, PAC e prezzi automatici.</p><button class="btn primary" data-a="invNew">${ic('plus', 18)} Aggiungi il primo investimento</button></div>`;
+  const t = invTotals(), due = invDue();
+  h += `<div class="inv-sum"><p class="muted sm">Valore attuale</p><p class="inv-big num">${eur(t.v)}</p><p class="inv-gl ${t.g >= 0 ? 'pos' : 'neg'}">${invGainHTML(t.g, t.pct)} <span class="muted">su ${eur(t.i)} investiti</span></p></div>`;
+  h += `<div class="chips">${[['3m', '3 mesi'], ['1y', '1 anno'], ['all', 'Tutto']].map(([k, l]) => `<button class="chip ${UI.invRange === k ? 'on' : ''}" data-a="invRangeSet" data-v="${k}">${l}</button>`).join('')}</div>`;
+  h += invChart(invRange(invSeries(), UI.invRange), 170);
+  h += `<button class="btn ${due ? 'primary' : 'dark'} w gap-t" data-a="invUpdateOpen">${ic('trend', 18)} ${due ? "È ora di aggiornare i valori" : 'Aggiorna i valori'}</button>`;
+  h += section('Le tue posizioni', `<div class="list">${D.invest.slice().sort((a, b) => invValue(b) - invValue(a)).map(invRow).join('')}</div><button class="btn outline w gap-t" data-a="invNew">${ic('plus', 18)} Aggiungi investimento</button>`);
+  h += `<section class="sec">${pacSection()}</section><section class="sec">${pxSection()}</section>`;
+  h += `<section class="sec">${fieldLabel('Promemoria per aggiornare')}<div class="chips wrap">${[[7, 'Ogni settimana'], [14, 'Ogni 2 settimane'], [30, 'Ogni mese'], [0, 'Mai']].map(([v, l]) => `<button class="chip ${invFreq() === v ? 'on' : ''}" data-a="invFreq" data-v="${v}">${l}</button>`).join('')}</div><p class="muted sm gap-t">Quando è il momento, all'apertura dell'app ti chiedo i nuovi valori degli investimenti che non si aggiornano da soli.</p></section>`;
+  return h;
+};
+ACT.invRangeSet = el => { UI.invRange = el.dataset.v; render(); };
+ACT.invOpen = () => { UI.sheets.slice().reverse().forEach(s => closeSheet(s)); goTab('invest'); };
+ACT.invFreq = el => { D.settings.invRemind = Number(el.dataset.v); save({ undo: false }); const sh = sheetOf(el); if (sh) drawSheet(sh); else render(); };
 
 /* =========================================================
    Avvio
