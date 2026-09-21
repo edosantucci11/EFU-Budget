@@ -570,6 +570,27 @@ a.btn{text-decoration:none}
 .guide .g-b li+li{margin-top:4px}
 .guide .g-go{font-size:15px;font-weight:600}
 
+/* 1.7 spese fisse mese per mese */
+.fxlist{display:flex;flex-direction:column}
+.fxm{padding:12px 0;border-bottom:1px solid var(--line)}
+.fxm.dim{opacity:.55}
+.fxm-top{display:flex;align-items:center;gap:12px;width:100%;text-align:left;color:inherit}
+.fxm-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.fxm-t b{font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fxm-v{font-size:16px;white-space:nowrap}
+.st{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--ink-2)}
+.st.ok{color:var(--pos,#0A8A4A)}
+.st.late{color:#E0245E}
+.fxm-act{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-top:8px}
+.fx-tot{margin-top:16px;padding:16px;border-radius:16px;background:var(--surface-2)}
+.fx-tot-h{margin:0 0 6px;font-size:17px;font-weight:700}
+.fx-tot .r{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;font-size:15px}
+.fx-tot .r span{color:var(--ink)}
+.fx-tot .r.sum{border-top:1px solid var(--line);margin-top:6px;padding-top:10px;font-size:17px;font-weight:700}
+.fx-tot .fx-note2{margin:0 0 2px}
+.fx-tot p.muted{margin:8px 0 0}
+.rt small.wrap{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35}
+
 </style>
 </head>
 <body>
@@ -585,7 +606,7 @@ a.btn{text-decoration:none}
    I dati restano sul dispositivo: localStorage per i dati,
    IndexedDB per le foto degli scontrini.
    ========================================================= */
-const APP_VERSION = '1.6.1';
+const APP_VERSION = '1.7.1';
 const IS_PACKAGE = true; // la build installabile imposta true
 const DATA_KEY = 'budget.iphone.v1';
 
@@ -1733,7 +1754,7 @@ function fixedRow(f) {
   const next = nx ? `Prossima il ${shortDate(nx.due)}${f.count ? `, rata ${nx.n} di ${f.count}` : ''}` : (f.paused ? 'In pausa' : 'Conclusa');
   return `<button class="mrow" data-a="fxEdit" data-id="${f.id}">${avatar(t ? t.emoji : '🔁', t ? t.color : null)}<span class="mrow-m"><span class="mt">${esc(f.name)}</span><span class="ms">${esc(sub)}</span><span class="ms">${next}</span></span><span class="ma num ${sign > 0 ? 'pos' : sign < 0 ? 'neg' : 'neu'}">${f.variable ? '≈ ' : ''}${sign ? eur(sign * amt, { sign: sign > 0 }) : eur(amt)}</span></button>`;
 }
-function planFixed() {
+function planFixedOld() {
   const ck = curMk();
   if (!D.fixed.length) return `<div class="empty"><div class="empty-art">${ic('repeat', 30)}</div><h3>Nessuna spesa fissa</h3><p>Aggiungi affitto, bollette, abbonamenti, rate o lo stipendio: ogni mese li trovi pronti da registrare con un tocco.</p><button class="btn primary" data-a="fxNew">Aggiungi spesa fissa</button></div>`;
   const pend = pendingFixed(ck);
@@ -4008,7 +4029,7 @@ function investBlock() {
 }
 function invRow(p) {
   const k = invKind(p.kind), v = invValue(p), g = v - (p.invested || 0), pc = p.invested > 0 ? g / p.invested : null;
-  return `<button class="row" data-a="invView" data-id="${p.id}"><span class="row-ic av-e">${k[2]}</span><span class="rt">${esc(p.name)}<small>${esc([p.code, k[1], 'aggiornato il ' + shortDate(invLast(p).d)].filter(Boolean).join(', '))}</small></span><span class="rv num inv-rv"><b>${eur(v)}</b>${pc != null ? `<small class="${g >= 0 ? 'pos' : 'neg'}">${g >= 0 ? '+' : '−'}${pctDec(Math.abs(pc))}</small>` : ''}</span></button>`;
+  return `<button class="row" data-a="invView" data-id="${p.id}"><span class="row-ic av-e">${k[2]}</span><span class="rt">${esc(p.name)}<small>${esc([p.code, k[1], pxAuto(p) ? 'prezzo automatico' : p.sym ? 'mancano le quote' : '', 'aggiornato il ' + shortDate(invLast(p).d)].filter(Boolean).join(', '))}</small></span><span class="rv num inv-rv"><b>${eur(v)}</b>${pc != null ? `<small class="${g >= 0 ? 'pos' : 'neg'}">${g >= 0 ? '+' : '−'}${pctDec(Math.abs(pc))}</small>` : ''}</span></button>`;
 }
 const invFreq = () => (D.settings.invRemind == null ? 7 : Number(D.settings.invRemind));
 function invDue() {
@@ -4233,42 +4254,53 @@ function pxEndpoint(path, params) {
   return u.toString();
 }
 const pxAuto = p => !!(pxUrl() && p.sym && p.qty > 0);
-let PX_BUSY = false;
-async function autoPrices(force) {
-  if (!D || !pxUrl() || PX_BUSY) return null;
-  const list = D.invest.filter(pxAuto);
-  if (!list.length) return { n: 0, errs: [] };
-  if (!force && Date.now() - (D.settings.pxLast || 0) < 3 * 3600e3) return null;
-  PX_BUSY = true;
+let PX_RUN = null;
+/* se un aggiornamento è già in corso, chi lo richiede riceve lo stesso risultato invece di un errore */
+function autoPrices(force) {
+  if (!D || !pxUrl()) return Promise.resolve(null);
+  if (PX_RUN) return PX_RUN;
+  const withSym = D.invest.filter(p => p.sym);
+  if (!withSym.length) return Promise.resolve({ n: 0, errs: [], report: [] });
+  if (!force && Date.now() - (D.settings.pxLast || 0) < 3 * 3600e3) return Promise.resolve(null);
+  PX_RUN = pxRun(withSym).finally(() => { PX_RUN = null; });
+  return PX_RUN;
+}
+async function pxRun(withSym) {
   try {
-    const syms = Array.from(new Set(list.map(p => p.sym)));
-    const j = await getJSON(pxEndpoint('', { s: syms.join(',') }), 12000);
-    if (!j || !j.quotes) throw new Error((j && j.error) || 'risposta non valida');
+    let j;
+    try { j = await getJSON(pxEndpoint('', { s: Array.from(new Set(withSym.map(p => p.sym))).join(',') }), 12000); }
+    catch (e) { throw new Error('il ponte non risponde (' + ((e && e.message) || e) + ')'); }
+    if (!j || !j.quotes) throw new Error((j && j.error) || 'risposta del ponte non valida');
     let n = 0;
-    const errs = [], t = today();
-    for (const p of list) {
-      const q = j.quotes[p.sym];
-      if (!q || !(q.price > 0)) { errs.push(p.sym); continue; }
+    const errs = [], report = [], t = today();
+    for (const p of withSym) {
+      const q = j.quotes[p.sym], it = { id: p.id, name: p.name, sym: p.sym, qty: p.qty || 0 };
+      report.push(it);
+      if (!q || !(q.price > 0)) { it.err = q && q.error && !/non trovato/i.test(q.error) ? 'Prezzo non ricevuto: ' + q.error : q && q.error ? 'Simbolo non trovato su Yahoo Finance' : 'Nessun prezzo ricevuto per questo simbolo'; errs.push(p.sym); continue; }
       let price = q.price, cur = String(q.currency || baseCur());
+      Object.assign(it, { price: q.price, cur: q.currency || cur, time: q.time || null });
       if (cur === 'GBp' || cur === 'GBX') { price /= 100; cur = 'GBP'; }
+      else if (cur === 'ZAc') { price /= 100; cur = 'ZAR'; }
+      else if (cur === 'ILA') { price /= 100; cur = 'ILS'; }
       cur = cur.toUpperCase();
       let rate = 1;
-      if (cur !== baseCur()) { const r = await fxRate(cur, baseCur(), t); if (!r) { errs.push(p.sym); continue; } rate = r.rate; }
-      const unit = price * rate;
-      p.px = { price: q.price, cur: q.currency || cur, unit: Math.round(unit * 1e6) / 1e6, at: q.time || new Date().toISOString() };
-      invPoint(p, t, p.qty * unit, p.invested || 0);
+      if (cur !== baseCur()) { const r = await fxRate(cur, baseCur(), t); if (!r) { it.err = `Prezzo ricevuto, ma il cambio ${cur} non è disponibile: riprova più tardi`; errs.push(p.sym); continue; } rate = r.rate; }
+      it.unit = Math.round(price * rate * 1e6) / 1e6;
+      if (!(p.qty > 0)) { it.warn = 'aggiungi il numero di quote per aggiornare il valore'; continue; }
+      p.px = { price: q.price, cur: q.currency || cur, unit: it.unit, at: q.time || new Date().toISOString() };
+      it.value = r2(p.qty * it.unit);
+      invPoint(p, t, it.value, p.invested || 0);
       n++;
     }
     D.settings.pxLast = Date.now();
-    D.settings.pxErr = errs.length ? 'Nessun prezzo per ' + errs.join(', ') + ': controlla il simbolo.' : '';
+    D.settings.pxErr = errs.length ? 'Problemi con ' + errs.join(', ') + ': tocca Aggiorna ora per i dettagli.' : '';
     save({ undo: false });
-    return { n, errs };
+    return { n, errs, report };
   } catch (e) {
-    D.settings.pxErr = 'Il ponte non risponde: ' + ((e && e.message) || e);
+    D.settings.pxErr = 'Prezzi non aggiornati: ' + ((e && e.message) || e);
     save({ undo: false });
     return null;
   } finally {
-    PX_BUSY = false;
     redrawInvest();
     const ae = document.activeElement;
     if (!ae || !/INPUT|TEXTAREA|SELECT/.test(ae.tagName)) refresh();
@@ -4296,18 +4328,31 @@ function pxSection() {
   let h = fieldLabel('Prezzi automatici');
   if (!pxUrl()) return h + `<p class="muted sm">Collega il ponte gratuito e il valore di ETF e azioni si aggiorna da solo quando apri l'app.</p><button class="btn outline w gap-t" data-a="pxSetupOpen">Configura i prezzi automatici</button>`;
   const n = D.invest.filter(pxAuto).length, last = D.settings.pxLast ? new Date(D.settings.pxLast) : null;
-  h += `<p class="muted sm">${n ? `${n} ${n === 1 ? 'investimento si aggiorna' : 'investimenti si aggiornano'} da soli.` : 'Aggiungi simbolo e quote a un investimento per aggiornarlo da solo.'}${last ? ' Ultimo aggiornamento: ' + esc(last.toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })) + '.' : ''}</p>`;
+  const miss = D.invest.filter(p => p.sym && !(p.qty > 0)).length;
+  h += `<p class="muted sm">${n ? `${n} ${n === 1 ? 'investimento si aggiorna' : 'investimenti si aggiornano'} da soli.` : 'Aggiungi simbolo e quote a un investimento per aggiornarlo da solo.'}${miss ? ` ${miss} ${miss === 1 ? 'ha' : 'hanno'} il simbolo ma non le quote: aggiungile per aggiornare il valore.` : ''}${last ? ' Ultimo aggiornamento: ' + esc(last.toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })) + '.' : ''}</p>`;
   if (D.settings.pxErr) h += `<p class="warn-t">${esc(D.settings.pxErr)}</p>`;
   return h + '<div class="two-btn gap-t"><button class="btn dark" data-a="pxNow">Aggiorna ora</button><button class="btn outline" data-a="pxSetupOpen">Impostazioni</button></div>';
 }
-ACT.pxNow = async el => {
-  const sh = sheetOf(el);
+ACT.pxNow = async () => {
   toast('Aggiorno i prezzi…', null);
   const r = await autoPrices(true);
-  if (r && r.n) toast(`Prezzi aggiornati: ${r.n}${r.errs.length ? ', ' + r.errs.length + ' non trovati' : ''}`, null);
-  else if (r) toast(r.errs.length ? D.settings.pxErr : 'Nessun investimento con simbolo e quote', null);
-  else toast(D.settings.pxErr || 'Prezzi non aggiornati', null);
-  if (sh && sheetOpen(sh)) drawSheet(sh);
+  openSheet('pxReport', { r, err: r ? '' : D.settings.pxErr });
+};
+SHEETS.pxReport = {
+  cls: 'tall',
+  render(st, sh) {
+    const r = sh.props.r;
+    let h = sheetHead('Verifica dei prezzi') + '<div class="sheet-body">';
+    if (!r) return h + `<p class="warn-t">${esc(sh.props.err || 'Prezzi non aggiornati.')}</p><p class="muted sm gap-t">Controlla la connessione e riprova. Se il problema resta, apri nel browser ${esc(pxUrl().replace(/\/+$/, ''))}/?s=VWCE.DE e manda a chi ti aiuta quello che compare.</p></div>`;
+    if (!r.report.length) return h + '<p class="muted">Nessun investimento ha un simbolo: aprine uno, tocca Modifica e usa «Trova il simbolo dal nome o dall\'ISIN».</p></div>';
+    h += `<p class="lead sm">${r.n ? `Aggiornati ${r.n} ${r.n === 1 ? 'investimento' : 'investimenti'}.` : 'Nessun valore aggiornato.'}${r.errs.length ? ` ${r.errs.length} con problemi, spiegati qui sotto.` : ''}</p>`;
+    h += `<div class="list">${r.report.map(x => {
+      const okv = x.value != null, when = x.time ? new Date(x.time).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+      const det = x.err || [x.sym + ': ' + numStr(x.price, 4) + ' ' + (x.cur || ''), when ? 'prezzo del ' + when : '', x.unit != null && String(x.cur).toUpperCase() !== baseCur() ? 'una quota vale ' + eur(x.unit) : '', x.warn || (okv ? numStr(x.qty, 6) + ' quote' : '')].filter(Boolean).join(', ');
+      return `<div class="row static"><span class="row-ic av-e">${okv ? '✅' : x.warn ? '🟡' : '⚠️'}</span><span class="rt">${esc(x.name)}<small class="wrap">${esc(det)}</small></span>${okv ? `<span class="rv num"><b>${eur(x.value)}</b></span>` : ''}</div>`;
+    }).join('')}</div>`;
+    return h + '<p class="foot-note">I prezzi arrivano da Yahoo Finance con circa 15 minuti di ritardo; a borsa chiusa vedi l\'ultimo prezzo di chiusura. Se un simbolo non viene trovato, apri l\'investimento, tocca Modifica e usa «Trova il simbolo dal nome o dall\'ISIN».</p></div>';
+  }
 };
 SHEETS.pxSetup = {
   cls: 'tall',
@@ -4701,7 +4746,7 @@ const GUIDE = [
   ['Come funziona EFU Budget', `<p>EFU Budget è un'app web: la installi dalla schermata Home e funziona anche senza connessione. Non serve nessun account.</p><p>Tutti i dati restano solo su questo telefono, dentro l'app. Per questo è importante esportarli ogni tanto e salvare il file in File o su iCloud Drive.</p><p>In basso ci sono quattro sezioni: <b>Home</b> con saldo, previsione e cose da fare; <b>Movimenti</b> con elenco, ricerca e filtri; <b>Pianifica</b> con spese fisse, budget e salvadanai; <b>Statistiche</b>. Il <b>+</b> rosso al centro serve per registrare.</p>`],
   ['Registrare un movimento', `<p>Tocca il <b>+</b>, scrivi l'importo con il tastierino e tocca <b>Avanti</b>. In alto scegli uscita, entrata o trasferimento.</p><p>La categoria viene suggerita dalla descrizione e da quello che hai fatto in passato: puoi cambiarla con un tocco. Nei dettagli scegli data, conto, note, #tag e, se vuoi, una foto dello scontrino.</p><p>Per modificare o eliminare un movimento toccalo nell'elenco. Dopo ogni modifica compare <b>Annulla</b>.</p>`],
   ['Spese in valuta estera', `<p>Nel tastierino tocca la valuta e scegli quella della spesa: l'app scarica da sola il cambio ufficiale BCE del giorno, oppure quello della data della spesa se è passata.</p><p>La banca di solito applica un cambio un po' diverso e una commissione: se l'estratto conto mostra un'altra cifra, correggi il cambio a mano e l'app terrà il tuo.</p><p>Senza connessione usa l'ultimo cambio salvato. I cambi da internet si spengono in Impostazioni → Valuta principale.</p>`],
-  ['Spese fisse e rate', `<p>In <b>Pianifica → Spese fisse</b> aggiungi affitto, bollette, abbonamenti, stipendio o rate: scegli ogni quanto si ripetono e la prossima scadenza. Per le rate indica quante sono o la data di fine.</p><p>Quando arriva la scadenza la voce compare nella Home in <b>Da registrare</b>: tocca <b>Registra</b> e diventa un movimento. Con <b>Importo variabile</b>, per esempio per le bollette, scrivi la cifra giusta; l'app ti propone la media delle ultime volte.</p><p>Puoi saltare un mese, mettere in pausa o modificare la voce quando vuoi. Le spese fisse entrano nella <b>previsione di fine mese</b>.</p>`],
+  ['Spese fisse e rate', `<p>In <b>Pianifica → Spese fisse</b> aggiungi affitto, bollette, abbonamenti, stipendio o rate: scegli ogni quanto si ripetono e la prossima scadenza. Per le rate indica quante sono o la data di fine.</p><p>Quando arriva la scadenza la voce compare nella Home in <b>Da registrare</b>: tocca <b>Registra</b> e diventa un movimento. Con <b>Importo variabile</b>, per esempio per le bollette, scrivi la cifra giusta; l'app ti propone la media delle ultime volte.</p><p>In alto scorri i mesi con le frecce: per ogni mese vedi le voci registrate, quelle da registrare e, in fondo, il totale di entrate, uscite e risparmi fissi. Se paghi qualcosa in anticipo, vai al mese successivo e tocca <b>Registra ora</b>.</p><p>Puoi saltare un mese, ripristinarlo, mettere in pausa o modificare la voce quando vuoi. Le spese fisse entrano nella <b>previsione di fine mese</b>.</p>`],
   ['Spese non mensili e accantonamenti', `<p>Per assicurazioni, tasse o abbonamenti ogni 3, 6 o 12 mesi attiva <b>Accantona ogni mese</b> nella spesa fissa. Ogni mese l'app ti propone di mettere da parte una quota nel salvadanaio <b>Accantonamenti</b>.</p><p>Quando arriva la spesa viene pagata da lì, così il mese della scadenza non ha scossoni.</p>`],
   ['Budget per categoria e avvisi', `<p>In <b>Pianifica → Budget</b> dai a ogni categoria un tetto mensile. Nella Home vedi quanto hai speso e quanto resta.</p><p>Quando ti avvicini al budget o lo superi compare un avviso nell'app. Nella Home trovi anche il riepilogo del mese, con entrate, uscite e qualche curiosità.</p><p>Le categorie si creano e si modificano in Impostazioni → Categorie.</p>`],
   ['Conti e trasferimenti', `<p>In Impostazioni → Conti aggiungi conto corrente, carte, contanti o altro, con il saldo a una certa data. Il <b>conto predefinito</b> è quello proposto per le nuove spese.</p><p>Per spostare soldi tra due conti usa <b>Trasferimento</b>: non conta né come spesa né come entrata.</p><p>Il saldo iniziale è quello all'inizio del giorno indicato: se un saldo non torna, controlla quella data.</p>`, ['Apri i conti', 'data-a="setPage" data-p="accounts"']],
@@ -4786,6 +4831,97 @@ ACT.wipe = () => {
   AFTER_SAVE = null;
   if (D.settings.demo) return confirmBox('Cancellare i dati di esempio?', 'Sono solo dati di prova: non serve esportarli.', 'Cancella', wipeAll);
   openSheet('safeFirst', { mode: 'wipe', then: wipeAll });
+};
+
+/* =========================================================
+   Versione 1.7
+   Spese fisse mese per mese: registrare in anticipo, saltare,
+   ripristinare, e totali di entrate, uscite e risparmi
+   ========================================================= */
+function fixedMonthRows(k) {
+  const done = new Map();
+  for (const m of D.movements) { if (m.fixedId) done.set(m.fixedId + '|' + m.fixedKey, m); if (m.sinkOf) done.set('S' + m.sinkOf + '|' + m.sinkKey, m); }
+  const rows = [];
+  for (const f of D.fixed) {
+    for (const o of occurrences(f, k, k)) {
+      if (o.k < trackStart(f) || (f.pac && f.pac.from && o.due < f.pac.from)) continue;
+      rows.push({ f, k: o.k, due: o.due, m: done.get(f.id + '|' + o.k), skipped: (f.skipped || []).includes(o.k), sink: false });
+    }
+    for (const s of sinkOccurrences(f, k)) if (s.k === k) rows.push({ f, k, due: s.due, m: done.get('S' + f.id + '|' + k), skipped: (f.sinkSkipped || []).includes(k), sink: true, amt: s.amt });
+  }
+  return rows.sort((a, b) => a.due.localeCompare(b.due) || a.f.name.localeCompare(b.f.name));
+}
+const fxRowType = r => (r.sink ? 'save' : r.f.type === 'in' ? 'in' : r.f.type === 'out' ? 'out' : 'save');
+const fxRowAmt = r => (r.m ? r.m.amount : r.sink ? r.amt : estimateAmount(r.f));
+function fxMonthRow(r) {
+  const f = r.f, t = today(), ty = fxRowType(r), amt = fxRowAmt(r), approx = !r.m && !r.sink && f.variable;
+  const tg = r.sink ? null : fixedTarget(f), title = r.sink ? 'Quota per ' + f.name : f.name;
+  const em = r.sink ? '🗓️' : f.pac ? '🔁' : (tg && tg.emoji) || '📌';
+  let st = '', act = '';
+  if (r.m) st = `<span class="st ok">${ic('check', 14)} Registrata il ${esc(shortDate(r.m.date))}</span>`;
+  else if (r.skipped) { st = '<span class="st">Saltata</span>'; act = `<button class="link sm" data-a="fxUnskip" data-id="${f.id}" data-k="${r.k}" data-s="${r.sink ? 1 : 0}">Ripristina</button>`; }
+  else if (f.pac) st = `<span class="st">Acquisto automatico il ${esc(shortDate(r.due))}</span>`;
+  else {
+    const late = r.due < t, fut = r.due > t;
+    st = `<span class="st${late ? ' late' : ''}">${late ? 'Scaduta il ' + esc(shortDate(r.due)) : fut ? 'Scade il ' + esc(shortDate(r.due)) : 'Scade oggi'}</span>`;
+    const reg = r.sink ? 'sinkDo' : 'fxConfirm', skip = r.sink ? 'sinkSkip' : 'fxSkip';
+    act = `<button class="link sm" data-a="${skip}" data-id="${f.id}" data-k="${r.k}">Salta</button><button class="btn dark sm" data-a="${reg}" data-id="${f.id}" data-k="${r.k}">${fut ? 'Registra ora' : r.sink ? 'Metti da parte' : f.variable ? 'Inserisci importo' : 'Registra'}</button>`;
+  }
+  const tap = r.m ? `data-a="fxMovOpen" data-id="${r.m.id}"` : `data-a="fxEdit" data-id="${f.id}"`;
+  const val = ty === 'in' ? eur(amt, { sign: true }) : ty === 'out' ? eur(-amt) : eur(amt);
+  return `<div class="fxm${r.skipped ? ' dim' : ''}"><button class="fxm-top" ${tap}>${avatar(em, tg && tg.color)}<span class="fxm-t"><b>${esc(title)}</b>${st}</span><b class="num fxm-v ${ty === 'in' ? 'pos' : ty === 'out' ? 'neg' : ''}">${approx ? '≈ ' : ''}${val}</b></button>${act ? `<div class="fxm-act">${act}</div>` : ''}</div>`;
+}
+function fxTotals(rows, k) {
+  const t = today(), s = { in: 0, out: 0, save: 0, fund: 0, leftOut: 0, leftIn: 0, done: 0, n: 0 };
+  for (const r of rows) {
+    if (r.skipped) continue;
+    const ty = fxRowType(r), a = fxRowAmt(r);
+    s[ty] += a; s.n++;
+    if (ty === 'out' && r.f.sink) s.fund += a;
+    if (r.m) s.done++;
+    else if (ty === 'out' || ty === 'save') s.leftOut += a;
+    else s.leftIn += a;
+  }
+  const avg = { in: 0, out: 0, save: 0 };
+  for (const f of D.fixed) {
+    if (f.paused || fixedEnded(f)) continue;
+    const a = estimateAmount(f) / (Number(f.freq) || 1), ty = f.type === 'in' ? 'in' : f.type === 'out' ? 'out' : 'save';
+    avg[ty] += a;
+  }
+  const diff = s.in - (s.out - s.fund) - s.save, mn = monthName(k).toLowerCase(), row = (l, v, cls = '') => `<div class="r ${cls}"><span>${l}</span><b class="num">${v}</b></div>`;
+  let h = `<div class="fx-tot"><p class="fx-tot-h">Totale di ${esc(mn)}</p>`;
+  h += row('Entrate fisse', eur(s.in, { sign: true }), 'pos') + row('Uscite fisse', eur(-s.out), 'neg');
+  if (s.fund > 0.004) h += `<p class="muted sm fx-note2">di cui ${eur(s.fund)} pagati con gli accantonamenti</p>`;
+  if (s.save > 0.004) h += row('Risparmi, accantonamenti e PAC', eur(-s.save));
+  h += row('Differenza', eur(diff, { sign: true }), 'sum ' + (diff >= 0 ? 'pos' : 'neg'));
+  h += `<p class="muted sm">Registrate ${s.done} su ${s.n}${s.leftOut > 0.004 ? `, ancora da pagare ${eur(s.leftOut)}` : ''}${s.leftIn > 0.004 ? `, da incassare ${eur(s.leftIn)}` : ''}.</p>`;
+  h += `<p class="muted sm">In media al mese, contando anche le voci non mensili: entrate ${eur(avg.in)}, uscite ${eur(avg.out)}${avg.save > 0.004 ? `, risparmi ${eur(avg.save)}` : ''}.</p>`;
+  return h + '</div>';
+}
+function planFixed() {
+  if (!D.fixed.length) return planFixedOld();
+  const k = UI.month, ck = curMk(), rows = fixedMonthRows(k);
+  let h = `<div class="msw-row">${monthSwitcher()}</div>`;
+  if (k === ck) {
+    const older = pendingFixed(ck).filter(p => p.k < ck && !p.f.auto);
+    if (older.length) h += `<button class="notice" data-a="fxMonthGo" data-k="${older[0].k}">${ic('repeat', 20)}<div><b>${older.length === 1 ? 'Una voce' : older.length + ' voci'} di mesi precedenti da registrare</b><span>Tocca per andare a ${esc(monthName(older[0].k).toLowerCase())}.</span></div></button>`;
+  }
+  if (k > ck) h += '<p class="muted sm">Se paghi qualcosa in anticipo, tocca <b>Registra ora</b>: la registro con la data di oggi e non te la chiedo più quando arriva la scadenza.</p>';
+  h += section('Voci del mese', rows.length ? `<div class="fxlist">${rows.map(fxMonthRow).join('')}</div>${fxTotals(rows, k)}` : '<p class="muted">Nessuna voce fissa in questo mese.</p>');
+  const active = D.fixed.filter(f => !fixedEnded(f)), ended = D.fixed.filter(fixedEnded);
+  active.sort((a, b) => { const x = nextOcc(a), y = nextOcc(b); return (x ? x.due : '9').localeCompare(y ? y.due : '9'); });
+  h += section('Tutte le voci fisse', `<div class="mlist">${active.map(fixedRow).join('')}</div><button class="btn outline w gap-t" data-a="fxNew">${ic('plus', 18)} Nuova voce fissa</button>`, null, 'Tocca una voce per modificarla, metterla in pausa o eliminarla.');
+  if (ended.length) h += section('Concluse', `<div class="mlist dim">${ended.map(fixedRow).join('')}</div>`);
+  return h;
+}
+ACT.fxMovOpen = el => openSheet('mov', { id: el.dataset.id });
+ACT.fxMonthGo = el => { UI.month = el.dataset.k; refresh(); };
+ACT.fxUnskip = el => {
+  const f = D.fixed.find(x => x.id === el.dataset.id), k = el.dataset.k;
+  if (!f) return;
+  if (el.dataset.s === '1') f.sinkSkipped = (f.sinkSkipped || []).filter(x => x !== k);
+  else f.skipped = (f.skipped || []).filter(x => x !== k);
+  save(); refresh(); toast('Voce ripristinata');
 };
 
 /* =========================================================
