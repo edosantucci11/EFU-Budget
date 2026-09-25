@@ -1,4 +1,4 @@
-EFU BUDGET - web app per iPhone, versione 1.8
+EFU BUDGET - web app per iPhone, versione 1.9
 
 COSA C'È IN QUESTA CARTELLA
 index.html, sw.js, manifest.webmanifest e le icone: sono i file dell'app.

@@ -540,6 +540,11 @@ a.btn{text-decoration:none}
 .inv-gl{font-size:15px;margin:0}
 .inv-ch{display:block;width:100%;height:auto;color:var(--ink-2);margin:10px 0 2px;overflow:visible}
 .inv-ch .ax{font-size:10px;fill:var(--ink-2)}
+.inv-rng{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:4px;border-radius:14px;background:var(--surface-2)}
+.inv-rng button{height:34px;border-radius:10px;font-size:14px;font-weight:600;color:var(--ink-2);text-align:center}
+.inv-rng button.on{background:var(--seg-on);color:var(--ink);box-shadow:var(--shadow-s)}
+.inv-per{font-size:15px;margin:6px 0 0}
+.inv-per .num{font-weight:700}
 .inv-nochart{margin:12px 0}
 .inv-leg{display:flex;gap:16px;font-size:12.5px;color:var(--ink-2);margin:4px 0 0}
 .inv-leg span{display:inline-flex;align-items:center;gap:6px}
@@ -620,7 +625,7 @@ a.btn{text-decoration:none}
    I dati restano sul dispositivo: localStorage per i dati,
    IndexedDB per le foto degli scontrini.
    ========================================================= */
-const APP_VERSION = '1.8';
+const APP_VERSION = '1.9';
 const IS_PACKAGE = true; // la build installabile imposta true
 const DATA_KEY = 'budget.iphone.v1';
 
@@ -4017,10 +4022,30 @@ function invPoint(p, d, v, i) {
   p.hist.sort((a, b) => a.d.localeCompare(b.d));
 }
 const invGainHTML = (g, pc) => `<b class="num">${eur(g, { sign: true })}</b>${pc != null ? `<span> ${g >= 0 ? '+' : '−'}${pctDec(Math.abs(pc))}</span>` : ''}`;
+const INV_RANGES = [['1d', '1G', 'Un giorno'], ['1w', '1S', 'Una settimana'], ['1m', '1M', 'Un mese'], ['3m', '3M', 'Tre mesi'], ['1y', '1A', 'Un anno'], ['all', 'Tutto', 'Tutto lo storico']];
+const INV_DAYS = { '1w': 7, '1m': 31, '3m': 92, '1y': 366 };
+/* porta la serie fino a oggi con l'ultimo valore noto, poi la taglia sul periodo scelto */
 function invRange(s, r) {
-  if (r === 'all' || s.length < 3) return s;
-  const from = addDays(today(), r === '3m' ? -92 : -366), inside = s.filter(x => x.d >= from), before = s.filter(x => x.d < from).pop();
+  const t = today(), l = s[s.length - 1];
+  if (l && l.d < t) s = s.concat([{ d: t, v: l.v, i: l.i }]);
+  if (r === 'all' || s.length < 2) return s;
+  if (r === '1d') { const prev = s.filter(x => x.d < t).pop(); return prev ? [prev].concat(s.filter(x => x.d >= t)) : s.filter(x => x.d >= t); }
+  const from = addDays(t, -(INV_DAYS[r] || 366)), inside = s.filter(x => x.d > from), before = s.filter(x => x.d <= from).pop();
   return before ? [Object.assign({}, before, { d: from })].concat(inside) : inside;
+}
+const invRangeChips = (sel, attrs) => `<div class="inv-rng" role="group" aria-label="Periodo del grafico">${INV_RANGES.map(([k, l, a]) => `<button class="${sel === k ? 'on' : ''}" ${attrs} data-v="${k}" aria-label="${a}" aria-pressed="${sel === k}">${l}</button>`).join('')}</div>`;
+/* variazione nel periodo, senza contare acquisti, vendite e versamenti del PAC */
+function invDeltaHTML(series, r) {
+  if (series.length < 2) return '';
+  const a = series[0], b = series[series.length - 1], t = today();
+  const contrib = r2(b.i - a.i), g = r2(b.v - a.v - contrib), base = a.v + Math.max(0, contrib) / 2, pc = base > 0 ? g / base : null;
+  const wanted = r === '1d' ? null : r === 'all' ? a.d : addDays(t, -(INV_DAYS[r] || 366));
+  let lbl;
+  if (r === '1d') lbl = a.d === addDays(t, -1) ? 'Rispetto a ieri' : "Dall'ultimo aggiornamento, il " + shortDate(a.d);
+  else if (a.d > wanted) lbl = 'Dal ' + shortDate(a.d) + ', il primo valore che ho';
+  else lbl = { '1w': 'Nell\'ultima settimana', '1m': "Nell'ultimo mese", '3m': 'Negli ultimi 3 mesi', '1y': "Nell'ultimo anno", all: 'Dal ' + shortDate(a.d) }[r];
+  const note = Math.abs(contrib) > 0.004 ? `<span class="muted sm"> Senza contare ${contrib > 0 ? 'i versamenti' : 'le vendite'} di ${eur(Math.abs(contrib))}.</span>` : '';
+  return `<p class="inv-per">${esc(lbl)}: <span class="${g >= 0 ? 'pos' : 'neg'}">${invGainHTML(g, pc)}</span>${note}</p>`;
 }
 function invChart(series, h = 150) {
   if (series.length < 2) return '<p class="muted sm inv-nochart">Il grafico compare dal secondo aggiornamento del valore.</p>';
@@ -4101,7 +4126,8 @@ SHEETS.invView = {
     let h = sheetHead(p.name) + '<div class="sheet-body">';
     h += `<p class="muted sm">${esc([k[2] + ' ' + k[1], p.code, p.qty ? numStr(p.qty, 6) + ' quote' : ''].filter(Boolean).join(', '))}</p>`;
     h += `<div class="inv-sum"><p class="inv-big num">${eur(v)}</p><p class="inv-gl ${g >= 0 ? 'pos' : 'neg'}">${invGainHTML(g, pc)} <span class="muted">su ${eur(p.invested || 0)} investiti</span></p></div>`;
-    h += invChart(invSeries([p]), 150);
+    const rg = st.range || 'all', ser = invRange(invSeries([p]), rg);
+    h += invRangeChips(rg, 'data-a="pick" data-f="range"') + invChart(ser, 150) + invDeltaHTML(ser, rg);
     h += invViewExtra(p);
     h += `<div class="two-btn gap-t"><button class="btn dark" data-a="invUpdateOne" data-id="${p.id}">Aggiorna valore</button><button class="btn outline" data-a="invMoveOpen" data-id="${p.id}">Compra o vendi</button></div>`;
     const rows = (p.hist || []).slice().reverse();
@@ -4764,10 +4790,10 @@ const GUIDE = [
   ['Spese non mensili e accantonamenti', `<p>Per assicurazioni, tasse o abbonamenti ogni 3, 6 o 12 mesi attiva <b>Accantona ogni mese</b> nella spesa fissa. Ogni mese l'app ti propone di mettere da parte una quota nel salvadanaio <b>Accantonamenti</b>.</p><p>Quando arriva la spesa viene pagata da lì, così il mese della scadenza non ha scossoni.</p>`],
   ['Budget per categoria e avvisi', `<p>In <b>Pianifica → Budget</b> dai a ogni categoria un tetto mensile. Nella Home vedi quanto hai speso e quanto resta.</p><p>Quando ti avvicini al budget o lo superi compare un avviso nell'app. Nella Home trovi anche il riepilogo del mese, con entrate, uscite e qualche curiosità.</p><p>Le categorie si creano e si modificano in Impostazioni → Categorie.</p>`],
   ['Conti e trasferimenti', `<p>In Impostazioni → Conti aggiungi conto corrente, carte, contanti o altro, con il saldo a una certa data. Il <b>conto predefinito</b> è quello proposto per le nuove spese.</p><p>Per spostare soldi tra due conti usa <b>Trasferimento</b>: non conta né come spesa né come entrata.</p><p>Il saldo iniziale è quello all'inizio del giorno indicato: se un saldo non torna, controlla quella data.</p>`, ['Apri i conti', 'data-a="setPage" data-p="accounts"']],
-  ['Carta di credito', `<p>Apri la carta in Impostazioni → Conti e attiva <b>Carta di credito con addebito mensile</b>: indica il giorno di chiusura, il giorno di addebito e il conto da cui vengono presi i soldi.</p><p>Le spese fino al giorno di chiusura vanno nell'estratto del mese, quelle dopo nel ciclo successivo. Il giorno dell'addebito l'app registra da sola il trasferimento dal conto alla carta. Nella Home vedi quanto hai speso nel ciclo e il prossimo addebito.</p><p>Se la banca addebita una cifra diversa, correggi il movimento dell'addebito: non verrà più ricalcolato. Se importi l'estratto conto, elimina le righe «addebito carta», altrimenti la spesa risulta due volte.</p>`],
+  ['Carta di credito', `<p>Apri la carta in Impostazioni → Conti e attiva <b>Carta di credito con addebito mensile</b>: indica il giorno di chiusura, il giorno di addebito e il conto da cui vengono presi i soldi.</p><p>Le spese fino al giorno di chiusura vanno nell'estratto del mese, quelle dopo nel ciclo successivo. Il giorno dell'addebito l'app registra da sola il trasferimento dal conto alla carta. Nella Home vedi quanto hai speso nel ciclo e il prossimo addebito; in <b>Pianifica → Spese fisse</b>, mese per mese, trovi gli addebiti già fatti, quelli in arrivo e quello del ciclo ancora aperto.</p><p>Se la banca addebita una cifra diversa, correggi il movimento dell'addebito: non verrà più ricalcolato. Se importi l'estratto conto, elimina le righe «addebito carta», altrimenti la spesa risulta due volte.</p>`],
   ['Interessi sulla liquidità', `<p>Per i conti remunerati, come Trade Republic, apri il conto e attiva <b>Interessi sulla liquidità</b>: tasso annuo lordo, tasse (in Italia il 26%, oppure 0 se li ricevi lordi), ogni quanto vengono accreditati, in che giorno e, se c'è, il tetto del saldo remunerato.</p><p>L'app calcola gli interessi giorno per giorno e li accredita da sola come entrata nella categoria <b>Interessi</b>. Nel conto vedi anche quanto hai già maturato.</p><p>Se la banca cambia il tasso aggiornalo: gli interessi già accreditati restano com'erano.</p>`],
   ['Salvadanai e obiettivi', `<p>I salvadanai sono soldi messi da parte per un obiettivo, con una cifra e una data se vuoi. Li trovi in <b>Pianifica → Salvadanai</b> e nella Home.</p><p>Per versare o prelevare apri il salvadanaio. Per un versamento automatico ogni mese crea una spesa fissa di tipo <b>Risparmio</b>.</p><p>I soldi nei salvadanai non contano nel <b>Disponibile</b>.</p>`],
-  ['Investimenti', `<p>Nella sezione <b>Investimenti</b> della barra in basso aggiungi ETF, azioni, fondi o altro: quanto hai investito, quanto vale oggi e, se vuoi, le quote. Vedi valore, guadagno o perdita e il grafico rispetto al capitale investito.</p><p>Una volta a settimana, all'apertura, l'app ti chiede i nuovi valori; con le quote basta il prezzo di una quota. La frequenza si cambia, anche su <b>Mai</b>. Con <b>Compra o vendi</b> registri acquisti e vendite senza falsare il guadagno.</p>`, ['Apri gli investimenti', 'data-a="invOpen"']],
+  ['Investimenti', `<p>Nella sezione <b>Investimenti</b> della barra in basso aggiungi ETF, azioni, fondi o altro: quanto hai investito, quanto vale oggi e, se vuoi, le quote. Vedi valore, guadagno o perdita e il grafico rispetto al capitale investito.</p><p>Una volta a settimana, all'apertura, l'app ti chiede i nuovi valori; con le quote basta il prezzo di una quota. La frequenza si cambia, anche su <b>Mai</b>. Con <b>Compra o vendi</b> registri acquisti e vendite senza falsare il guadagno.</p><p>Sopra il grafico scegli il periodo: <b>1G</b> un giorno, <b>1S</b> una settimana, <b>1M</b> un mese, poi 3 mesi, un anno o tutto. Sotto trovi quanto hanno guadagnato o perso i tuoi investimenti in quel periodo, senza contare acquisti e versamenti del PAC. L'app salva un valore al giorno, quando la apri: se non la apri per qualche giorno, la variazione di «1G» parte dall'ultimo aggiornamento.</p>`, ['Apri gli investimenti', 'data-a="invOpen"']],
   ['Prezzi automatici', `<p>Il ponte dei prezzi è già collegato. Perché un investimento si aggiorni da solo servono il <b>simbolo</b> e le <b>quote</b>: aprilo, tocca <b>Modifica</b> e usa «Trova il simbolo dal nome o dall'ISIN».</p><p>I simboli di solito finiscono con <b>.MI</b> per Milano, <b>.DE</b> per Xetra e <b>.L</b> per Londra. I prezzi si aggiornano quando apri l'app, al massimo ogni 3 ore, oppure con <b>Aggiorna ora</b>, e hanno circa 15 minuti di ritardo.</p><p>Se compare «Nessun prezzo per…», il simbolo è sbagliato: cercalo di nuovo.</p>`],
   ['PAC, piani di accumulo', `<p>In Investimenti → <b>Nuovo PAC</b> scegli il conto, ogni quanto, la data del primo acquisto e quanto mettere in ogni titolo.</p><p>Alla data giusta l'app sposta i soldi dal conto agli investimenti e aggiorna capitale, valore e quote: non devi registrare niente. Gli acquisti in arrivo entrano nella previsione di fine mese.</p><p>Per cambiare l'importo modifica il PAC: vale dal prossimo acquisto. Se cancelli un acquisto dai movimenti, viene tolto anche dall'investimento.</p>`],
   ['Spese divise e persone', `<p>Nei dettagli di una spesa puoi dividerla con altre persone, oppure indicare che l'ha pagata qualcun altro: l'app tiene il conto di chi deve cosa.</p><p>In Impostazioni → Persone vedi i saldi; quando qualcuno ti restituisce i soldi registra un <b>rimborso</b>.</p>`, ['Apri le persone', 'data-a="setPage" data-p="people"']],
@@ -4912,9 +4938,40 @@ function fxTotals(rows, k) {
   h += `<p class="muted sm">In media al mese, contando anche le voci non mensili: entrate ${eur(avg.in)}, uscite ${eur(avg.out)}${avg.save > 0.004 ? `, risparmi ${eur(avg.save)}` : ''}.</p>`;
   return h + '</div>';
 }
+/* addebiti delle carte di credito che cadono nel mese k: già registrati, in arrivo o del ciclo ancora aperto */
+function cardDebitRows(k) {
+  const t = today(), rows = [];
+  for (const a of D.accounts.filter(isCredit)) {
+    for (const cyc of [addM(k, -1), k]) {
+      const dd = cardDebitDate(a, cyc);
+      if (mk(dd) !== k || dd < (a.autoFrom || t) || (a.skipDebits || []).includes(cyc)) continue;
+      const m = D.movements.find(x => x.id === cardDebitId(a, cyc)), amt = m ? m.amount : cardSpent(a, cyc);
+      const running = t > cardClose(a, addM(cyc, -1)) && t <= cardClose(a, cyc);
+      if (!m && !(amt > 0.004) && !running) continue;
+      rows.push({ a, cyc, dd, close: cardClose(a, cyc), m, amt });
+    }
+  }
+  return rows.sort((x, y) => x.dd.localeCompare(y.dd) || x.a.name.localeCompare(y.a.name));
+}
+function cardDebitRow(r) {
+  const t = today(), from = acc(r.m ? r.m.accountId : r.a.payFrom), su = from ? ' su ' + esc(from.name) : '', open = !r.m && t <= r.close;
+  let st;
+  if (r.m) st = `<span class="st ok">${ic('check', 14)} Addebitato il ${esc(shortDate(r.m.date))}${su}${r.m.manual ? ', importo corretto a mano' : ''}</span>`;
+  else if (open) st = `<span class="st">Speso finora: il ciclo chiude il ${esc(shortDate(r.close))}, addebito il ${esc(shortDate(r.dd))}${su}</span>`;
+  else st = `<span class="st">Estratto chiuso il ${esc(shortDate(r.close))}, addebito il ${esc(shortDate(r.dd))}${su}</span>`;
+  const tap = r.m ? `data-a="fxMovOpen" data-id="${r.m.id}"` : `data-a="accEdit" data-id="${r.a.id}"`;
+  return `<div class="fxm"><button class="fxm-top" ${tap}>${avatar(r.a.emoji || '💳')}<span class="fxm-t"><b>Addebito ${esc(r.a.name)}</b>${st}</span><b class="num fxm-v neg">${open ? '≈ ' : ''}${eur(-r.amt)}</b></button></div>`;
+}
+function cardDebitSection(k) {
+  const rows = cardDebitRows(k);
+  if (!rows.length) return '';
+  const n = new Set(rows.map(r => r.a.id)).size;
+  return section(n === 1 ? 'Addebito della carta di credito' : 'Addebiti delle carte di credito', `<div class="fxlist">${rows.map(cardDebitRow).join('')}</div><p class="muted sm gap-t">Non entra nei totali delle voci fisse: le spese con la carta sono già contate il giorno in cui le fai. Qui vedi quando e quanto uscirà dal conto.</p>`);
+}
 function planFixed() {
-  if (!D.fixed.length) return planFixedOld();
-  const k = UI.month, ck = curMk(), rows = fixedMonthRows(k);
+  const k = UI.month, ck = curMk();
+  if (!D.fixed.length) return D.accounts.some(isCredit) ? `<div class="msw-row">${monthSwitcher()}</div>` + cardDebitSection(k) + planFixedOld() : planFixedOld();
+  const rows = fixedMonthRows(k);
   let h = `<div class="msw-row">${monthSwitcher()}</div>`;
   if (k === ck) {
     const older = pendingFixed(ck).filter(p => p.k < ck && !p.f.auto);
@@ -4922,6 +4979,7 @@ function planFixed() {
   }
   if (k > ck) h += '<p class="muted sm">Se paghi qualcosa in anticipo, tocca <b>Registra ora</b>: la registro con la data di oggi e non te la chiedo più quando arriva la scadenza.</p>';
   h += section('Voci del mese', rows.length ? `<div class="fxlist">${rows.map(fxMonthRow).join('')}</div>${fxTotals(rows, k)}` : '<p class="muted">Nessuna voce fissa in questo mese.</p>');
+  h += cardDebitSection(k);
   const active = D.fixed.filter(f => !fixedEnded(f)), ended = D.fixed.filter(fixedEnded);
   active.sort((a, b) => { const x = nextOcc(a), y = nextOcc(b); return (x ? x.due : '9').localeCompare(y ? y.due : '9'); });
   h += section('Tutte le voci fisse', `<div class="mlist">${active.map(fixedRow).join('')}</div><button class="btn outline w gap-t" data-a="fxNew">${ic('plus', 18)} Nuova voce fissa</button>`, null, 'Tocca una voce per modificarla, metterla in pausa o eliminarla.');
@@ -4953,8 +5011,8 @@ VIEWS.invest = () => {
   if (!D.invest.length) return h + `<div class="empty"><div class="empty-art">${ic('trend', 30)}</div><h3>Nessun investimento</h3><p>Segna quanto hai investito in ETF, azioni, fondi o altro e segui come vanno: guadagno o perdita, grafico, PAC e prezzi automatici.</p><button class="btn primary" data-a="invNew">${ic('plus', 18)} Aggiungi il primo investimento</button></div>`;
   const t = invTotals(), due = invDue();
   h += `<div class="inv-sum"><p class="muted sm">Valore attuale</p><p class="inv-big num">${eur(t.v)}</p><p class="inv-gl ${t.g >= 0 ? 'pos' : 'neg'}">${invGainHTML(t.g, t.pct)} <span class="muted">su ${eur(t.i)} investiti</span></p></div>`;
-  h += `<div class="chips">${[['3m', '3 mesi'], ['1y', '1 anno'], ['all', 'Tutto']].map(([k, l]) => `<button class="chip ${UI.invRange === k ? 'on' : ''}" data-a="invRangeSet" data-v="${k}">${l}</button>`).join('')}</div>`;
-  h += invChart(invRange(invSeries(), UI.invRange), 170);
+  const ser = invRange(invSeries(), UI.invRange);
+  h += invRangeChips(UI.invRange, 'data-a="invRangeSet"') + invChart(ser, 170) + invDeltaHTML(ser, UI.invRange);
   h += `<button class="btn ${due ? 'primary' : 'dark'} w gap-t" data-a="invUpdateOpen">${ic('trend', 18)} ${due ? "È ora di aggiornare i valori" : 'Aggiorna i valori'}</button>`;
   h += section('Le tue posizioni', `<div class="list">${D.invest.slice().sort((a, b) => invValue(b) - invValue(a)).map(invRow).join('')}</div><button class="btn outline w gap-t" data-a="invNew">${ic('plus', 18)} Aggiungi investimento</button>`);
   h += `<section class="sec">${pacSection()}</section><section class="sec">${pxSection()}</section>`;
