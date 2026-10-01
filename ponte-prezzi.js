@@ -2,6 +2,7 @@
 // Incolla tutto questo codice in un Worker di Cloudflare e premi Deploy.
 // Chiede i prezzi a Yahoo Finance e li passa all'app, aggiungendo i permessi
 // che servono a una web app per leggerli. Non salva niente.
+// Versione 2: anche lo storico delle chiusure giornaliere, per grafici completi.
 // Facoltativo: in Settings > Variables and Secrets aggiungi KEY con una parola
 // segreta e scrivila anche nell'app, così solo tu puoi usare il ponte.
 
@@ -47,6 +48,20 @@ async function quote(symbol) {
   } catch (e) { return { error: String((e && e.message) || e) }; }
 }
 
+// chiusure giornaliere nel periodo (5d, 1mo, 3mo, 6mo, 1y, 2y), con la data della borsa
+const RANGES = ['5d', '1mo', '3mo', '6mo', '1y', '2y'];
+async function history(symbol, range) {
+  try {
+    const j = await yahoo('/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=' + range + '&interval=1d');
+    const r = j && j.chart && j.chart.result && j.chart.result[0];
+    if (!r || !r.timestamp) return { error: 'storico non disponibile' };
+    const off = (r.meta && r.meta.gmtoffset) || 0, close = (r.indicators && r.indicators.quote && r.indicators.quote[0] && r.indicators.quote[0].close) || [];
+    const points = [];
+    r.timestamp.forEach((t, i) => { const c = close[i]; if (c > 0) points.push([new Date((t + off) * 1000).toISOString().slice(0, 10), c]); });
+    return { currency: (r.meta && r.meta.currency) || null, points };
+  } catch (e) { return { error: String((e && e.message) || e) }; }
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
@@ -62,7 +77,13 @@ export default {
       } catch (e) { return json({ error: String((e && e.message) || e) }, 502); }
     }
     const symbols = [...new Set((url.searchParams.get('s') || '').split(',').map(s => s.trim()).filter(Boolean))].slice(0, 40);
-    if (!symbols.length) return json({ ok: true, service: 'EFU Budget prezzi', version: 1 });
+    if (url.pathname.replace(/\/+$/, '').endsWith('/history')) {
+      const range = RANGES.includes(url.searchParams.get('range')) ? url.searchParams.get('range') : '1y';
+      const out = {};
+      await Promise.all(symbols.map(async s => { out[s] = await history(s, range); }));
+      return json({ ok: true, version: 2, history: out });
+    }
+    if (!symbols.length) return json({ ok: true, service: 'EFU Budget prezzi', version: 2 });
     const quotes = {};
     await Promise.all(symbols.map(async s => { quotes[s] = await quote(s); }));
     return json({ ok: true, quotes });

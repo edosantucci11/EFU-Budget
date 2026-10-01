@@ -8,9 +8,8 @@
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="format-detection" content="telephone=no">
 <title>EFU Budget</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -20,7 +19,7 @@
 :root{
   --bg:#fff;--surface:#fff;--surface-2:#F7F7F7;--surface-3:#EBEBEB;
   --ink:#222;--ink-2:#6A6A6A;--ink-3:#B0B0B0;--line:#EBEBEB;--line-2:#DDD;
-  --accent:#FF385C;--grad:linear-gradient(90deg,#E61E4D 0%,#E31C5F 50%,#D70466 100%);
+  --accent:#FF385C;--accent-soft:#FFF0F3;--grad:linear-gradient(90deg,#E61E4D 0%,#E31C5F 50%,#D70466 100%);
   --pos:#008A05;--neg:#C13515;--neg-soft:#FDF0EC;--warn:#B45309;--warn-soft:#FFF6E5;
   --seg-on:#fff;--dark-btn:#222;--on-dark:#fff;--toast:#222;
   --shadow:0 6px 20px rgba(0,0,0,.1);--shadow-s:0 2px 8px rgba(0,0,0,.07);
@@ -61,7 +60,7 @@ svg{flex:none}
 .lead{font-size:17px;line-height:1.45;margin:4px 0 12px}
 .lead.sm{font-size:15px;color:var(--ink-2)}
 .err{color:var(--neg);font-weight:500}
-.warn-t{background:var(--warn-soft);padding:12px 14px;border-radius:12px}
+.warn-t{background:var(--warn-soft);color:var(--warn);padding:12px 14px;border-radius:12px;font-size:14px;margin:14px 0 0}
 
 /* struttura */
 .view{max-width:600px;margin:0 auto;padding:calc(var(--sat) + 10px) 20px calc(var(--sab) + 112px)}
@@ -221,6 +220,7 @@ svg{flex:none}
 .btn.outline{border:1px solid var(--ink);color:var(--ink);background:transparent}
 .btn.danger{background:var(--neg);color:#fff}
 .btn:disabled,.btn.is-busy{opacity:.35}
+.btn:active:not(:disabled){transform:scale(.98)}
 .link{font-size:15px;font-weight:600;text-decoration:underline;text-underline-offset:2px;color:var(--ink);position:relative;cursor:pointer}
 .link.sm{font-size:14px}
 .link.danger{color:var(--neg)}
@@ -242,7 +242,7 @@ svg{flex:none}
 .sw.on::after{transform:translateX(20px)}
 
 /* barra in basso */
-#tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding-bottom:var(--sab)}
+#tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--tabbar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:1px solid var(--line);padding-bottom:var(--sab)}
 .tabs{display:grid;grid-template-columns:repeat(5,1fr);max-width:600px;margin:0 auto;height:60px;align-items:center}
 .tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:100%;font-size:10.5px;font-weight:500;color:var(--ink-2)}
 .tab.on{color:var(--accent);font-weight:600}
@@ -286,7 +286,7 @@ svg{flex:none}
 .fx-in{width:104px;height:40px;border:1px solid var(--line-2);border-radius:10px;padding:0 10px;text-align:center;background:var(--surface);font-family:var(--font-r);font-size:17px}
 .fx-eq{margin:8px 0 0;font-size:14px;color:var(--ink-2);min-height:20px}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:420px;width:100%;margin:0 auto}
-.key{height:60px;border-radius:14px;font-family:var(--font-r);font-size:28px;font-weight:500;display:grid;place-items:center}
+.key{height:60px;border-radius:14px;font-family:var(--font-r);font-size:28px;font-weight:500;display:grid;place-items:center;transition:background .1s}
 .key:active{background:var(--surface-2)}
 .amt-sum{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;padding:8px 0 6px}
 .amt-sum .num{font-size:40px;font-weight:700;letter-spacing:-.03em}
@@ -438,8 +438,8 @@ svg{flex:none}
 .rc-l .num{margin-left:auto;font-weight:600}
 
 /* toast e blocco */
-#toast{position:fixed;left:16px;right:16px;bottom:calc(var(--sab) + 86px);z-index:120;max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;border-radius:12px;background:var(--toast);color:#fff;font-size:15px;box-shadow:var(--shadow);opacity:0;pointer-events:none}
-#toast.on{opacity:1;pointer-events:auto}
+#toast{position:fixed;left:16px;right:16px;bottom:calc(var(--sab) + 86px);z-index:120;max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;border-radius:12px;background:var(--toast);color:#fff;font-size:15px;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .2s,transform .2s}
+#toast.on{opacity:1;transform:none;pointer-events:auto}
 #toast.above-sheet{bottom:calc(var(--sab) + 90px)}
 #toast button{color:#fff;font-weight:700;text-decoration:underline;white-space:nowrap}
 #lock{position:fixed;inset:0;z-index:200;background:var(--bg);display:none;align-items:center;justify-content:center;padding:calc(var(--sat) + 20px) 24px calc(var(--sab) + 20px)}
@@ -602,113 +602,19 @@ a.btn{text-decoration:none}
 #tabbar .fbar{display:flex;align-items:center;gap:10px;max-width:520px;margin:0 auto;pointer-events:auto}
 .fpill{flex:1;min-width:0;display:flex;align-items:center;height:62px;padding:0 6px;border-radius:31px;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);border:1px solid var(--glass-line);box-shadow:0 10px 30px rgba(0,0,0,.14),0 1px 3px rgba(0,0,0,.06)}
 .ftab{position:relative;flex:1;min-width:0;height:50px;border-radius:25px;display:grid;place-items:center;color:var(--ink);transition:background .2s,color .2s,transform .12s}
-.ftab.on{color:var(--accent)}
+.ftab.on{color:var(--accent);background:var(--accent-soft)}
 .ftab:active{transform:scale(.92)}
 .ftab .badge{position:absolute;top:5px;left:calc(50% + 4px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;font-style:normal;font-weight:700;display:grid;place-items:center;border:2px solid var(--surface)}
 .ftab .fdot{position:absolute;top:10px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--accent);border:2px solid var(--surface)}
-.ffab{flex:none;width:62px;height:62px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px rgba(227,28,95,.38)}
-
-/* =========================================================
-   2.0 — movimento con uno scopo (aspetto invariato)
-   ========================================================= */
-:root{--ease:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.4,.64,1);--soft:cubic-bezier(.3,1.1,.55,1)}
-/* la scheda attiva in basso scivola */
-.fpill{position:relative}
-.find{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 12px)/5);border-radius:25px;background:var(--accent-soft);transform:translateX(calc(var(--ti,0)*100%));transition:transform .44s var(--spring)}
-.ftab{z-index:1}
-.ftab.on{background:none}
-.ffab{transition:transform .16s var(--spring)}
-.ffab:active{transform:scale(.9) rotate(90deg)}
-/* ingresso nelle sezioni, solo quando cambi sezione */
-.view.entering>*{animation:rise .42s var(--ease) both}
-.view.entering>*:nth-child(2){animation-delay:.03s}.view.entering>*:nth-child(3){animation-delay:.06s}.view.entering>*:nth-child(4){animation-delay:.09s}
-.view.entering>*:nth-child(5){animation-delay:.12s}.view.entering>*:nth-child(6){animation-delay:.15s}.view.entering>*:nth-child(n+7){animation-delay:.18s}
-@keyframes rise{from{opacity:0;transform:translateY(12px)}}
-.view.in-fwd{animation:inR .34s var(--ease) both}.view.in-back{animation:inL .34s var(--ease) both}
-@keyframes inR{from{opacity:0;transform:translateX(16%)}}@keyframes inL{from{opacity:0;transform:translateX(-16%)}}
-@keyframes outL{to{opacity:0;transform:translateX(-16%)}}@keyframes outR{to{opacity:0;transform:translateX(16%)}}
-/* barre, grafici e ciambella che si disegnano */
-.bar i{transform-origin:left}
-.view.entering .bar i,.view.entering .strip i{animation:growX .8s var(--spring) both .12s}
-.view.entering .strip i{transform-origin:left}
-@keyframes growX{from{transform:scaleX(0)}}
-.view.entering .chart .ln.draw{stroke-dasharray:1;animation:draw 1s var(--ease) both .12s}
-@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
-.view.entering .chart .ln.dash,.view.entering .chart path[fill],.view.entering .inv-ch{animation:fadeIn .7s var(--ease) both .35s}
-@keyframes fadeIn{from{opacity:0}}
-.view.entering .chart rect.b-in,.view.entering .chart rect.b-out{transform-box:fill-box;transform-origin:bottom;animation:growY .65s var(--spring) both}
-@keyframes growY{from{transform:scaleY(0)}}
-.view.entering .donut{animation:donutIn .75s var(--spring) both .08s}
-@keyframes donutIn{from{opacity:0;transform:rotate(-70deg) scale(.9)}}
-.view.entering .chart .dot{animation:fadeIn .3s both 1s}
-/* tastierino */
-.amt-v.pop{animation:amtPop .26s var(--spring)}
-.amt-v.drop{animation:amtDrop .18s var(--ease)}
-@keyframes amtPop{0%{transform:scale(.94)}60%{transform:scale(1.04)}100%{transform:none}}
-@keyframes amtDrop{0%{transform:scale(1.03)}100%{transform:none}}
-.amt.shake{animation:shake .38s ease}
-.key{transition:background .1s,transform .14s var(--spring)}
-.key:active{transform:scale(.93)}
-.cg button{transition:transform .14s var(--spring)}
-.cg button:active{transform:scale(.93)}
-.chip{transition:transform .14s var(--spring)}
-.chip:active{transform:scale(.95)}
-.btn{transition:transform .14s var(--spring),opacity .2s}
-.btn:active:not(:disabled){transform:scale(.97)}
-/* scorri per eliminare */
-.mrow{touch-action:pan-y;background:var(--bg);position:relative}
-.mswipe{position:relative;overflow:hidden;transition:height .28s var(--ease),opacity .28s var(--ease)}
-.mswipe>.mrow{z-index:1;transition:transform .34s var(--spring)}
-.mswipe.drag>.mrow{transition:none}
-.mswipe.gone{height:0!important;opacity:0}
-.mdel{position:absolute;right:0;top:0;bottom:0;width:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--neg);color:#fff;font-size:12px;font-weight:700;text-align:center}
-.mrow.fresh{animation:fresh 1.6s var(--ease)}
-@keyframes fresh{0%,30%{background:var(--accent-soft)}100%{background:var(--bg)}}
-/* avviso che arriva con una piccola molla */
-#toast{transition:opacity .2s,transform .42s var(--spring);transform:translateY(16px) scale(.97)}
-#toast.on{transform:none}
-/* attese reali: file in lavorazione e prezzi in aggiornamento */
-.btn.is-busy{opacity:.75;overflow:hidden}
-.btn.is-busy::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:translateX(-100%);animation:shim 1.1s infinite}
-@keyframes shim{to{transform:translateX(100%)}}
-.px-busy .inv-big,.px-busy .inv-v,.px-busy .inv-g{position:relative;color:transparent!important}
-.px-busy .inv-big::after,.px-busy .inv-v::after,.px-busy .inv-g::after{content:"";position:absolute;inset:2px 0;border-radius:8px;background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 50%,var(--surface-2) 75%);background-size:200% 100%;animation:skel 1.1s linear infinite}
-@keyframes skel{to{background-position:-200% 0}}
-.hap{position:fixed;left:-50px;top:0;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden}
-/* transizioni condivise */
-#tabbar{view-transition-name:tabbar}
-::view-transition-group(*){animation-duration:.42s;animation-timing-function:var(--soft)}
-html[data-nav=fwd]::view-transition-old(root){animation:.32s var(--ease) both outL}
-html[data-nav=fwd]::view-transition-new(root){animation:.32s var(--ease) both inR}
-html[data-nav=back]::view-transition-old(root){animation:.32s var(--ease) both outR}
-html[data-nav=back]::view-transition-new(root){animation:.32s var(--ease) both inL}
-html[data-nav=card]::view-transition-old(root),html[data-nav=card]::view-transition-new(root){animation-duration:.24s}
-html[data-nav=card]::view-transition-group(mvcard){animation-duration:.4s;animation-timing-function:cubic-bezier(.2,.9,.25,1);overflow:clip;border-radius:16px}
-html[data-nav=card]::view-transition-old(mvcard),html[data-nav=card]::view-transition-new(mvcard){width:100%;height:100%;object-fit:none;object-position:top left}
-::view-transition-old(tabbar){display:none}::view-transition-new(tabbar){animation:none}
-.vt-now .sheet{transition:none!important;transform:none!important}
-@media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
-
-/* ---------- 2.1: patrimonio netto e categorie suggerite ---------- */
-.nw-link{display:inline-flex;align-items:center;gap:6px;min-height:36px;margin-top:6px;padding:0 12px;border-radius:18px;background:var(--surface-2);color:var(--ink-2);font-size:14px}
-.nw-link b{color:var(--ink);font-weight:700}
-.nw-link:active{transform:scale(.97)}
-.nw-card .nw-ch{margin-top:10px}
-.nw-v{display:block;font-size:24px;font-weight:700;letter-spacing:-.02em}
-.nw-card .inv-g small{display:block;font-weight:500;color:var(--ink-2);font-size:12px;text-align:right}
-.nw-parts{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13px;color:var(--ink-2)}
-.nw-parts b{color:var(--ink);font-weight:650}
-.nw-top{margin-bottom:8px}
-.nw-top .inv-g small{margin-left:6px;color:var(--ink-2);font-weight:500}
-.nw-tr{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-.nw-tr small{font-size:12.5px}
-.cg-why{min-height:18px;margin-top:8px}
-.cg-why:empty{display:none}
+.ffab{flex:none;width:62px;height:62px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px rgba(227,28,95,.38);transition:transform .12s}
+.ffab:active{transform:scale(.92)}
 
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true"><div class="sp-in"><span class="sp-ic"><svg viewBox="0 0 96 96" width="84" height="84" aria-hidden="true"><defs><linearGradient id="sp-spg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF5A77"/><stop offset="1" stop-color="#E31C5F"/></linearGradient></defs><rect width="96" height="96" rx="22" fill="url(#sp-spg)"/><circle cx="48" cy="48" r="24" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="10"/><path d="M48 24a24 24 0 1 1-22.8 16.6" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"/></svg></span><p class="sp-name"><span>EFU</span> Budget</p></div></div>
+<a class="v1-back" href="../">Stai usando la versione 1.9, copia di sicurezza. <b>Torna alla 2.0</b></a>
+<style>.v1-back{display:block;padding:calc(env(safe-area-inset-top,0px) + 8px) 16px 8px;background:#141014;color:#fff;font:600 14px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;text-align:center;text-decoration:none}.v1-back b{text-decoration:underline}body .view{padding-top:12px}</style>
 <div id="app"><main id="view" class="view"></main><nav id="tabbar" aria-label="Sezioni" hidden></nav></div>
 <div id="sheets"></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -720,7 +626,7 @@ html[data-nav=card]::view-transition-old(mvcard),html[data-nav=card]::view-trans
    I dati restano sul dispositivo: localStorage per i dati,
    IndexedDB per le foto degli scontrini.
    ========================================================= */
-const APP_VERSION = '2.1';
+const APP_VERSION = '1.9';
 const IS_PACKAGE = true; // la build installabile imposta true
 const DATA_KEY = 'budget.iphone.v1';
 
@@ -986,6 +892,7 @@ function balancesAt(dateIso) {
   });
 }
 function availAt(dateIso) { const b = balancesAt(dateIso); return sum(liquidAccounts().map(a => b[a.id])); }
+function goalsAt(dateIso) { const b = balancesAt(dateIso); return sum(goals().map(a => b[a.id])); }
 
 function monthStats(k) {
   return memo('ms' + k, () => {
@@ -1146,74 +1053,19 @@ function suggest(q, type) {
   }
   return st.sort(by).concat(inc.sort(by)).slice(0, 4);
 }
-/* ---------- categorie intelligenti: l'app impara dalle tue scelte ---------- */
-// Parole che non dicono nulla sul negozio: sigle societarie, diciture dei pagamenti, articoli
-const CAT_NOISE = new Set(('spa srl srls snc sas sapa coop soc societa ltd inc gmbh sa sl bv the www com it eu net org ' +
-  'pos pagamento pagam pag acquisto acq presso carta card visa mastercard maestro contactless apple pay google paypal ' +
-  'sumup satispay nexi web online shop store negozio punto vendita filiale via viale piazza corso ' +
-  'del della dello dei degli delle di da in e il lo la gli le per con su al alla allo ai agli alle dal dalla nr num').split(' '));
-function catTokens(desc) {
-  return String(desc || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ')
-    .split(' ').filter(t => t.length >= 2 && !/\d/.test(t) && !CAT_NOISE.has(t));
-}
-function catLearn() {
-  return memo('catLearn', () => {
-    const ex = new Map(), key = new Map(), first = new Map(), tok = new Map();
-    const add = (map, k, m) => {
-      const e = map.get(k) || { by: {}, list: [], text: m.description.trim(), last: '' };
-      e.by[m.categoryId] = (e.by[m.categoryId] || 0) + 1;
-      e.list.push({ d: m.date, c: m.categoryId });
-      if (m.date >= e.last) { e.last = m.date; e.text = m.description.trim(); }
-      map.set(k, e);
-    };
-    for (const m of D.movements) {
-      if ((m.type !== 'in' && m.type !== 'out') || !m.categoryId || !m.description || !m.description.trim()) continue;
-      const t = m.type + '|', tk = catTokens(m.description);
-      add(ex, t + m.description.trim().toLowerCase(), m);
-      if (tk.length) { add(key, t + tk.slice(0, 2).join(' '), m); if (tk[0].length >= 3) add(first, t + tk[0], m); }
-      for (const w of new Set(tk)) if (w.length >= 4) add(tok, t + w, m);
-    }
-    return { ex, key, first, tok };
-  });
-}
-// La scelta più frequente; ma se le ultime due volte hai scelto un'altra categoria, vince la nuova abitudine
-function catPick(e, ok) {
-  const l = e.list.filter(x => ok(x.c)).sort((a, b) => b.d.localeCompare(a.d));
-  if (!l.length) return null;
-  const cnt = {}, pos = {};
-  l.forEach((x, i) => { cnt[x.c] = (cnt[x.c] || 0) + 1; if (pos[x.c] == null) pos[x.c] = i; });
-  let id = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || pos[a] - pos[b])[0], recent = false;
-  if (l.length >= 3 && l[0].c === l[1].c && l[0].c !== id) { id = l[0].c; recent = true; }
-  return { id, n: cnt[id], tot: l.length, recent };
-}
-function guessCategoryInfo(desc, type) {
-  const q = String(desc || '').trim().toLowerCase();
+function guessCategory(desc, type) {
+  const q = desc.trim().toLowerCase();
   if (q.length < 2) return null;
-  const ok = id => { const c = cat(id); return !!c && !c.archived && c.type === type; };
-  const L = catLearn(), t = type + '|', tk = catTokens(q);
-  const why = (p, e) => p.recent ? `come le ultime due volte per «${e.text}»` : p.n === 1 ? `come l'ultima volta per «${e.text}»` : p.n === p.tot ? `come le altre ${p.n} volte per «${e.text}»` : `come ${p.n} volte su ${p.tot} per «${e.text}»`;
-  const tries = [[L.ex, t + q], [L.key, tk.length ? t + tk.slice(0, 2).join(' ') : ''], [L.first, tk.length && tk[0].length >= 3 ? t + tk[0] : '']];
-  for (const [map, k] of tries) {
-    const e = k && map.get(k), p = e && catPick(e, ok);
-    if (p) return { id: p.id, why: why(p, e) };
-  }
-  // parole in comune con descrizioni già usate: serve una maggioranza chiara
-  const score = {}; let tot = 0, ref = null;
-  for (const w of new Set(tk)) {
-    const e = w.length >= 4 && L.tok.get(t + w);
-    if (!e) continue;
-    for (const [c, n] of Object.entries(e.by)) if (ok(c)) { score[c] = (score[c] || 0) + n; tot += n; if (!ref) ref = e; }
-  }
-  const best = Object.keys(score).sort((a, b) => score[b] - score[a])[0];
-  if (best && score[best] >= 2 && score[best] / tot >= 0.7) return { id: best, why: `da descrizioni simili, come «${ref.text}»` };
+  const ok = id => { const c = cat(id); return c && !c.archived && c.type === type; };
+  const exact = descIndex().find(e => e.type === type && e.text.toLowerCase() === q);
+  if (exact && ok(exact.cat)) return exact.cat;
   for (const [re, keys] of KEYWORDS) {
     if (!re.test(q)) continue;
     const c = activeCats(type).find(c => keys.some(k => c.name.toLowerCase().includes(k)));
-    if (c) return { id: c.id, why: 'dalla descrizione' };
+    if (c) return c.id;
   }
   return null;
 }
-function guessCategory(desc, type) { const g = guessCategoryInfo(desc, type); return g ? g.id : null; }
 function allTags() {
   return memo('tags', () => {
     const n = {};
@@ -1365,10 +1217,6 @@ function undoLast() {
   toast('Modifica annullata', null);
 }
 
-/* ---------- date e percentuali ---------- */
-const dayDiff = (a, b) => Math.round((dateOf(b) - dateOf(a)) / 864e5);
-const pctDec = x => (Math.round(x * 1000) / 10).toLocaleString('it-IT') + '%';
-
 /* =========================================================
    Interfaccia: icone, rendering, fogli a comparsa, eventi
    ========================================================= */
@@ -1404,12 +1252,7 @@ const ICONS = {
   sliders: '<path d="M4 6h10M18 6h2M4 12h3M11 12h9M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
   share: '<path d="M12 3.5v11M8 7.5l4-4 4 4"/><path d="M7 11H5.5v9.5h13V11H17"/>',
   info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8h.01"/>',
-  spark: '<path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4M6 6l2.6 2.6M15.4 15.4 18 18M6 18l2.6-2.6M15.4 8.6 18 6"/>',
-  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
-  eyeOff: '<path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c6.5 0 10 8 10 8a17.4 17.4 0 0 1-2.2 3.2"/><path d="M6.6 6.6C3.9 8.4 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m2 2 20 20"/>',
-  trend: '<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
-  help: '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
-  undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>'
+  spark: '<path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4M6 6l2.6 2.6M15.4 15.4 18 18M6 18l2.6-2.6M15.4 8.6 18 6"/>'
 };
 const ic = (n, s = 24) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
 const tint = c => (c || '#7A8B99') + '24';
@@ -1434,37 +1277,11 @@ function render() {
   view.innerHTML = (VIEWS[UI.tab] || VIEWS.home)();
   renderTabbar();
   hydrate(view);
-  // movimento: ingresso animato solo quando cambi sezione, poi numeri e grafici
-  if ((MOTION.entering || MOTION.first) && !RM()) {
-    view.classList.add('entering');
-    if (MOTION.navDir) view.classList.add('in-' + MOTION.navDir);
-    clearTimeout(MOTION.et);
-    MOTION.et = setTimeout(() => view.classList.remove('entering', 'in-fwd', 'in-back'), 1500);
-  }
-  MOTION.navDir = '';
-  decorate(view);
-  countUp(view);
-  MOTION.entering = false; MOTION.first = false;
 }
-/* barra in basso: la scheda attiva scivola al suo posto */
-function renderTabbar() {
-  const bar = $('#tabbar');
-  const n = dueBadge(), due = D && D.invest && invDue();
-  const tabs = [['home', 'home', 'Home'], ['movs', 'list', 'Movimenti'], ['invest', 'trend', 'Investimenti'], ['plan', 'plan', 'Pianifica'], ['stats', 'chart', 'Statistiche']];
-  let pill = bar.querySelector('.fpill');
-  if (!pill) {
-    bar.innerHTML = `<div class="fbar"><nav class="fpill"><span class="find" aria-hidden="true"></span>${tabs.map(([t, , l]) => `<button class="ftab" data-a="tab" data-t="${t}" aria-label="${l}" title="${l}"></button>`).join('')}</nav><button class="ffab" data-a="add" aria-label="Aggiungi movimento">${ic('plus', 28)}</button></div>`;
-    pill = bar.querySelector('.fpill');
-  }
-  const btns = pill.querySelectorAll('.ftab');
-  tabs.forEach(([t, icon], i) => {
-    const b = btns[i], on = UI.tab === t;
-    b.classList.toggle('on', on);
-    if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
-    const h = ic(icon, 24) + (t === 'plan' && n ? `<i class="badge">${n}</i>` : '') + (t === 'invest' && due ? '<i class="fdot"></i>' : '');
-    if (b.dataset.h !== h) { b.innerHTML = h; b.dataset.h = h; }
-  });
-  pill.style.setProperty('--ti', Math.max(0, TAB_ORDER.indexOf(UI.tab)));
+function renderTabbarOld() {
+  const n = dueBadge();
+  const tab = (t, icon, label) => `<button class="tab ${UI.tab === t ? 'on' : ''}" data-a="tab" data-t="${t}" aria-label="${label}"${UI.tab === t ? ' aria-current="page"' : ''}>${ic(icon, 25)}<span>${label}</span>${t === 'plan' && n ? `<i class="badge">${n}</i>` : ''}</button>`;
+  $('#tabbar').innerHTML = `<div class="tabs">${tab('home', 'home', 'Home')}${tab('movs', 'list', 'Movimenti')}<div class="fab-slot"><button class="fab" data-a="add" aria-label="Aggiungi movimento">${ic('plus', 28)}</button></div>${tab('plan', 'plan', 'Pianifica')}${tab('stats', 'chart', 'Statistiche')}</div>`;
 }
 function hydrate(root) {
   $$('img[data-photo]', root).forEach(img => {
@@ -1478,23 +1295,8 @@ function refresh() {
   if (top && SHEETS[top.type].live) drawSheet(top);
 }
 function goTab(t) {
-  if (UI.tab === t) { window.scrollTo({ top: 0, behavior: RM() ? 'auto' : 'smooth' }); return; }
-  hap();
-  closeSwipe();
-  const dir = TAB_ORDER.indexOf(t) > TAB_ORDER.indexOf(UI.tab) ? 'fwd' : 'back';
-  const swap = () => { UI.tab = t; MOTION.entering = true; render(); window.scrollTo(0, 0); };
-  if (VT_OK()) {
-    const de = document.documentElement;
-    de.dataset.nav = dir;
-    try {
-      const vt = document.startViewTransition(swap);
-      const clean = () => { if (de.dataset.nav === dir) delete de.dataset.nav; };
-      vt.finished.then(clean, clean);
-      return;
-    } catch (e) { delete de.dataset.nav; }
-  }
-  MOTION.navDir = RM() ? '' : dir;
-  swap();
+  if (UI.tab !== t) { UI.tab = t; render(); window.scrollTo(0, 0); }
+  else { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 }
 
 /* ---------- fogli a comparsa ---------- */
@@ -1524,8 +1326,6 @@ function drawSheet(sh) {
   if (!SHEETS[sh.type].full) attachDrag(el, sh);
   hydrate(el);
   if (SHEETS[sh.type].after) SHEETS[sh.type].after(sh, el);
-  // attese reali: il pulsante che sta lavorando («Preparo il backup…») si anima
-  $$('.sheet-foot .btn', el).forEach(b => { if (/…\s*$/.test(b.textContent || '')) b.classList.add('is-busy'); });
 }
 function closeSheet(sh = topSheet()) {
   if (!sh) return;
@@ -1583,7 +1383,7 @@ SHEETS.confirm = {
     <footer class="sheet-foot two"><button class="btn outline" data-a="closeSheet">${esc(p.cancel || 'Annulla')}</button><button class="btn ${p.danger ? 'danger' : 'dark'}" data-a="confirmOk">${esc(p.ok || 'Conferma')}</button></footer>`;
   }
 };
-ACT.confirmOk = el => { const sh = sheetOf(el); if (sh.props.danger) hap('warn'); closeSheet(sh); sh.props.onOk && sh.props.onOk(); };
+ACT.confirmOk = el => { const sh = sheetOf(el); closeSheet(sh); sh.props.onOk && sh.props.onOk(); };
 const confirmBox = (title, text, ok, onOk, danger = true) => openSheet('confirm', { title, text, ok, onOk, danger });
 
 /* ---------- toast ---------- */
@@ -1750,7 +1550,6 @@ VIEWS.home = () => {
     <p class="hero-l">${isCur ? 'Disponibile oggi' : k < ck ? 'Disponibile a fine ' + mName : 'Disponibile con i movimenti già inseriti'}</p>
     <p class="hero-n">${bigAmount(avail)}</p>
     ${heroSub(gs.length, inGoals)}
-    ${isCur ? nwHomeLink() : ''}
     ${accountPills(bal)}
     ${spendStrip(ms)}
     <div class="kpis">
@@ -2041,7 +1840,6 @@ function legendRows(parts, tot, month) {
 function statsMonth(k) {
   const ms = monthStats(k);
   let h = kpiGrid([['Entrate', eur(ms.inc), 'pos'], ['Uscite', eur(ms.out), 'neg'], ['Risultato', eur(ms.net, { sign: true })], ['Tasso di risparmio', ms.rate == null ? '–' : pct(ms.rate)]]);
-  h += nwBlock(k);
   const parts = spendParts(ms), tot = sum(parts.map(p => p.v));
   h += section('Spese per categoria', parts.length ? `<div class="donut-wrap">${donut(parts.map(p => ({ v: p.v, color: p.c.color })), tot, eur0(tot), 'di uscite')}</div>${legendRows(parts, tot, k)}` : '<p class="muted">Nessuna spesa in questo mese.</p>');
   h += section('Andamento del saldo', balanceChart(k), null, k === curMk() ? 'Disponibile giorno per giorno, senza i salvadanai. La linea tratteggiata è la previsione con le voci fisse ancora da registrare.' : 'Disponibile giorno per giorno, senza i salvadanai.');
@@ -2056,7 +1854,6 @@ function statsYear(y) {
   const st = months.map(monthStats);
   const inc = sum(st.map(s => s.inc)), out = sum(st.map(s => s.out)), saved = sum(st.map(s => s.saved));
   let h = kpiGrid([['Entrate', eur(inc), 'pos'], ['Uscite', eur(out), 'neg'], ['Risultato', eur(inc - out, { sign: true })], ['Nei salvadanai', eur(saved)]]);
-  h += nwYearBlock(y);
   h += section('Entrate e uscite per mese', yearBars(months, st) + `<div class="lg-inline"><span><i class="k-in"></i>Entrate</span><span><i class="k-out"></i>Uscite</span></div>`, null, 'Tocca un mese per vederne il dettaglio.');
   const ck = curMk(), t = today();
   const rows = months.map((k, i) => {
@@ -2156,18 +1953,6 @@ VIEWS.onboarding = () => `<div class="onb">
   </div>
 </div>`;
 
-/* ---------- importi nascosti ---------- */
-const HIDE_KEY = 'budget.iphone.hide';
-ACT.hideToggle = () => { HIDE = !HIDE; try { localStorage.setItem(HIDE_KEY, HIDE ? '1' : '0'); } catch (e) { } refresh(); };
-ACT.hideOpenToggle = el => { D.settings.hideOnOpen = !D.settings.hideOnOpen; save({ undo: false }); drawSheet(sheetOf(el)); };
-function heroSub(nG, inGoals) {
-  const parts = [];
-  if (nG) parts.push(eur(inGoals) + ' nei salvadanai');
-  const iv = D.invest && D.invest.length ? invTotals().v : 0;
-  if (iv > 0) parts.push(eur(iv) + ' investiti');
-  return parts.length ? `<p class="hero-s">e ${parts.join(', ')}</p>` : '';
-}
-
 /* =========================================================
    Fogli a comparsa (inserimento e modifica)
    ========================================================= */
@@ -2223,7 +2008,7 @@ function amtDisplay(st) {
   return `<span class="amt-v ${s ? '' : 'zero'} ${size}">${txt}</span><span class="amt-c">${esc(curSym(st.type === 'transfer' ? baseCur() : st.cur))}</span>`;
 }
 const fxEq = st => (st.type !== 'transfer' && st.cur !== baseCur() ? 'Corrispondono a ' + eur(movEUR(st)) : '');
-function amtKey(sh, k) {
+function pressKey(sh, k) {
   const st = sh.st;
   let s = st.amt || '';
   if (k === 'del') s = s.slice(0, -1);
@@ -2239,20 +2024,6 @@ function amtKey(sh, k) {
   $('.amt', el).innerHTML = amtDisplay(st);
   const b = $('.amt-next', el); if (b) b.disabled = !(strToNum(s) > 0);
   const eq = $('.fx-eq', el); if (eq) eq.textContent = fxEq(st);
-}
-// tastierino: la cifra salta, l'importo trema se il tasto non si può usare
-function pressKey(sh, k) {
-  const before = sh.st.amt || '';
-  amtKey(sh, k);
-  const after = sh.st.amt || '', el = sheetEl(sh), a = el && $('.amt', el);
-  if (before === after) {
-    hap('warn');
-    if (a && !RM()) { a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake'); }
-    return;
-  }
-  hap();
-  const v = a && $('.amt-v', a);
-  if (v && !RM()) v.classList.add(after.length > before.length ? 'pop' : 'drop');
 }
 ACT.key = el => pressKey(sheetOf(el), el.dataset.k);
 
@@ -2313,7 +2084,7 @@ function movDetailsHTML(st) {
     h += `<label class="fld"><span>Descrizione (facoltativa)</span><input data-in="set" data-f="description" value="${esc(st.description)}" placeholder="Es. Versamento per le vacanze" autocomplete="off" enterkeyhint="done"></label>`;
   } else {
     h += `<label class="fld"><span>Descrizione</span><input data-in="movDesc" value="${esc(st.description)}" placeholder="${st.type === 'out' ? 'Es. Supermercato' : 'Es. Stipendio'}" autocomplete="off" enterkeyhint="done"></label><div class="sugg">${suggHTML(st)}</div>`;
-    h += fieldLabel('Categoria') + `<div class="cg">${catGridHTML(st)}</div><p class="cg-why muted sm" aria-live="polite">${st.catWhy ? 'Categoria suggerita ' + esc(st.catWhy) + '.' : ''}</p>`;
+    h += fieldLabel('Categoria') + `<div class="cg">${catGridHTML(st)}</div>`;
   }
   h += fieldLabel('Data') + dateChips(st.date, 'date');
   const paidByOther = st.type === 'out' && st.split.on && st.split.people.length && st.split.paidBy !== 'me';
@@ -2343,7 +2114,7 @@ SHEETS.mov = {
   },
   onClose(sh) { if (sh.st.newPhotoURL) URL.revokeObjectURL(sh.st.newPhotoURL); }
 };
-ACT.add = () => { if (!D) return; hap(); openSheet('mov', {}); };
+ACT.add = () => { if (!D) return; openSheet('mov', {}); };
 ACT.movType = el => {
   const sh = sheetOf(el), st = sh.st, k = el.dataset.k;
   if (st.type === k) return;
@@ -2373,10 +2144,8 @@ INP.movDesc = el => {
   const sh = sheetOf(el), st = sh.st, root = sheetEl(sh);
   st.description = el.value;
   if (!st.catManual) {
-    const g = guessCategoryInfo(el.value, st.type);
-    if (g && g.id !== st.categoryId) { st.categoryId = g.id; $('.cg', root).innerHTML = catGridHTML(st); }
-    st.catWhy = g && g.id === st.categoryId ? g.why : '';
-    const w = $('.cg-why', root); if (w) w.textContent = st.catWhy ? 'Categoria suggerita ' + st.catWhy + '.' : '';
+    const g = guessCategory(el.value, st.type);
+    if (g && g !== st.categoryId) { st.categoryId = g; $('.cg', root).innerHTML = catGridHTML(st); }
   }
   $('.sugg', root).innerHTML = suggHTML(st);
 };
@@ -2389,8 +2158,7 @@ ACT.suggPick = el => {
 };
 ACT.movCat = el => {
   const sh = sheetOf(el), st = sh.st;
-  st.categoryId = el.dataset.id; st.catManual = true; st.catWhy = '';
-  const w = $('.cg-why', sheetEl(sh)); if (w) w.textContent = '';
+  st.categoryId = el.dataset.id; st.catManual = true;
   $('.cg', sheetEl(sh)).innerHTML = catGridHTML(st);
 };
 ACT.movCatNew = el => { const sh = sheetOf(el); openSheet('category', { type: sh.st.type, onSave: c => { sh.st.categoryId = c.id; sh.st.catManual = true; drawSheet(sh); } }); };
@@ -2442,7 +2210,7 @@ ACT.personNew = el => {
   const sh = sheetOf(el);
   openSheet('person', { onSave: p => { if (sh && sh.type === 'mov' && UI.sheets.includes(sh)) { sh.st.split.people.push(p.id); drawSheet(sh); } } });
 };
-async function movSaveCore(el) {
+ACT.movSave = async el => {
   const sh = sheetOf(el), st = sh.st;
   const orig = strToNum(st.amt);
   if (!(orig > 0)) return toast("Inserisci l'importo");
@@ -2490,17 +2258,6 @@ async function movSaveCore(el) {
   closeSheet(sh);
   refresh();
   toast(isNew ? { out: 'Uscita salvata', in: 'Entrata salvata', transfer: 'Trasferimento salvato' }[st.type] : 'Modifiche salvate');
-}
-// salvataggio: conferma tattile e la riga nuova si illumina un istante
-ACT.movSave = async el => {
-  const ids = new Set(D.movements.map(m => m.id)), n = UI.sheets.length;
-  const r = await movSaveCore(el);
-  if (UI.sheets.length < n) {
-    hap('ok');
-    const nu = D.movements.find(m => !ids.has(m.id));
-    if (nu) { const row = $(`#view .mrow[data-id="${nu.id}"]`); if (row) row.classList.add('fresh'); }
-  }
-  return r;
 };
 ACT.movDelete = el => {
   const sh = sheetOf(el), id = sh.st.id;
@@ -2516,34 +2273,16 @@ ACT.movDelete = el => {
     if (m.photoId) setTimeout(() => { if (!D || !D.movements.some(x => x.photoId === m.photoId)) PhotoDB.del(m.photoId).catch(() => { }); }, 8000);
   });
 };
-function movOpenCore(el) {
+ACT.movOpen = el => {
   const m = D.movements.find(x => x.id === el.dataset.id);
   if (!m) return;
   if (m.type === 'settle') openSheet('settle', { id: m.id }); else openSheet('mov', { id: m.id });
-}
-ACT.movOpen = el => {
-  if (!VT_OK() || !el.classList.contains('mrow') || !el.closest('#view')) return movOpenCore(el);
-  hap();
-  const de = document.documentElement;
-  el.style.viewTransitionName = 'mvcard';
-  de.dataset.nav = 'card';
-  let vt;
-  try {
-    vt = document.startViewTransition(() => {
-      el.style.viewTransitionName = '';
-      movOpenCore(el);
-      const w = $('#sheets').lastElementChild;
-      if (w) { w.classList.add('in', 'vt-now'); const s = w.querySelector('.sheet'); if (s) s.style.viewTransitionName = 'mvcard'; }
-    });
-  } catch (err) { el.style.viewTransitionName = ''; delete de.dataset.nav; return movOpenCore(el); }
-  const clean = () => {
-    if (de.dataset.nav === 'card') delete de.dataset.nav;
-    $$('#sheets .vt-now').forEach(w => { w.classList.remove('vt-now'); const s = w.querySelector('.sheet'); if (s) s.style.viewTransitionName = ''; });
-  };
-  vt.finished.then(clean, clean);
 };
 
 /* ---------- valuta ---------- */
+SHEETS.currency = {
+  render: (st, sh) => `${sheetHead('Valuta')}<div class="sheet-body"><div class="list">${[[baseCur(), '€', 'Euro']].concat(CURRENCIES).map(([c, s, n]) => `<button class="row" data-a="curPick" data-c="${c}"><span class="cur-s">${esc(s)}</span><span class="rt">${esc(n)}<small>${c}${c !== baseCur() && D.settings.rates[c] ? ', ultimo cambio ' + numStr(D.settings.rates[c], 5) + ' €' : ''}</small></span>${sh.props.cur === c ? ic('check', 20) : ''}</button>`).join('')}</div></div>`
+};
 ACT.curPick = el => { const sh = sheetOf(el); closeSheet(sh); sh.props.onPick(el.dataset.c); };
 
 /* ---------- SPESE FISSE ---------- */
@@ -2626,7 +2365,6 @@ ACT.fxDelete = el => {
   });
 };
 ACT.fxConfirm = el => {
-  hap();
   const f = D.fixed.find(x => x.id === el.dataset.id), k = el.dataset.k;
   if (!f) return;
   const due = dueDate(f, k), t = today(), date = due <= t ? due : t, amt = estimateAmount(f);
@@ -3031,6 +2769,12 @@ ACT.lockAfter = el => { D.settings.lockAfter = Number(el.dataset.v); save(); ref
 ACT.openExport = () => openSheet('export', {});
 ACT.openImport = () => openSheet('import', {});
 ACT.backup = () => openSheet('backup', {});
+ACT.wipe = () => confirmBox('Cancellare tutti i dati?', 'Movimenti, conti, spese fisse, salvadanai e foto verranno eliminati da questo dispositivo. Senza un backup non si potranno recuperare.', 'Cancella tutto', () => {
+  wipeStorage(); D = null;
+  UI.sheets.slice().forEach(s => closeSheet(s));
+  UI.tab = 'home'; UI.month = curMk(); UI.filters = blankFilters();
+  render(); toast('Dati cancellati');
+});
 
 /* ---------- codice di blocco ---------- */
 SHEETS.pin = {
@@ -3226,6 +2970,34 @@ ACT.bkGo = async el => {
     closeSheet(sh);
     openSheet('fileReady', { blob, name: `EFU_Budget_backup_${today()}.json`, kind: 'backup' });
   } catch (e) { st.busy = false; drawSheet(sh); toast('Backup non riuscito: ' + e.message); }
+};
+CHG.restoreFile = async el => {
+  const f = el.files && el.files[0];
+  if (!f) return;
+  let obj;
+  try { obj = JSON.parse(await f.text()); } catch (e) { el.value = ''; return toast('Il file scelto non è un backup valido.'); }
+  el.value = '';
+  const data = obj && obj.data;
+  if (!data || !Array.isArray(data.movements) || !Array.isArray(data.accounts)) return toast('Il file scelto non è un backup di questa app.');
+  const when = obj.at ? shortDate(isoOf(new Date(obj.at))) : '';
+  const go = async () => {
+    const pin = D ? D.settings.pin : null;
+    D = migrate(data);
+    D.settings.pin = pin;
+    save({ noStamp: true, undo: false });
+    UNDO.length = 0;
+    try {
+      await PhotoDB.clear();
+      for (const [k, p] of Object.entries(obj.photos || {})) await PhotoDB.put(k, { type: p.type, buf: b64ToBuf(p.b64) });
+    } catch (e) { toast('Dati ripristinati, ma le foto no: memoria non disponibile.'); }
+    PHOTO_URLS.clear();
+    UI.sheets.slice().forEach(s => closeSheet(s));
+    UI.tab = 'home'; UI.month = curMk(); UI.filters = blankFilters();
+    render();
+    toast('Backup ripristinato');
+  };
+  if (!D) return go();
+  confirmBox('Ripristinare il backup?', `Il backup${when ? ' del ' + when : ''} contiene ${data.movements.length} movimenti. I dati attuali su questo dispositivo verranno sostituiti.`, 'Ripristina', go);
 };
 
 /* ---------- import dal file Excel del budget ---------- */
@@ -3441,6 +3213,7 @@ function seedDemo() {
    accantonamenti per le spese non mensili · budget di coppia
    pagamenti Apple Pay tramite Comandi Rapidi
    ========================================================= */
+ICONS.undo = '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>';
 ACT.undoLast = () => undoLast();
 
 /* ---------- identità di questo telefono (non finisce nei backup) ---------- */
@@ -3466,7 +3239,6 @@ function sinkCard(p) {
 }
 ACT.fxSink = el => { const sh = sheetOf(el), st = sh.st; st.sink = !(st.sink == null ? Number(st.freq) >= 3 : st.sink); drawSheet(sh); };
 ACT.sinkDo = el => {
-  hap('ok');
   const f = D.fixed.find(x => x.id === el.dataset.id), k = el.dataset.k;
   if (!f) return;
   const p = sinkOccurrences(f, k > curMk() ? k : curMk()).find(x => x.k === k);
@@ -4008,7 +3780,7 @@ SETTINGS.main = function () {
   let h = sheetHead('Impostazioni', { grab: false }) + '<div class="sheet-body">';
   h += `<div class="set-hero"><span class="app-ic">${appIconSVG(52)}</span><div><b>EFU Budget</b><span class="muted">I tuoi dati restano su questo dispositivo</span></div></div>`;
   if (UNDO.length) h += `<button class="notice undo-n" data-a="undoLast">${ic('undo', 20)}<div><b>Annulla l'ultima modifica</b><span>Torna indietro di un passo, anche se il messaggio è già sparito.</span></div></button>`;
-  h += `<h3 class="set-h">Aiuto</h3><div class="list">${setRow('help', 'Guida e soluzioni<small>Tutte le funzioni spiegate e i problemi più comuni</small>', '', 'data-a="setPage" data-p="guide"')}${setRow('info', 'Versione precedente 1.9<small>Copia di sicurezza con gli stessi dati, da usare se qualcosa non va</small>', '', 'data-a="openV1"')}</div>`;
+  h += `<h3 class="set-h">Aiuto</h3><div class="list">${setRow('help', 'Guida e soluzioni<small>Tutte le funzioni spiegate e i problemi più comuni</small>', '', 'data-a="setPage" data-p="guide"')}</div>`;
   h += `<h3 class="set-h">Il tuo denaro</h3><div class="list">${setRow('wallet', 'Conti', liquidAccounts().length, 'data-a="setPage" data-p="accounts"')}${setRow('tag', 'Categorie', activeCats().length, 'data-a="setPage" data-p="categories"')}${setRow('people', 'Persone e spese divise', D.people.length || '', 'data-a="setPage" data-p="people"')}${setRow('globe', 'Valuta principale', esc(curName(baseCur()) + ' (' + baseSym() + ')'), 'data-a="openBaseCur"')}${setRow('trend', 'Investimenti', D.invest.length || '', 'data-a="invOpen"')}</div>`;
   h += `<h3 class="set-h">Insieme e in automatico</h3><div class="list">${setRow('people', 'Budget di coppia', ps.length ? esc('Con ' + ps.join(', ')) : 'Non attivo', 'data-a="setPage" data-p="share"')}${setRow('wallet', 'Pagamenti con Apple Pay', nIn ? nIn + ' da controllare' : '', 'data-a="setPage" data-p="applepay"')}</div>`;
   h += `<h3 class="set-h">Sicurezza</h3><div class="list">${setRow('lock', 'Codice di blocco', D.settings.pin ? 'Attivo' : 'Non attivo', 'data-a="setPage" data-p="security"')}</div>${swRow("Nascondi gli importi all'apertura", 'hideOnOpen', !!D.settings.hideOnOpen, "Ogni volta che apri l'app gli importi sono coperti: per vederli tocca l'occhio in alto nella Home.", 'hideOpenToggle')}`;
@@ -4110,9 +3882,15 @@ ACT.fxToggle = el => { D.settings.fxAuto = !fxOn(); save({ undo: false }); drawS
 }
 
 /* =========================================================
-   Carte di credito
-   Ciclo contabile, addebito automatico sul conto, riquadro in Home.
+   Versione 1.4
+   Carte di credito con chiusura contabile e addebito automatico,
+   importi nascosti, investimenti con grafico e promemoria
    ========================================================= */
+ICONS.eye = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>';
+ICONS.eyeOff = '<path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c6.5 0 10 8 10 8a17.4 17.4 0 0 1-2.2 3.2"/><path d="M6.6 6.6C3.9 8.4 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m2 2 20 20"/>';
+ICONS.trend = '<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>';
+const dayDiff = (a, b) => Math.round((dateOf(b) - dateOf(a)) / 864e5);
+const pctDec = x => (Math.round(x * 1000) / 10).toLocaleString('it-IT') + '%';
 
 /* ---------- carte di credito: ciclo contabile e addebito automatico ---------- */
 const isCredit = a => !!a && !a.archived && a.kind === 'card' && !!a.credit && a.closeDay >= 1 && a.payDay >= 1 && !!a.payFrom && a.payFrom !== a.id;
@@ -4212,11 +3990,17 @@ function applyCardSettings(a, st) {
   };
 }
 
-/* =========================================================
-   Investimenti
-   Posizioni, valore nel tempo, grafici per periodo, promemoria,
-   pagina Investimenti nella barra in basso.
-   ========================================================= */
+/* ---------- importi nascosti ---------- */
+const HIDE_KEY = 'budget.iphone.hide';
+ACT.hideToggle = () => { HIDE = !HIDE; try { localStorage.setItem(HIDE_KEY, HIDE ? '1' : '0'); } catch (e) { } refresh(); };
+ACT.hideOpenToggle = el => { D.settings.hideOnOpen = !D.settings.hideOnOpen; save({ undo: false }); drawSheet(sheetOf(el)); };
+function heroSub(nG, inGoals) {
+  const parts = [];
+  if (nG) parts.push(eur(inGoals) + ' nei salvadanai');
+  const iv = D.invest && D.invest.length ? invTotals().v : 0;
+  if (iv > 0) parts.push(eur(iv) + ' investiti');
+  return parts.length ? `<p class="hero-s">e ${parts.join(', ')}</p>` : '';
+}
 
 /* ---------- investimenti ---------- */
 const INV_KINDS = [['etf', 'ETF', '📈'], ['stock', 'Azioni', '🏢'], ['fund', 'Fondo', '🧺'], ['bond', 'Obbligazioni', '📜'], ['crypto', 'Cripto', '🪙'], ['other', 'Altro', '💼']];
@@ -4347,7 +4131,7 @@ SHEETS.invView = {
     h += invRangeChips(rg, 'data-a="pick" data-f="range"') + invChart(ser, 150) + invDeltaHTML(ser, rg);
     h += invViewExtra(p);
     h += `<div class="two-btn gap-t"><button class="btn dark" data-a="invUpdateOne" data-id="${p.id}">Aggiorna valore</button><button class="btn outline" data-a="invMoveOpen" data-id="${p.id}">Compra o vendi</button></div>`;
-    const rows = (p.hist || []).filter(h => !h.y).slice().reverse(); // solo i valori registrati, non quelli stimati
+    const rows = (p.hist || []).slice().reverse();
     h += fieldLabel('Storico dei valori') + `<div class="list">${rows.map((x, j) => {
       const prev = rows[j + 1], d = prev ? x.v - prev.v - (x.i - prev.i) : null;
       return `<div class="row static"><span class="rt">${esc(shortDate(x.d))}<small>Investito ${eur(x.i)}</small></span><span class="rv num inv-rv"><b>${eur(x.v)}</b>${d != null ? `<small class="${d >= 0 ? 'pos' : 'neg'}">${eur(d, { sign: true })}</small>` : ''}</span>${rows.length > 1 ? `<button class="icon-btn ghost sm" data-a="invPtDel" data-id="${p.id}" data-d="${x.d}" aria-label="Elimina questo valore">${ic('close', 16)}</button>` : ''}</div>`;
@@ -4382,12 +4166,14 @@ SHEETS.invUpdate = {
     return h + `</div><footer class="sheet-foot"><button class="btn primary w" data-a="invUpdSave">Salva</button>${st.only ? '' : '<button class="link w later" data-a="invLater">Ricordamelo domani</button>'}</footer>`;
   }
 };
+ACT.invOpen = () => openSheet('invest', {});
 ACT.invNew = () => openSheet('invPos', {});
 ACT.invView = el => openSheet('invView', { id: el.dataset.id });
 ACT.invEdit = el => openSheet('invPos', { id: el.dataset.id });
 ACT.invUpdateOpen = () => openSheet('invUpdate', {});
 ACT.invUpdateOne = el => openSheet('invUpdate', { id: el.dataset.id });
 ACT.invMoveOpen = el => openSheet('invMove', { id: el.dataset.id });
+ACT.invFreq = el => { D.settings.invRemind = Number(el.dataset.v); save({ undo: false }); drawSheet(sheetOf(el)); };
 INP.invVal = el => { sheetOf(el).st.vals[el.dataset.id] = el.value; };
 ACT.invUnit = el => { const sh = sheetOf(el), id = el.dataset.id; sh.st.mode[id] = sh.st.mode[id] === 'unit' ? 'tot' : 'unit'; sh.st.vals[id] = ''; drawSheet(sh); };
 ACT.invSave = el => {
@@ -4419,7 +4205,7 @@ ACT.invDelete = el => {
 };
 ACT.invPtDel = el => {
   const p = invById(el.dataset.id);
-  if (!p || (p.hist || []).filter(h => !h.y).length < 2) return;
+  if (!p || (p.hist || []).length < 2) return;
   p.hist = p.hist.filter(h => h.d !== el.dataset.d);
   p.invested = invLast(p).i;
   save(); redrawInvest(); refresh(); toast('Valore eliminato');
@@ -4479,32 +4265,18 @@ function demoInvest() {
   return [mkP('Vanguard FTSE All-World', 'VWCE', 'etf', 6000, 0.0025, 0.035, 12345), mkP('iShares Core MSCI EM IMI', 'EIMI', 'etf', 1500, 0.0012, 0.05, 777)];
 }
 
-
-/* ---------- pagina Investimenti ---------- */
-if (!UI.invRange) UI.invRange = 'all';
-VIEWS.invest = () => {
-  let h = '<header class="ph"><h1>Investimenti</h1></header>';
-  if (!D.invest.length) return h + `<div class="empty"><div class="empty-art">${ic('trend', 30)}</div><h3>Nessun investimento</h3><p>Segna quanto hai investito in ETF, azioni, fondi o altro e segui come vanno: guadagno o perdita, grafico, PAC e prezzi automatici.</p><button class="btn primary" data-a="invNew">${ic('plus', 18)} Aggiungi il primo investimento</button></div>`;
-  const t = invTotals(), due = invDue();
-  h += `<div class="inv-sum"><p class="muted sm">Valore attuale</p><p class="inv-big num">${eur(t.v)}</p><p class="inv-gl ${t.g >= 0 ? 'pos' : 'neg'}">${invGainHTML(t.g, t.pct)} <span class="muted">su ${eur(t.i)} investiti</span></p></div>`;
-  const ser = invRange(invSeries(), UI.invRange);
-  h += invRangeChips(UI.invRange, 'data-a="invRangeSet"') + invChart(ser, 170) + invDeltaHTML(ser, UI.invRange);
-  h += `<button class="btn ${due ? 'primary' : 'dark'} w gap-t" data-a="invUpdateOpen">${ic('trend', 18)} ${due ? "È ora di aggiornare i valori" : 'Aggiorna i valori'}</button>`;
-  h += section('Le tue posizioni', `<div class="list">${D.invest.slice().sort((a, b) => invValue(b) - invValue(a)).map(invRow).join('')}</div><button class="btn outline w gap-t" data-a="invNew">${ic('plus', 18)} Aggiungi investimento</button>`);
-  h += `<section class="sec">${pacSection()}</section><section class="sec">${pxSection()}</section>`;
-  h += `<section class="sec">${fieldLabel('Promemoria per aggiornare')}<div class="chips wrap">${[[7, 'Ogni settimana'], [14, 'Ogni 2 settimane'], [30, 'Ogni mese'], [0, 'Mai']].map(([v, l]) => `<button class="chip ${invFreq() === v ? 'on' : ''}" data-a="invFreq" data-v="${v}">${l}</button>`).join('')}</div><p class="muted sm gap-t">Quando è il momento, all'apertura dell'app ti chiedo i nuovi valori degli investimenti che non si aggiornano da soli.</p></section>`;
-  return h;
-};
-ACT.invRangeSet = el => { UI.invRange = el.dataset.v; render(); };
-ACT.invOpen = () => { UI.sheets.slice().reverse().forEach(s => closeSheet(s)); goTab('invest'); };
-ACT.invFreq = el => { D.settings.invRemind = Number(el.dataset.v); save({ undo: false }); const sh = sheetOf(el); if (sh) drawSheet(sh); else render(); };
+/* ---------- avvio ---------- */
+function bootExtras() {
+  try { HIDE = !!(D && D.settings.hideOnOpen) || localStorage.getItem(HIDE_KEY) === '1'; } catch (e) { }
+  if (D && syncAuto()) save({ undo: false });
+}
 
 /* =========================================================
-   Aggiornamenti automatici
-   Prezzi tramite il ponte Cloudflare, piani di accumulo (PAC),
-   interessi sulla liquidità dei conti.
+   Versione 1.5
+   Prezzi automatici tramite il ponte Cloudflare, piani di accumulo (PAC)
+   automatici, interessi sulla liquidità dei conti
    ========================================================= */
-const PONTE_CODE = "// EFU Budget - ponte dei prezzi (Cloudflare Worker)\n// Incolla tutto questo codice in un Worker di Cloudflare e premi Deploy.\n// Chiede i prezzi a Yahoo Finance e li passa all'app, aggiungendo i permessi\n// che servono a una web app per leggerli. Non salva niente.\n// Versione 2: anche lo storico delle chiusure giornaliere, per grafici completi.\n// Facoltativo: in Settings > Variables and Secrets aggiungi KEY con una parola\n// segreta e scrivila anche nell'app, cos\u00ec solo tu puoi usare il ponte.\n\nconst UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';\nconst HOSTS = ['https://query1.finance.yahoo.com', 'https://query2.finance.yahoo.com'];\nconst CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': '*' };\n\nfunction json(obj, status = 200) {\n  return new Response(JSON.stringify(obj), { status, headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });\n}\n\nasync function yahoo(path) {\n  let last = null;\n  for (const host of HOSTS) {\n    try {\n      const r = await fetch(host + path, { headers: { 'User-Agent': UA, 'Accept': 'application/json' }, cf: { cacheTtl: 600, cacheEverything: true } });\n      if (r.ok) return await r.json();\n      last = new Error('Yahoo ha risposto ' + r.status);\n    } catch (e) { last = e; }\n  }\n  throw last || new Error('Yahoo non raggiungibile');\n}\n\nasync function quote(symbol) {\n  try {\n    const j = await yahoo('/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=5d&interval=1d');\n    const r = j && j.chart && j.chart.result && j.chart.result[0];\n    const m = r && r.meta;\n    if (!m) return { error: 'simbolo non trovato' };\n    let price = m.regularMarketPrice;\n    if (!(price > 0) && r.indicators && r.indicators.quote && r.indicators.quote[0]) {\n      const closes = (r.indicators.quote[0].close || []).filter(x => x > 0);\n      price = closes[closes.length - 1];\n    }\n    if (!(price > 0)) return { error: 'prezzo non disponibile' };\n    return {\n      price,\n      currency: m.currency || null,\n      time: m.regularMarketTime ? new Date(m.regularMarketTime * 1000).toISOString() : null,\n      name: m.longName || m.shortName || null,\n      exchange: m.fullExchangeName || m.exchangeName || null\n    };\n  } catch (e) { return { error: String((e && e.message) || e) }; }\n}\n\n// chiusure giornaliere nel periodo (5d, 1mo, 3mo, 6mo, 1y, 2y), con la data della borsa\nconst RANGES = ['5d', '1mo', '3mo', '6mo', '1y', '2y'];\nasync function history(symbol, range) {\n  try {\n    const j = await yahoo('/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=' + range + '&interval=1d');\n    const r = j && j.chart && j.chart.result && j.chart.result[0];\n    if (!r || !r.timestamp) return { error: 'storico non disponibile' };\n    const off = (r.meta && r.meta.gmtoffset) || 0, close = (r.indicators && r.indicators.quote && r.indicators.quote[0] && r.indicators.quote[0].close) || [];\n    const points = [];\n    r.timestamp.forEach((t, i) => { const c = close[i]; if (c > 0) points.push([new Date((t + off) * 1000).toISOString().slice(0, 10), c]); });\n    return { currency: (r.meta && r.meta.currency) || null, points };\n  } catch (e) { return { error: String((e && e.message) || e) }; }\n}\n\nexport default {\n  async fetch(request, env) {\n    if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });\n    const url = new URL(request.url);\n    if (env && env.KEY && url.searchParams.get('key') !== env.KEY) return json({ error: 'chiave non valida' }, 401);\n    if (url.pathname.replace(/\\/+$/, '').endsWith('/search')) {\n      const q = (url.searchParams.get('q') || '').trim();\n      if (!q) return json({ ok: true, results: [] });\n      try {\n        const j = await yahoo('/v1/finance/search?q=' + encodeURIComponent(q) + '&quotesCount=10&newsCount=0&listsCount=0');\n        const results = (j.quotes || []).filter(x => x.symbol).map(x => ({ symbol: x.symbol, name: x.longname || x.shortname || x.symbol, exchange: x.exchDisp || x.exchange || '', type: x.quoteType || '' }));\n        return json({ ok: true, results });\n      } catch (e) { return json({ error: String((e && e.message) || e) }, 502); }\n    }\n    const symbols = [...new Set((url.searchParams.get('s') || '').split(',').map(s => s.trim()).filter(Boolean))].slice(0, 40);\n    if (url.pathname.replace(/\\/+$/, '').endsWith('/history')) {\n      const range = RANGES.includes(url.searchParams.get('range')) ? url.searchParams.get('range') : '1y';\n      const out = {};\n      await Promise.all(symbols.map(async s => { out[s] = await history(s, range); }));\n      return json({ ok: true, version: 2, history: out });\n    }\n    if (!symbols.length) return json({ ok: true, service: 'EFU Budget prezzi', version: 2 });\n    const quotes = {};\n    await Promise.all(symbols.map(async s => { quotes[s] = await quote(s); }));\n    return json({ ok: true, quotes });\n  }\n};\n";
+const PONTE_CODE = "// EFU Budget - ponte dei prezzi (Cloudflare Worker)\n// Incolla tutto questo codice in un Worker di Cloudflare e premi Deploy.\n// Chiede i prezzi a Yahoo Finance e li passa all'app, aggiungendo i permessi\n// che servono a una web app per leggerli. Non salva niente.\n// Facoltativo: in Settings > Variables and Secrets aggiungi KEY con una parola\n// segreta e scrivila anche nell'app, cos\u00ec solo tu puoi usare il ponte.\n\nconst UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';\nconst HOSTS = ['https://query1.finance.yahoo.com', 'https://query2.finance.yahoo.com'];\nconst CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': '*' };\n\nfunction json(obj, status = 200) {\n  return new Response(JSON.stringify(obj), { status, headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });\n}\n\nasync function yahoo(path) {\n  let last = null;\n  for (const host of HOSTS) {\n    try {\n      const r = await fetch(host + path, { headers: { 'User-Agent': UA, 'Accept': 'application/json' }, cf: { cacheTtl: 600, cacheEverything: true } });\n      if (r.ok) return await r.json();\n      last = new Error('Yahoo ha risposto ' + r.status);\n    } catch (e) { last = e; }\n  }\n  throw last || new Error('Yahoo non raggiungibile');\n}\n\nasync function quote(symbol) {\n  try {\n    const j = await yahoo('/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=5d&interval=1d');\n    const r = j && j.chart && j.chart.result && j.chart.result[0];\n    const m = r && r.meta;\n    if (!m) return { error: 'simbolo non trovato' };\n    let price = m.regularMarketPrice;\n    if (!(price > 0) && r.indicators && r.indicators.quote && r.indicators.quote[0]) {\n      const closes = (r.indicators.quote[0].close || []).filter(x => x > 0);\n      price = closes[closes.length - 1];\n    }\n    if (!(price > 0)) return { error: 'prezzo non disponibile' };\n    return {\n      price,\n      currency: m.currency || null,\n      time: m.regularMarketTime ? new Date(m.regularMarketTime * 1000).toISOString() : null,\n      name: m.longName || m.shortName || null,\n      exchange: m.fullExchangeName || m.exchangeName || null\n    };\n  } catch (e) { return { error: String((e && e.message) || e) }; }\n}\n\nexport default {\n  async fetch(request, env) {\n    if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });\n    const url = new URL(request.url);\n    if (env && env.KEY && url.searchParams.get('key') !== env.KEY) return json({ error: 'chiave non valida' }, 401);\n    if (url.pathname.replace(/\\/+$/, '').endsWith('/search')) {\n      const q = (url.searchParams.get('q') || '').trim();\n      if (!q) return json({ ok: true, results: [] });\n      try {\n        const j = await yahoo('/v1/finance/search?q=' + encodeURIComponent(q) + '&quotesCount=10&newsCount=0&listsCount=0');\n        const results = (j.quotes || []).filter(x => x.symbol).map(x => ({ symbol: x.symbol, name: x.longname || x.shortname || x.symbol, exchange: x.exchDisp || x.exchange || '', type: x.quoteType || '' }));\n        return json({ ok: true, results });\n      } catch (e) { return json({ error: String((e && e.message) || e) }, 502); }\n    }\n    const symbols = [...new Set((url.searchParams.get('s') || '').split(',').map(s => s.trim()).filter(Boolean))].slice(0, 40);\n    if (!symbols.length) return json({ ok: true, service: 'EFU Budget prezzi', version: 1 });\n    const quotes = {};\n    await Promise.all(symbols.map(async s => { quotes[s] = await quote(s); }));\n    return json({ ok: true, quotes });\n  }\n};\n";
 function syncAuto() {
   let ch = false;
   if (syncPAC()) { ch = true; invalidate(); }
@@ -4531,53 +4303,8 @@ function autoPrices(force) {
   const withSym = D.invest.filter(p => p.sym);
   if (!withSym.length) return Promise.resolve({ n: 0, errs: [], report: [] });
   if (!force && Date.now() - (D.settings.pxLast || 0) < 3 * 3600e3) return Promise.resolve(null);
-  PX_RUN = pxRun(withSym).then(async r => {
-    // una volta al giorno completa lo storico con le chiusure di borsa, per grafici senza buchi
-    if (r && (force || D.settings.pxHistAt !== today())) {
-      try {
-        const old = D.settings.pxHistOld, n = await pxHistory();
-        if (n || D.settings.pxHistOld !== old) { redrawInvest(); const ae = document.activeElement; if (!ae || !/INPUT|TEXTAREA|SELECT/.test(ae.tagName)) refresh(); }
-      } catch (e) { }
-    }
-    return r;
-  }).finally(() => { PX_RUN = null; });
+  PX_RUN = pxRun(withSym).finally(() => { PX_RUN = null; });
   return PX_RUN;
-}
-/* ---------- storico: i giorni in cui l'app non era aperta ----------
-   Tra due valori registrati davvero, il valore segue l'andamento del prezzo di chiusura.
-   I punti stimati hanno y: 1 e non sostituiscono mai un valore registrato. */
-function closeOnOrBefore(points, d) { let c = null; for (const [pd, v] of points) { if (pd <= d) c = v; else break; } return c; }
-async function pxHistory() {
-  const t = today();
-  const list = D.invest.filter(p => pxAuto(p) && (p.hist || []).some(h => !h.y));
-  if (!list.length) return 0;
-  const start = list.map(p => p.hist.find(h => !h.y).d).sort()[0];
-  const days = dayDiff(start, t);
-  const range = days <= 5 ? '5d' : days <= 28 ? '1mo' : days <= 88 ? '3mo' : days <= 180 ? '6mo' : days <= 360 ? '1y' : '2y';
-  let j;
-  try { j = await getJSON(pxEndpoint('/history', { s: Array.from(new Set(list.map(p => p.sym))).join(','), range }), 15000); }
-  catch (e) { return 0; }
-  if (!j || !j.history) { D.settings.pxHistOld = true; save({ undo: false }); return 0; } // ponte della versione precedente
-  D.settings.pxHistOld = false;
-  let n = 0;
-  for (const p of list) {
-    const h = j.history[p.sym];
-    if (!h || !h.points || !h.points.length) continue;
-    const real = p.hist.filter(x => !x.y), have = new Set(real.map(x => x.d)), add = [];
-    for (const [d, c] of h.points) {
-      if (d < real[0].d || d >= t || have.has(d)) continue;
-      let prev = null;
-      for (const x of real) { if (x.d <= d) prev = x; else break; }
-      const ref = prev && closeOnOrBefore(h.points, prev.d);
-      if (!ref) continue;
-      add.push({ d, v: r2(prev.v * c / ref), i: prev.i, y: 1 });
-    }
-    p.hist = real.concat(add).sort((a, b) => a.d.localeCompare(b.d));
-    n += add.length;
-  }
-  D.settings.pxHistAt = t;
-  save({ undo: false });
-  return n;
 }
 async function pxRun(withSym) {
   try {
@@ -4645,14 +4372,11 @@ function pxSection() {
   const miss = D.invest.filter(p => p.sym && !(p.qty > 0)).length;
   h += `<p class="muted sm">${n ? `${n} ${n === 1 ? 'investimento si aggiorna' : 'investimenti si aggiornano'} da soli.` : 'Aggiungi simbolo e quote a un investimento per aggiornarlo da solo.'}${miss ? ` ${miss} ${miss === 1 ? 'ha' : 'hanno'} il simbolo ma non le quote: aggiungile per aggiornare il valore.` : ''}${last ? ' Ultimo aggiornamento: ' + esc(last.toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })) + '.' : ''}</p>`;
   if (D.settings.pxErr) h += `<p class="warn-t">${esc(D.settings.pxErr)}</p>`;
-  if (D.settings.pxHistOld) h += `<p class="muted sm">Per avere i grafici di settimana e mese completi anche nei giorni in cui non apri l'app, aggiorna il codice del ponte su Cloudflare: tocca <b>Configura</b>, copia il codice nuovo e incollalo nel Worker al posto del vecchio.</p>`;
   return h + '<div class="two-btn gap-t"><button class="btn dark" data-a="pxNow">Aggiorna ora</button><button class="btn outline" data-a="pxSetupOpen">Impostazioni</button></div>';
 }
 ACT.pxNow = async () => {
   toast('Aggiorno i prezzi…', null);
-  document.body.classList.add('px-busy'); // i valori lasciano il posto a un segnaposto animato
-  let r;
-  try { r = await autoPrices(true); } finally { document.body.classList.remove('px-busy'); }
+  const r = await autoPrices(true);
   openSheet('pxReport', { r, err: r ? '' : D.settings.pxErr });
 };
 SHEETS.pxReport = {
@@ -4972,9 +4696,188 @@ function applyInterestSettings(a, st) {
 const invFresh = p => pxAuto(p) && dayDiff(invLast(p).d, today()) < 3;
 
 /* =========================================================
-   Spese fisse mese per mese
-   Registrare in anticipo, saltare, ripristinare; totali del mese;
-   addebiti della carta di credito nel mese.
+   Versione 1.6
+   Esportazione Excel completa e reimportabile, un solo punto
+   per importare tutto, guida e soluzioni nelle impostazioni
+   ========================================================= */
+ICONS.help = '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>';
+const FULL_MARK = 'EFU-BUDGET-DATI-v1', FULL_SHEET = 'Dati app';
+
+/* ---------- esportazione: fogli leggibili in più e dati completi nascosti ---------- */
+const KIND_NAMES = { bank: 'Conto corrente', card: 'Carta', cash: 'Contanti', other: 'Altro', goal: 'Salvadanaio', invest: 'Investimenti (PAC)' };
+async function addFullData(XLSX, wb) {
+  const EUR = '#,##0.00 "' + baseSym() + '"';
+  const money = (ws, cols, n) => { for (let r = 1; r < n; r++) for (const c of cols) { const cell = ws[XLSX.utils.encode_cell({ r, c })]; if (cell && typeof cell.v === 'number') cell.z = EUR; } };
+  const bal = balancesAt(today());
+  const rc = [['Conto', 'Tipo', 'Saldo oggi', 'Saldo iniziale', 'Dal', 'Dettagli']];
+  for (const a of D.accounts.filter(x => !x.archived)) {
+    const det = [];
+    if (isCredit(a)) det.push(`Carta di credito: chiusura il ${a.closeDay}, addebito il ${a.payDay} su ${(acc(a.payFrom) || {}).name || '?'}`);
+    if (hasInterest(a)) det.push(`Interessi ${numStr(a.interest.rate, 3)}% lordi, tasse ${numStr(a.interest.tax || 0, 2)}%, accredito ogni ${a.interest.freq === 1 ? 'mese' : a.interest.freq + ' mesi'} il giorno ${a.interest.day}`);
+    if (a.kind === 'goal' && a.target) det.push('Obiettivo ' + numStr(a.target));
+    rc.push([a.name, KIND_NAMES[a.kind] || a.kind, r2(bal[a.id] || 0), a.initial || 0, a.initialDate || '', det.join('; ')]);
+  }
+  let ws = XLSX.utils.aoa_to_sheet(rc); money(ws, [2, 3], rc.length);
+  ws['!cols'] = [24, 18, 14, 14, 12, 60].map(w => ({ wch: w }));
+  XLSX.utils.book_append_sheet(wb, ws, 'Conti');
+  if (D.invest.length) {
+    const ri = [['Investimento', 'Codice', 'Simbolo', 'Tipo', 'Quote', 'Investito', 'Valore', 'Guadagno', 'Aggiornato il']];
+    for (const p of D.invest) { const v = invValue(p); ri.push([p.name, p.code || '', p.sym || '', invKind(p.kind)[1], p.qty || '', p.invested || 0, v, r2(v - (p.invested || 0)), invLast(p).d]); }
+    ws = XLSX.utils.aoa_to_sheet(ri); money(ws, [5, 6, 7], ri.length);
+    ws['!cols'] = [30, 16, 12, 12, 10, 14, 14, 14, 13].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, ws, 'Investimenti');
+  }
+  const text = await (await buildBackup(true)).text(), size = 30000, rows = [["EFU Budget: dati completi per reimportare questo file nell'app. Non modificare questo foglio."], [FULL_MARK], [Math.ceil(text.length / size)]];
+  for (let i = 0; i < text.length; i += size) rows.push([text.slice(i, i + size)]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), FULL_SHEET);
+  wb.Workbook = wb.Workbook || {};
+  wb.Workbook.Sheets = wb.SheetNames.map(n => ({ name: n, Hidden: n === FULL_SHEET ? 1 : 0 }));
+}
+function readFullData(XLSX, wb) {
+  const ws = wb.Sheets[FULL_SHEET];
+  if (!ws) return null;
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+  if (String(rows[1] && rows[1][0]) !== FULL_MARK) return null;
+  const n = Number(rows[2] && rows[2][0]) || 0;
+  try { return JSON.parse(rows.slice(3, 3 + n).map(r => String(r[0] == null ? '' : r[0])).join('')); } catch (e) { return null; }
+}
+
+/* ---------- ripristino da esportazione o backup ---------- */
+async function restoreBackupObj(obj) {
+  const data = obj && obj.data;
+  if (!data || !Array.isArray(data.movements) || !Array.isArray(data.accounts)) { toast('Il file non contiene dati di EFU Budget.', null); return false; }
+  const when = obj.at ? shortDate(isoOf(new Date(obj.at))) : '';
+  const go = async () => {
+    const pin = D ? D.settings.pin : null;
+    D = migrate(JSON.parse(JSON.stringify(data)));
+    D.settings.pin = pin;
+    save({ noStamp: true, undo: false });
+    UNDO.length = 0;
+    try {
+      await PhotoDB.clear();
+      for (const [k, p] of Object.entries(obj.photos || {})) await PhotoDB.put(k, { type: p.type, buf: b64ToBuf(p.b64) });
+    } catch (e) { toast('Dati importati, ma le foto no: memoria non disponibile.', null); }
+    PHOTO_URLS.clear();
+    UI.sheets.slice().forEach(s => closeSheet(s));
+    UI.tab = 'home'; UI.month = curMk(); UI.filters = blankFilters();
+    render();
+    toast(`Importati ${data.movements.length} movimenti e tutti gli altri dati`, null);
+  };
+  if (!D) { await go(); return true; }
+  if (!D.settings.demo && (D.movements.length || D.invest.length)) { AFTER_SAVE = null; openSheet('safeFirst', { mode: 'replace', then: go }); return true; }
+  confirmBox('Sostituire i dati?', `Il file${when ? ' del ' + esc(when) : ''} contiene ${data.movements.length} movimenti, con conti, categorie, spese fisse, investimenti e impostazioni. I dati attuali su questo telefono verranno sostituiti.`, 'Importa tutto', go);
+  return true;
+}
+CHG.restoreFile = async el => {
+  const f = el.files && el.files[0];
+  if (!f) return;
+  let obj = null;
+  try {
+    if (/\.(xlsx|xls|xlsm)$/i.test(f.name)) { const XLSX = await loadXLSX(); obj = readFullData(XLSX, XLSX.read(await f.arrayBuffer(), { type: 'array' })); }
+    else obj = JSON.parse(await f.text());
+  } catch (e) { obj = null; }
+  el.value = '';
+  if (obj && obj.type === 'budget-sync') return toast('Questo è un file del budget di coppia: aprilo da Budget di coppia → Ricevi.', null);
+  if (!obj) return toast('Il file scelto non è un backup o un\'esportazione di EFU Budget.', null);
+  await restoreBackupObj(obj);
+};
+
+/* ---------- guida e soluzioni ---------- */
+const GUIDE = [
+  ['Come funziona EFU Budget', `<p>EFU Budget è un'app web: la installi dalla schermata Home e funziona anche senza connessione. Non serve nessun account.</p><p>Tutti i dati restano solo su questo telefono, dentro l'app. Per questo è importante esportarli ogni tanto e salvare il file in File o su iCloud Drive.</p><p>In basso c'è la barra con cinque sezioni: <b>Home</b> con saldo, previsione e cose da fare; <b>Movimenti</b> con elenco, ricerca e filtri; <b>Investimenti</b>, l'icona con la freccia che sale; <b>Pianifica</b> con spese fisse, budget e salvadanai; <b>Statistiche</b>. Il <b>+</b> rosso accanto serve per registrare.</p>`],
+  ['Registrare un movimento', `<p>Tocca il <b>+</b>, scrivi l'importo con il tastierino e tocca <b>Avanti</b>. In alto scegli uscita, entrata o trasferimento.</p><p>La categoria viene suggerita dalla descrizione e da quello che hai fatto in passato: puoi cambiarla con un tocco. Nei dettagli scegli data, conto, note, #tag e, se vuoi, una foto dello scontrino.</p><p>Per modificare o eliminare un movimento toccalo nell'elenco. Dopo ogni modifica compare <b>Annulla</b>.</p>`],
+  ['Spese in valuta estera', `<p>Nel tastierino tocca la valuta e scegli quella della spesa: l'app scarica da sola il cambio ufficiale BCE del giorno, oppure quello della data della spesa se è passata.</p><p>La banca di solito applica un cambio un po' diverso e una commissione: se l'estratto conto mostra un'altra cifra, correggi il cambio a mano e l'app terrà il tuo.</p><p>Senza connessione usa l'ultimo cambio salvato. I cambi da internet si spengono in Impostazioni → Valuta principale.</p>`],
+  ['Spese fisse e rate', `<p>In <b>Pianifica → Spese fisse</b> aggiungi affitto, bollette, abbonamenti, stipendio o rate: scegli ogni quanto si ripetono e la prossima scadenza. Per le rate indica quante sono o la data di fine.</p><p>Quando arriva la scadenza la voce compare nella Home in <b>Da registrare</b>: tocca <b>Registra</b> e diventa un movimento. Con <b>Importo variabile</b>, per esempio per le bollette, scrivi la cifra giusta; l'app ti propone la media delle ultime volte.</p><p>In alto scorri i mesi con le frecce: per ogni mese vedi le voci registrate, quelle da registrare e, in fondo, il totale di entrate, uscite e risparmi fissi. Se paghi qualcosa in anticipo, vai al mese successivo e tocca <b>Registra ora</b>.</p><p>Puoi saltare un mese, ripristinarlo, mettere in pausa o modificare la voce quando vuoi. Le spese fisse entrano nella <b>previsione di fine mese</b>.</p>`],
+  ['Spese non mensili e accantonamenti', `<p>Per assicurazioni, tasse o abbonamenti ogni 3, 6 o 12 mesi attiva <b>Accantona ogni mese</b> nella spesa fissa. Ogni mese l'app ti propone di mettere da parte una quota nel salvadanaio <b>Accantonamenti</b>.</p><p>Quando arriva la spesa viene pagata da lì, così il mese della scadenza non ha scossoni.</p>`],
+  ['Budget per categoria e avvisi', `<p>In <b>Pianifica → Budget</b> dai a ogni categoria un tetto mensile. Nella Home vedi quanto hai speso e quanto resta.</p><p>Quando ti avvicini al budget o lo superi compare un avviso nell'app. Nella Home trovi anche il riepilogo del mese, con entrate, uscite e qualche curiosità.</p><p>Le categorie si creano e si modificano in Impostazioni → Categorie.</p>`],
+  ['Conti e trasferimenti', `<p>In Impostazioni → Conti aggiungi conto corrente, carte, contanti o altro, con il saldo a una certa data. Il <b>conto predefinito</b> è quello proposto per le nuove spese.</p><p>Per spostare soldi tra due conti usa <b>Trasferimento</b>: non conta né come spesa né come entrata.</p><p>Il saldo iniziale è quello all'inizio del giorno indicato: se un saldo non torna, controlla quella data.</p>`, ['Apri i conti', 'data-a="setPage" data-p="accounts"']],
+  ['Carta di credito', `<p>Apri la carta in Impostazioni → Conti e attiva <b>Carta di credito con addebito mensile</b>: indica il giorno di chiusura, il giorno di addebito e il conto da cui vengono presi i soldi.</p><p>Le spese fino al giorno di chiusura vanno nell'estratto del mese, quelle dopo nel ciclo successivo. Il giorno dell'addebito l'app registra da sola il trasferimento dal conto alla carta. Nella Home vedi quanto hai speso nel ciclo e il prossimo addebito; in <b>Pianifica → Spese fisse</b>, mese per mese, trovi gli addebiti già fatti, quelli in arrivo e quello del ciclo ancora aperto.</p><p>Se la banca addebita una cifra diversa, correggi il movimento dell'addebito: non verrà più ricalcolato. Se importi l'estratto conto, elimina le righe «addebito carta», altrimenti la spesa risulta due volte.</p>`],
+  ['Interessi sulla liquidità', `<p>Per i conti remunerati, come Trade Republic, apri il conto e attiva <b>Interessi sulla liquidità</b>: tasso annuo lordo, tasse (in Italia il 26%, oppure 0 se li ricevi lordi), ogni quanto vengono accreditati, in che giorno e, se c'è, il tetto del saldo remunerato.</p><p>L'app calcola gli interessi giorno per giorno e li accredita da sola come entrata nella categoria <b>Interessi</b>. Nel conto vedi anche quanto hai già maturato.</p><p>Se la banca cambia il tasso aggiornalo: gli interessi già accreditati restano com'erano.</p>`],
+  ['Salvadanai e obiettivi', `<p>I salvadanai sono soldi messi da parte per un obiettivo, con una cifra e una data se vuoi. Li trovi in <b>Pianifica → Salvadanai</b> e nella Home.</p><p>Per versare o prelevare apri il salvadanaio. Per un versamento automatico ogni mese crea una spesa fissa di tipo <b>Risparmio</b>.</p><p>I soldi nei salvadanai non contano nel <b>Disponibile</b>.</p>`],
+  ['Investimenti', `<p>Nella sezione <b>Investimenti</b> della barra in basso aggiungi ETF, azioni, fondi o altro: quanto hai investito, quanto vale oggi e, se vuoi, le quote. Vedi valore, guadagno o perdita e il grafico rispetto al capitale investito.</p><p>Una volta a settimana, all'apertura, l'app ti chiede i nuovi valori; con le quote basta il prezzo di una quota. La frequenza si cambia, anche su <b>Mai</b>. Con <b>Compra o vendi</b> registri acquisti e vendite senza falsare il guadagno.</p><p>Sopra il grafico scegli il periodo: <b>1G</b> un giorno, <b>1S</b> una settimana, <b>1M</b> un mese, poi 3 mesi, un anno o tutto. Sotto trovi quanto hanno guadagnato o perso i tuoi investimenti in quel periodo, senza contare acquisti e versamenti del PAC. L'app salva un valore al giorno, quando la apri: se non la apri per qualche giorno, la variazione di «1G» parte dall'ultimo aggiornamento.</p>`, ['Apri gli investimenti', 'data-a="invOpen"']],
+  ['Prezzi automatici', `<p>Il ponte dei prezzi è già collegato. Perché un investimento si aggiorni da solo servono il <b>simbolo</b> e le <b>quote</b>: aprilo, tocca <b>Modifica</b> e usa «Trova il simbolo dal nome o dall'ISIN».</p><p>I simboli di solito finiscono con <b>.MI</b> per Milano, <b>.DE</b> per Xetra e <b>.L</b> per Londra. I prezzi si aggiornano quando apri l'app, al massimo ogni 3 ore, oppure con <b>Aggiorna ora</b>, e hanno circa 15 minuti di ritardo.</p><p>Se compare «Nessun prezzo per…», il simbolo è sbagliato: cercalo di nuovo.</p>`],
+  ['PAC, piani di accumulo', `<p>In Investimenti → <b>Nuovo PAC</b> scegli il conto, ogni quanto, la data del primo acquisto e quanto mettere in ogni titolo.</p><p>Alla data giusta l'app sposta i soldi dal conto agli investimenti e aggiorna capitale, valore e quote: non devi registrare niente. Gli acquisti in arrivo entrano nella previsione di fine mese.</p><p>Per cambiare l'importo modifica il PAC: vale dal prossimo acquisto. Se cancelli un acquisto dai movimenti, viene tolto anche dall'investimento.</p>`],
+  ['Spese divise e persone', `<p>Nei dettagli di una spesa puoi dividerla con altre persone, oppure indicare che l'ha pagata qualcun altro: l'app tiene il conto di chi deve cosa.</p><p>In Impostazioni → Persone vedi i saldi; quando qualcuno ti restituisce i soldi registra un <b>rimborso</b>.</p>`, ['Apri le persone', 'data-a="setPage" data-p="people"']],
+  ['Budget di coppia', `<p>In Impostazioni → <b>Budget di coppia</b> scrivi il tuo nome. Ognuno registra le spese sul proprio telefono; ogni tanto toccate <b>Invia</b> e mandate il file all'altra persona, che lo apre con <b>Ricevi</b>.</p><p>L'app unisce i movimenti senza doppioni, fa arrivare anche le cancellazioni e mostra chi ha inserito cosa. Se modificate entrambi la stessa voce vale la modifica più recente. Foto, codice di blocco e impostazioni restano personali.</p>`, ['Apri Budget di coppia', 'data-a="setPage" data-p="share"']],
+  ['Pagamenti con Apple Pay', `<p>Un'automazione di Comandi Rapidi scrive ogni pagamento contactless in un file su iCloud Drive; nell'app lo importi e i pagamenti compaiono nella Home in <b>Pagamenti da controllare</b>, con la categoria suggerita.</p><p>Le istruzioni passo passo sono nella pagina dedicata. Funziona con i pagamenti nei negozi, non con quelli online.</p>`, ['Apri le istruzioni', 'data-a="setPage" data-p="applepay"']],
+  ['Importare dati', `<p>In Impostazioni → <b>Importa dati</b> puoi scegliere:</p><ul><li>un file <b>esportato da EFU Budget</b> o un <b>backup</b>: reimporta tutto, anche su un altro telefono;</li><li>il file <b>Excel del tuo budget</b>;</li><li>l'esportazione di <b>un'altra app</b>, come Money Lover, Wallet o Spendee, oppure l'<b>estratto conto</b> della banca, in CSV o Excel.</li></ul><p>Negli ultimi due casi l'app riconosce le colonne e ti fa controllare tutto prima di importare; i movimenti già presenti non vengono duplicati.</p>`, ['Importa dati', 'data-a="openImportAny"']],
+  ['Esportare e fare il backup', `<p><b>Esporta in Excel</b> crea un file con tutti i dati: movimenti, conti, categorie, spese fisse, salvadanai, investimenti, PAC, impostazioni e foto. Puoi leggerlo con Excel e reimportarlo in EFU Budget su qualsiasi telefono. Il periodo che scegli vale solo per i fogli da leggere: i dati per reimportare sono sempre completi.</p><p>Il <b>CSV</b> contiene solo i movimenti del periodo, per usarli in altre app. Il <b>Backup completo</b> è un file .json con tutto, alternativo all'Excel.</p><p>Prima di cancellare tutti i dati, o di sostituirli importando un file, l'app ti propone di esportarli: basta salvare il file e poi confermare.</p><p>Esporta almeno una volta al mese e salva il file in File o su iCloud Drive.</p>`, ['Esporta', 'data-a="openExport"']],
+  ['Privacy e sicurezza', `<p>Con il <b>codice di blocco</b> l'app chiede un codice a ogni apertura, o dopo il tempo che scegli.</p><p>L'<b>occhio</b> in alto nella Home nasconde tutti gli importi; con <b>Nascondi gli importi all'apertura</b> l'app parte sempre coperta.</p><p>I tuoi dati non escono mai dal telefono: a internet vengono chiesti solo i cambi delle valute e i prezzi dei titoli, senza informazioni personali.</p>`, ['Codice di blocco', 'data-a="setPage" data-p="security"']],
+  ['Valuta principale', `<p>È la valuta di saldi, budget e statistiche. Si cambia in Impostazioni → Valuta principale: puoi convertire tutti gli importi al cambio di oggi, proposto in automatico, oppure cambiare solo il simbolo se all'inizio avevi scelto la valuta sbagliata.</p>`, ['Valuta principale', 'data-a="openBaseCur"']],
+  ['Annullare un errore', `<p>Dopo ogni modifica compare un messaggio con <b>Annulla</b>. Se è già sparito, in Impostazioni c'è <b>Annulla l'ultima modifica</b>, che torna indietro fino a 12 passi.</p><p>Quando chiudi l'app la cronologia degli annullamenti si azzera.</p>`],
+  ["Aggiornare l'app", `<p>Dal PC estrai il nuovo zip, apri il repository su GitHub, fai clic su Add file → Upload files e trascina i file, non la cartella, sopra quelli vecchi; poi Commit changes.</p><p>Dopo un paio di minuti riapri l'app: si aggiorna da sola e i dati restano. Se non vedi le novità, chiudila dal multitasking e riaprila.</p>`],
+  ['Cambiare telefono o reinstallare', `<p>Prima esporta tutto in Excel e salva il file su iCloud Drive. Sul nuovo telefono installa l'app da Safari, poi nella schermata di benvenuto tocca <b>Importa i tuoi dati</b> e scegli il file: torna tutto com'era.</p><p>Non eliminare mai l'icona senza aver salvato prima i dati: togliendo l'app si possono perdere.</p>`],
+  ['Problemi frequenti', `<p><b>L'app non mostra le novità.</b> Aspetta due minuti dopo il caricamento su GitHub, poi chiudi l'app dal multitasking e riaprila. Controlla che index.html sia nella radice del repository, non in una cartella.</p><p><b>In Safari vedo dati diversi.</b> Safari e l'app installata hanno memorie separate: usa sempre l'icona.</p><p><b>Ho perso i dati.</b> Ripristinali con Importa dati, scegliendo l'ultimo file esportato o il backup.</p><p><b>Il file esportato non si reimporta.</b> I file esportati prima della versione 1.6 contengono solo i movimenti: esporta di nuovo con la versione attuale.</p><p><b>Il cambio non si scarica.</b> Controlla la connessione; la BCE pubblica i cambi nei giorni lavorativi. Intanto scrivilo a mano.</p><p><b>I prezzi non si aggiornano.</b> Servono simbolo e quote: tocca Aggiorna ora in Investimenti e leggi il messaggio.</p><p><b>L'addebito della carta non torna.</b> Controlla i giorni di chiusura e di addebito, poi correggi il movimento dell'addebito.</p><p><b>Il promemoria degli investimenti ricompare.</b> Salva i valori oppure tocca Ricordamelo domani; puoi cambiarne la frequenza o sceglierne Mai.</p><p><b>L'import non riconosce le colonne.</b> Scegli tu quale colonna contiene la data e quale l'importo, poi controlla formato delle date e segno degli importi.</p><p><b>Ho dimenticato il codice di blocco.</b> Nella schermata di blocco puoi cancellare i dati e ripartire: per questo è importante esportarli ogni tanto.</p>`]
+];
+const guideNorm = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+SETTINGS.guide = () => {
+  let h = sheetHead('Guida e soluzioni', { back: true, grab: false }) + '<div class="sheet-body">';
+  h += '<label class="fld guide-q"><span>Cerca nella guida</span><input data-in="guideFind" placeholder="Es. carta, PAC, backup" autocomplete="off"></label>';
+  h += `<div class="guide">${GUIDE.map(([t, body, act]) => `<details><summary>${esc(t)}${ic('right', 16)}</summary><div class="g-b">${body}${act ? `<button class="link g-go" ${act[1]}>${esc(act[0])}</button>` : ''}</div></details>`).join('')}<p class="muted sm guide-none" hidden>Nessun argomento trovato: prova con un'altra parola.</p></div>`;
+  return h + `<p class="foot-note">EFU Budget versione ${APP_VERSION}.</p></div>`;
+};
+INP.guideFind = el => {
+  const q = guideNorm(el.value.trim()), box = el.closest('.sheet-body');
+  let shown = 0;
+  for (const d of box.querySelectorAll('.guide details')) {
+    const hit = !q || guideNorm(d.textContent).includes(q);
+    d.hidden = !hit;
+    d.open = hit && q.length >= 3;
+    if (hit) shown++;
+  }
+  const none = box.querySelector('.guide-none');
+  if (none) none.hidden = shown > 0;
+};
+
+/* =========================================================
+   Versione 1.6.1
+   Prima di cancellare tutti i dati, o di sostituirli con un file,
+   l'app propone di esportarli
+   ========================================================= */
+let AFTER_SAVE = null;
+function wipeAll() {
+  wipeStorage(); D = null;
+  UI.sheets.slice().forEach(s => closeSheet(s));
+  UI.tab = 'home'; UI.month = curMk(); UI.filters = blankFilters();
+  render(); toast('Dati cancellati', null);
+}
+SHEETS.safeFirst = {
+  init: () => ({ busy: false }),
+  render(st, sh) {
+    const wipe = sh.props.mode === 'wipe', n = D ? D.movements.length : 0, last = D && D.settings.lastBackup;
+    let h = sheetHead(wipe ? 'Cancellare tutti i dati?' : 'Sostituire i dati?') + '<div class="sheet-body">';
+    h += `<p class="lead sm">${wipe ? 'Stai per cancellare da questo telefono' : 'Il file che hai scelto prenderà il posto, su questo telefono, di'} ${n} ${n === 1 ? 'movimento' : 'movimenti'}, con conti, spese fisse, investimenti e impostazioni.</p>`;
+    h += "<p class=\"lead sm\">Prima ti conviene esportarli: con il file potrai rimettere tutto com'era, anche su un altro telefono.</p>";
+    h += last ? `<p class="muted sm">Ultima esportazione o backup: ${esc(shortDate(last))}.</p>` : '<p class="warn-t">Non hai ancora mai esportato i tuoi dati.</p>';
+    return h + `</div><footer class="sheet-foot"><button class="btn primary w" data-a="safeExport" ${st.busy ? 'disabled' : ''}>${st.busy ? 'Preparo il file…' : wipe ? 'Esporta e poi cancella' : 'Esporta e poi importa'}</button><button class="link w later${wipe ? ' danger' : ''}" data-a="safeSkip">${wipe ? 'Cancella senza esportare' : 'Importa senza esportare'}</button></footer>`;
+  }
+};
+ACT.safeExport = async el => {
+  const sh = sheetOf(el), st = sh.st, { mode, then } = sh.props;
+  st.busy = true; drawSheet(sh);
+  try {
+    const out = await buildXlsx('all');
+    closeSheet(sh);
+    AFTER_SAVE = () => confirmBox(mode === 'wipe' ? 'File salvato: cancello i dati?' : 'File salvato: importo il nuovo file?', 'Prima controlla di averlo salvato in File o su iCloud Drive.', mode === 'wipe' ? 'Cancella tutto' : 'Importa tutto', then, mode === 'wipe');
+    openSheet('fileReady', Object.assign(out, { kind: 'safe' }));
+  } catch (e) { st.busy = false; drawSheet(sh); toast('Esportazione non riuscita: ' + (e.message || e), null); }
+};
+ACT.safeSkip = el => {
+  const sh = sheetOf(el), { mode, then } = sh.props;
+  if (mode !== 'wipe') { closeSheet(sh); return then(); }
+  confirmBox('Cancellare senza una copia?', 'I dati verranno eliminati da questo telefono e non si potranno più recuperare.', 'Cancella tutto', () => { closeSheet(sh); then(); });
+};
+ACT.wipe = () => {
+  if (!D) return;
+  AFTER_SAVE = null;
+  if (D.settings.demo) return confirmBox('Cancellare i dati di esempio?', 'Sono solo dati di prova: non serve esportarli.', 'Cancella', wipeAll);
+  openSheet('safeFirst', { mode: 'wipe', then: wipeAll });
+};
+
+/* =========================================================
+   Versione 1.7
+   Spese fisse mese per mese: registrare in anticipo, saltare,
+   ripristinare, e totali di entrate, uscite e risparmi
    ========================================================= */
 function fixedMonthRows(k) {
   const done = new Map();
@@ -5095,496 +4998,31 @@ ACT.fxUnskip = el => {
 };
 
 /* =========================================================
-   Esportazione e ripristino
-   Excel completo e reimportabile, ripristino da file, proposta
-   di esportare prima di cancellare o sostituire i dati.
+   Versione 1.8
+   Pagina Investimenti nella barra in basso e barra flottante
    ========================================================= */
-
-/* ---------- esportazione: fogli leggibili in più e dati completi nascosti ---------- */
-const KIND_NAMES = { bank: 'Conto corrente', card: 'Carta', cash: 'Contanti', other: 'Altro', goal: 'Salvadanaio', invest: 'Investimenti (PAC)' };
-async function addFullData(XLSX, wb) {
-  const EUR = '#,##0.00 "' + baseSym() + '"';
-  const money = (ws, cols, n) => { for (let r = 1; r < n; r++) for (const c of cols) { const cell = ws[XLSX.utils.encode_cell({ r, c })]; if (cell && typeof cell.v === 'number') cell.z = EUR; } };
-  const bal = balancesAt(today());
-  const rc = [['Conto', 'Tipo', 'Saldo oggi', 'Saldo iniziale', 'Dal', 'Dettagli']];
-  for (const a of D.accounts.filter(x => !x.archived)) {
-    const det = [];
-    if (isCredit(a)) det.push(`Carta di credito: chiusura il ${a.closeDay}, addebito il ${a.payDay} su ${(acc(a.payFrom) || {}).name || '?'}`);
-    if (hasInterest(a)) det.push(`Interessi ${numStr(a.interest.rate, 3)}% lordi, tasse ${numStr(a.interest.tax || 0, 2)}%, accredito ogni ${a.interest.freq === 1 ? 'mese' : a.interest.freq + ' mesi'} il giorno ${a.interest.day}`);
-    if (a.kind === 'goal' && a.target) det.push('Obiettivo ' + numStr(a.target));
-    rc.push([a.name, KIND_NAMES[a.kind] || a.kind, r2(bal[a.id] || 0), a.initial || 0, a.initialDate || '', det.join('; ')]);
-  }
-  let ws = XLSX.utils.aoa_to_sheet(rc); money(ws, [2, 3], rc.length);
-  ws['!cols'] = [24, 18, 14, 14, 12, 60].map(w => ({ wch: w }));
-  XLSX.utils.book_append_sheet(wb, ws, 'Conti');
-  if (D.invest.length) {
-    const ri = [['Investimento', 'Codice', 'Simbolo', 'Tipo', 'Quote', 'Investito', 'Valore', 'Guadagno', 'Aggiornato il']];
-    for (const p of D.invest) { const v = invValue(p); ri.push([p.name, p.code || '', p.sym || '', invKind(p.kind)[1], p.qty || '', p.invested || 0, v, r2(v - (p.invested || 0)), invLast(p).d]); }
-    ws = XLSX.utils.aoa_to_sheet(ri); money(ws, [5, 6, 7], ri.length);
-    ws['!cols'] = [30, 16, 12, 12, 10, 14, 14, 14, 13].map(w => ({ wch: w }));
-    XLSX.utils.book_append_sheet(wb, ws, 'Investimenti');
-  }
-  const text = await (await buildBackup(true)).text(), size = 30000, rows = [["EFU Budget: dati completi per reimportare questo file nell'app. Non modificare questo foglio."], [FULL_MARK], [Math.ceil(text.length / size)]];
-  for (let i = 0; i < text.length; i += size) rows.push([text.slice(i, i + size)]);
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), FULL_SHEET);
-  wb.Workbook = wb.Workbook || {};
-  wb.Workbook.Sheets = wb.SheetNames.map(n => ({ name: n, Hidden: n === FULL_SHEET ? 1 : 0 }));
+function renderTabbar() {
+  const n = dueBadge(), due = D && D.invest && invDue();
+  const tab = (t, icon, label) => `<button class="ftab ${UI.tab === t ? 'on' : ''}" data-a="tab" data-t="${t}" aria-label="${label}" title="${label}"${UI.tab === t ? ' aria-current="page"' : ''}>${ic(icon, 24)}${t === 'plan' && n ? `<i class="badge">${n}</i>` : ''}${t === 'invest' && due ? '<i class="fdot"></i>' : ''}</button>`;
+  $('#tabbar').innerHTML = `<div class="fbar"><nav class="fpill">${tab('home', 'home', 'Home')}${tab('movs', 'list', 'Movimenti')}${tab('invest', 'trend', 'Investimenti')}${tab('plan', 'plan', 'Pianifica')}${tab('stats', 'chart', 'Statistiche')}</nav><button class="ffab" data-a="add" aria-label="Aggiungi movimento">${ic('plus', 28)}</button></div>`;
 }
-function readFullData(XLSX, wb) {
-  const ws = wb.Sheets[FULL_SHEET];
-  if (!ws) return null;
-  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
-  if (String(rows[1] && rows[1][0]) !== FULL_MARK) return null;
-  const n = Number(rows[2] && rows[2][0]) || 0;
-  try { return JSON.parse(rows.slice(3, 3 + n).map(r => String(r[0] == null ? '' : r[0])).join('')); } catch (e) { return null; }
-}
-
-/* ---------- ripristino da esportazione o backup ---------- */
-async function restoreBackupObj(obj) {
-  const data = obj && obj.data;
-  if (!data || !Array.isArray(data.movements) || !Array.isArray(data.accounts)) { toast('Il file non contiene dati di EFU Budget.', null); return false; }
-  const when = obj.at ? shortDate(isoOf(new Date(obj.at))) : '';
-  const go = async () => {
-    const pin = D ? D.settings.pin : null;
-    D = migrate(JSON.parse(JSON.stringify(data)));
-    D.settings.pin = pin;
-    save({ noStamp: true, undo: false });
-    UNDO.length = 0;
-    try {
-      await PhotoDB.clear();
-      for (const [k, p] of Object.entries(obj.photos || {})) await PhotoDB.put(k, { type: p.type, buf: b64ToBuf(p.b64) });
-    } catch (e) { toast('Dati importati, ma le foto no: memoria non disponibile.', null); }
-    PHOTO_URLS.clear();
-    UI.sheets.slice().forEach(s => closeSheet(s));
-    UI.tab = 'home'; UI.month = curMk(); UI.filters = blankFilters();
-    render();
-    toast(`Importati ${data.movements.length} movimenti e tutti gli altri dati`, null);
-  };
-  if (!D) { await go(); return true; }
-  if (!D.settings.demo && (D.movements.length || D.invest.length)) { AFTER_SAVE = null; openSheet('safeFirst', { mode: 'replace', then: go }); return true; }
-  confirmBox('Sostituire i dati?', `Il file${when ? ' del ' + esc(when) : ''} contiene ${data.movements.length} movimenti, con conti, categorie, spese fisse, investimenti e impostazioni. I dati attuali su questo telefono verranno sostituiti.`, 'Importa tutto', go);
-  return true;
-}
-CHG.restoreFile = async el => {
-  const f = el.files && el.files[0];
-  if (!f) return;
-  let obj = null;
-  try {
-    if (/\.(xlsx|xls|xlsm)$/i.test(f.name)) { const XLSX = await loadXLSX(); obj = readFullData(XLSX, XLSX.read(await f.arrayBuffer(), { type: 'array' })); }
-    else obj = JSON.parse(await f.text());
-  } catch (e) { obj = null; }
-  el.value = '';
-  if (obj && obj.type === 'budget-sync') return toast('Questo è un file del budget di coppia: aprilo da Budget di coppia → Ricevi.', null);
-  if (!obj) return toast('Il file scelto non è un backup o un\'esportazione di EFU Budget.', null);
-  await restoreBackupObj(obj);
+if (!UI.invRange) UI.invRange = 'all';
+VIEWS.invest = () => {
+  let h = '<header class="ph"><h1>Investimenti</h1></header>';
+  if (!D.invest.length) return h + `<div class="empty"><div class="empty-art">${ic('trend', 30)}</div><h3>Nessun investimento</h3><p>Segna quanto hai investito in ETF, azioni, fondi o altro e segui come vanno: guadagno o perdita, grafico, PAC e prezzi automatici.</p><button class="btn primary" data-a="invNew">${ic('plus', 18)} Aggiungi il primo investimento</button></div>`;
+  const t = invTotals(), due = invDue();
+  h += `<div class="inv-sum"><p class="muted sm">Valore attuale</p><p class="inv-big num">${eur(t.v)}</p><p class="inv-gl ${t.g >= 0 ? 'pos' : 'neg'}">${invGainHTML(t.g, t.pct)} <span class="muted">su ${eur(t.i)} investiti</span></p></div>`;
+  const ser = invRange(invSeries(), UI.invRange);
+  h += invRangeChips(UI.invRange, 'data-a="invRangeSet"') + invChart(ser, 170) + invDeltaHTML(ser, UI.invRange);
+  h += `<button class="btn ${due ? 'primary' : 'dark'} w gap-t" data-a="invUpdateOpen">${ic('trend', 18)} ${due ? "È ora di aggiornare i valori" : 'Aggiorna i valori'}</button>`;
+  h += section('Le tue posizioni', `<div class="list">${D.invest.slice().sort((a, b) => invValue(b) - invValue(a)).map(invRow).join('')}</div><button class="btn outline w gap-t" data-a="invNew">${ic('plus', 18)} Aggiungi investimento</button>`);
+  h += `<section class="sec">${pacSection()}</section><section class="sec">${pxSection()}</section>`;
+  h += `<section class="sec">${fieldLabel('Promemoria per aggiornare')}<div class="chips wrap">${[[7, 'Ogni settimana'], [14, 'Ogni 2 settimane'], [30, 'Ogni mese'], [0, 'Mai']].map(([v, l]) => `<button class="chip ${invFreq() === v ? 'on' : ''}" data-a="invFreq" data-v="${v}">${l}</button>`).join('')}</div><p class="muted sm gap-t">Quando è il momento, all'apertura dell'app ti chiedo i nuovi valori degli investimenti che non si aggiornano da soli.</p></section>`;
+  return h;
 };
-
-/* ---------- prima di cancellare, proponi di esportare ---------- */let AFTER_SAVE = null;
-function wipeAll() {
-  wipeStorage(); D = null;
-  UI.sheets.slice().forEach(s => closeSheet(s));
-  UI.tab = 'home'; UI.month = curMk(); UI.filters = blankFilters();
-  render(); toast('Dati cancellati', null);
-}
-SHEETS.safeFirst = {
-  init: () => ({ busy: false }),
-  render(st, sh) {
-    const wipe = sh.props.mode === 'wipe', n = D ? D.movements.length : 0, last = D && D.settings.lastBackup;
-    let h = sheetHead(wipe ? 'Cancellare tutti i dati?' : 'Sostituire i dati?') + '<div class="sheet-body">';
-    h += `<p class="lead sm">${wipe ? 'Stai per cancellare da questo telefono' : 'Il file che hai scelto prenderà il posto, su questo telefono, di'} ${n} ${n === 1 ? 'movimento' : 'movimenti'}, con conti, spese fisse, investimenti e impostazioni.</p>`;
-    h += "<p class=\"lead sm\">Prima ti conviene esportarli: con il file potrai rimettere tutto com'era, anche su un altro telefono.</p>";
-    h += last ? `<p class="muted sm">Ultima esportazione o backup: ${esc(shortDate(last))}.</p>` : '<p class="warn-t">Non hai ancora mai esportato i tuoi dati.</p>';
-    return h + `</div><footer class="sheet-foot"><button class="btn primary w" data-a="safeExport" ${st.busy ? 'disabled' : ''}>${st.busy ? 'Preparo il file…' : wipe ? 'Esporta e poi cancella' : 'Esporta e poi importa'}</button><button class="link w later${wipe ? ' danger' : ''}" data-a="safeSkip">${wipe ? 'Cancella senza esportare' : 'Importa senza esportare'}</button></footer>`;
-  }
-};
-ACT.safeExport = async el => {
-  const sh = sheetOf(el), st = sh.st, { mode, then } = sh.props;
-  st.busy = true; drawSheet(sh);
-  try {
-    const out = await buildXlsx('all');
-    closeSheet(sh);
-    AFTER_SAVE = () => confirmBox(mode === 'wipe' ? 'File salvato: cancello i dati?' : 'File salvato: importo il nuovo file?', 'Prima controlla di averlo salvato in File o su iCloud Drive.', mode === 'wipe' ? 'Cancella tutto' : 'Importa tutto', then, mode === 'wipe');
-    openSheet('fileReady', Object.assign(out, { kind: 'safe' }));
-  } catch (e) { st.busy = false; drawSheet(sh); toast('Esportazione non riuscita: ' + (e.message || e), null); }
-};
-ACT.safeSkip = el => {
-  const sh = sheetOf(el), { mode, then } = sh.props;
-  if (mode !== 'wipe') { closeSheet(sh); return then(); }
-  confirmBox('Cancellare senza una copia?', 'I dati verranno eliminati da questo telefono e non si potranno più recuperare.', 'Cancella tutto', () => { closeSheet(sh); then(); });
-};
-ACT.wipe = () => {
-  if (!D) return;
-  AFTER_SAVE = null;
-  if (D.settings.demo) return confirmBox('Cancellare i dati di esempio?', 'Sono solo dati di prova: non serve esportarli.', 'Cancella', wipeAll);
-  openSheet('safeFirst', { mode: 'wipe', then: wipeAll });
-};
-
-/* =========================================================
-   Guida e soluzioni
-   Argomenti con ricerca, nelle impostazioni.
-   ========================================================= */
-
-/* ---------- guida e soluzioni ---------- */
-const GUIDE = [
-  ['Come funziona EFU Budget', `<p>EFU Budget è un'app web: la installi dalla schermata Home e funziona anche senza connessione. Non serve nessun account.</p><p>Tutti i dati restano solo su questo telefono, dentro l'app. Per questo è importante esportarli ogni tanto e salvare il file in File o su iCloud Drive.</p><p>In basso c'è la barra con cinque sezioni: <b>Home</b> con saldo, previsione e cose da fare; <b>Movimenti</b> con elenco, ricerca e filtri; <b>Investimenti</b>, l'icona con la freccia che sale; <b>Pianifica</b> con spese fisse, budget e salvadanai; <b>Statistiche</b>. Il <b>+</b> rosso accanto serve per registrare.</p>`],
-  ['Novità della versione 2.1', `<ul><li><b>Patrimonio netto</b>: in Home sotto il disponibile e in Statistiche, con l'andamento mese per mese.</li><li><b>Categorie più intelligenti</b>: l'app riconosce il negozio anche quando la scritta cambia (per esempio «ESSELUNGA SPA 1234» ed «Esselunga») e propone la categoria che usi di solito, spiegando perché. Vale anche per le importazioni e per Apple Pay.</li><li><b>Grafici degli investimenti completi</b> anche nei giorni in cui non apri l'app, con il ponte aggiornato.</li></ul>`],
-  ['Novità della versione 2.0', `<p>La 2.0 ha lo stesso aspetto e le stesse funzioni della 1.9: aggiunge movimento solo dove aiuta a capire cosa succede.</p><ul><li>Cambiando sezione la pagina scorre nella direzione in cui ti muovi e la scheda attiva in basso scivola al suo posto.</li><li>Saldo, entrate, uscite e budget scorrono fino al nuovo valore quando cambiano, per esempio dopo un salvataggio o quando cambi mese.</li><li>Barre e grafici si disegnano quando apri una sezione.</li><li>Toccando un movimento la riga si apre nel dettaglio; facendola scorrere verso sinistra la elimini, con <b>Annulla</b> subito dopo.</li><li>Il tastierino fa un piccolo salto a ogni cifra e trema se il tasto non si può usare.</li><li>Mentre l'app legge un file, prepara un backup o aggiorna i prezzi, lo vedi muoversi.</li><li>Sui telefoni che lo permettono senti un leggero tocco quando premi i tasti, salvi o elimini.</li></ul><p>Se preferisci meno movimento attiva <b>Riduci movimento</b> nelle impostazioni di accessibilità dell'iPhone: l'app lo rispetta. Se qualcosa non va, in <b>Impostazioni → Aiuto</b> trovi la <b>versione 1.9</b>, che usa gli stessi dati.</p>`],
-  ['Registrare un movimento', `<p>Tocca il <b>+</b>, scrivi l'importo con il tastierino e tocca <b>Avanti</b>. In alto scegli uscita, entrata o trasferimento.</p><p>La categoria viene suggerita dalla descrizione e da quello che hai fatto in passato: puoi cambiarla con un tocco. Nei dettagli scegli data, conto, note, #tag e, se vuoi, una foto dello scontrino.</p><p>Per modificare un movimento toccalo nell'elenco. Per eliminarlo al volo fallo scorrere verso sinistra: se lo trascini fino in fondo sparisce subito, se ti fermi a metà compare il pulsante <b>Elimina</b>. Dopo ogni modifica compare <b>Annulla</b>.</p>`],
-  ['Spese in valuta estera', `<p>Nel tastierino tocca la valuta e scegli quella della spesa: l'app scarica da sola il cambio ufficiale BCE del giorno, oppure quello della data della spesa se è passata.</p><p>La banca di solito applica un cambio un po' diverso e una commissione: se l'estratto conto mostra un'altra cifra, correggi il cambio a mano e l'app terrà il tuo.</p><p>Senza connessione usa l'ultimo cambio salvato. I cambi da internet si spengono in Impostazioni → Valuta principale.</p>`],
-  ['Spese fisse e rate', `<p>In <b>Pianifica → Spese fisse</b> aggiungi affitto, bollette, abbonamenti, stipendio o rate: scegli ogni quanto si ripetono e la prossima scadenza. Per le rate indica quante sono o la data di fine.</p><p>Quando arriva la scadenza la voce compare nella Home in <b>Da registrare</b>: tocca <b>Registra</b> e diventa un movimento. Con <b>Importo variabile</b>, per esempio per le bollette, scrivi la cifra giusta; l'app ti propone la media delle ultime volte.</p><p>In alto scorri i mesi con le frecce: per ogni mese vedi le voci registrate, quelle da registrare e, in fondo, il totale di entrate, uscite e risparmi fissi. Se paghi qualcosa in anticipo, vai al mese successivo e tocca <b>Registra ora</b>.</p><p>Puoi saltare un mese, ripristinarlo, mettere in pausa o modificare la voce quando vuoi. Le spese fisse entrano nella <b>previsione di fine mese</b>.</p>`],
-  ['Spese non mensili e accantonamenti', `<p>Per assicurazioni, tasse o abbonamenti ogni 3, 6 o 12 mesi attiva <b>Accantona ogni mese</b> nella spesa fissa. Ogni mese l'app ti propone di mettere da parte una quota nel salvadanaio <b>Accantonamenti</b>.</p><p>Quando arriva la spesa viene pagata da lì, così il mese della scadenza non ha scossoni.</p>`],
-  ['Budget per categoria e avvisi', `<p>In <b>Pianifica → Budget</b> dai a ogni categoria un tetto mensile. Nella Home vedi quanto hai speso e quanto resta.</p><p>Quando ti avvicini al budget o lo superi compare un avviso nell'app. Nella Home trovi anche il riepilogo del mese, con entrate, uscite e qualche curiosità.</p><p>Le categorie si creano e si modificano in Impostazioni → Categorie.</p>`],
-  ['Conti e trasferimenti', `<p>In Impostazioni → Conti aggiungi conto corrente, carte, contanti o altro, con il saldo a una certa data. Il <b>conto predefinito</b> è quello proposto per le nuove spese.</p><p>Per spostare soldi tra due conti usa <b>Trasferimento</b>: non conta né come spesa né come entrata.</p><p>Il saldo iniziale è quello all'inizio del giorno indicato: se un saldo non torna, controlla quella data.</p>`, ['Apri i conti', 'data-a="setPage" data-p="accounts"']],
-  ['Carta di credito', `<p>Apri la carta in Impostazioni → Conti e attiva <b>Carta di credito con addebito mensile</b>: indica il giorno di chiusura, il giorno di addebito e il conto da cui vengono presi i soldi.</p><p>Le spese fino al giorno di chiusura vanno nell'estratto del mese, quelle dopo nel ciclo successivo. Il giorno dell'addebito l'app registra da sola il trasferimento dal conto alla carta. Nella Home vedi quanto hai speso nel ciclo e il prossimo addebito; in <b>Pianifica → Spese fisse</b>, mese per mese, trovi gli addebiti già fatti, quelli in arrivo e quello del ciclo ancora aperto.</p><p>Se la banca addebita una cifra diversa, correggi il movimento dell'addebito: non verrà più ricalcolato. Se importi l'estratto conto, elimina le righe «addebito carta», altrimenti la spesa risulta due volte.</p>`],
-  ['Interessi sulla liquidità', `<p>Per i conti remunerati, come Trade Republic, apri il conto e attiva <b>Interessi sulla liquidità</b>: tasso annuo lordo, tasse (in Italia il 26%, oppure 0 se li ricevi lordi), ogni quanto vengono accreditati, in che giorno e, se c'è, il tetto del saldo remunerato.</p><p>L'app calcola gli interessi giorno per giorno e li accredita da sola come entrata nella categoria <b>Interessi</b>. Nel conto vedi anche quanto hai già maturato.</p><p>Se la banca cambia il tasso aggiornalo: gli interessi già accreditati restano com'erano.</p>`],
-  ['Patrimonio netto', `<p>È quanto possiedi in tutto: conti e contanti, salvadanai e valore degli investimenti, meno il debito delle carte di credito, più o meno quello che tu e le altre persone vi dovete per le spese divise.</p><p>Lo trovi in Home sotto il disponibile e in <b>Statistiche</b>, sia nel mese sia nell'anno. Toccandolo vedi com'è composto e il valore a fine di ogni mese. Per gli investimenti conta l'ultimo valore noto a quella data: più spesso li aggiorni, più il grafico è preciso.</p>`],
-  ['Categorie suggerite', `<p>Quando scrivi la descrizione di un movimento l'app propone la categoria guardando quelle che hai scelto in passato per lo stesso negozio, anche se la scritta è un po' diversa: ignora numeri, sigle come SPA o SRL e diciture come «pagamento POS». Sotto le categorie una riga spiega perché, per esempio «come le altre 4 volte per Esselunga».</p><p>Se scegli tu un'altra categoria, l'app se ne ricorda: quando le ultime volte hai cambiato abitudine, segue la nuova. Lo stesso vale per i movimenti importati e per quelli arrivati da Apple Pay.</p>`],
-  ['Salvadanai e obiettivi', `<p>I salvadanai sono soldi messi da parte per un obiettivo, con una cifra e una data se vuoi. Li trovi in <b>Pianifica → Salvadanai</b> e nella Home.</p><p>Per versare o prelevare apri il salvadanaio. Per un versamento automatico ogni mese crea una spesa fissa di tipo <b>Risparmio</b>.</p><p>I soldi nei salvadanai non contano nel <b>Disponibile</b>.</p>`],
-  ['Investimenti', `<p>Nella sezione <b>Investimenti</b> della barra in basso aggiungi ETF, azioni, fondi o altro: quanto hai investito, quanto vale oggi e, se vuoi, le quote. Vedi valore, guadagno o perdita e il grafico rispetto al capitale investito.</p><p>Una volta a settimana, all'apertura, l'app ti chiede i nuovi valori; con le quote basta il prezzo di una quota. La frequenza si cambia, anche su <b>Mai</b>. Con <b>Compra o vendi</b> registri acquisti e vendite senza falsare il guadagno.</p><p>Sopra il grafico scegli il periodo: <b>1G</b> un giorno, <b>1S</b> una settimana, <b>1M</b> un mese, poi 3 mesi, un anno o tutto. Sotto trovi quanto hanno guadagnato o perso i tuoi investimenti in quel periodo, senza contare acquisti e versamenti del PAC. L'app salva un valore al giorno, quando la apri: se non la apri per qualche giorno, la variazione di «1G» parte dall'ultimo aggiornamento.</p>`, ['Apri gli investimenti', 'data-a="invOpen"']],
-  ['Prezzi automatici', `<p>Il ponte dei prezzi è già collegato. Perché un investimento si aggiorni da solo servono il <b>simbolo</b> e le <b>quote</b>: aprilo, tocca <b>Modifica</b> e usa «Trova il simbolo dal nome o dall'ISIN».</p><p>I simboli di solito finiscono con <b>.MI</b> per Milano, <b>.DE</b> per Xetra e <b>.L</b> per Londra. I prezzi si aggiornano quando apri l'app, al massimo ogni 3 ore, oppure con <b>Aggiorna ora</b>, e hanno circa 15 minuti di ritardo.</p><p>Una volta al giorno l'app chiede al ponte anche le chiusure di borsa dei giorni in cui non l'hai aperta, così i grafici di settimana e mese sono completi. Se in Investimenti compare l'invito ad aggiornare il ponte, apri Cloudflare, incolla nel Worker il codice nuovo (in <b>Configura</b> c'è il tasto per copiarlo) e tocca <b>Deploy</b>. I valori stimati non sostituiscono mai quelli registrati.</p><p>Se compare «Nessun prezzo per…», il simbolo è sbagliato: cercalo di nuovo.</p>`],
-  ['PAC, piani di accumulo', `<p>In Investimenti → <b>Nuovo PAC</b> scegli il conto, ogni quanto, la data del primo acquisto e quanto mettere in ogni titolo.</p><p>Alla data giusta l'app sposta i soldi dal conto agli investimenti e aggiorna capitale, valore e quote: non devi registrare niente. Gli acquisti in arrivo entrano nella previsione di fine mese.</p><p>Per cambiare l'importo modifica il PAC: vale dal prossimo acquisto. Se cancelli un acquisto dai movimenti, viene tolto anche dall'investimento.</p>`],
-  ['Spese divise e persone', `<p>Nei dettagli di una spesa puoi dividerla con altre persone, oppure indicare che l'ha pagata qualcun altro: l'app tiene il conto di chi deve cosa.</p><p>In Impostazioni → Persone vedi i saldi; quando qualcuno ti restituisce i soldi registra un <b>rimborso</b>.</p>`, ['Apri le persone', 'data-a="setPage" data-p="people"']],
-  ['Budget di coppia', `<p>In Impostazioni → <b>Budget di coppia</b> scrivi il tuo nome. Ognuno registra le spese sul proprio telefono; ogni tanto toccate <b>Invia</b> e mandate il file all'altra persona, che lo apre con <b>Ricevi</b>.</p><p>L'app unisce i movimenti senza doppioni, fa arrivare anche le cancellazioni e mostra chi ha inserito cosa. Se modificate entrambi la stessa voce vale la modifica più recente. Foto, codice di blocco e impostazioni restano personali.</p>`, ['Apri Budget di coppia', 'data-a="setPage" data-p="share"']],
-  ['Pagamenti con Apple Pay', `<p>Un'automazione di Comandi Rapidi scrive ogni pagamento contactless in un file su iCloud Drive; nell'app lo importi e i pagamenti compaiono nella Home in <b>Pagamenti da controllare</b>, con la categoria suggerita.</p><p>Le istruzioni passo passo sono nella pagina dedicata. Funziona con i pagamenti nei negozi, non con quelli online.</p>`, ['Apri le istruzioni', 'data-a="setPage" data-p="applepay"']],
-  ['Importare dati', `<p>In Impostazioni → <b>Importa dati</b> puoi scegliere:</p><ul><li>un file <b>esportato da EFU Budget</b> o un <b>backup</b>: reimporta tutto, anche su un altro telefono;</li><li>il file <b>Excel del tuo budget</b>;</li><li>l'esportazione di <b>un'altra app</b>, come Money Lover, Wallet o Spendee, oppure l'<b>estratto conto</b> della banca, in CSV o Excel.</li></ul><p>Negli ultimi due casi l'app riconosce le colonne e ti fa controllare tutto prima di importare; i movimenti già presenti non vengono duplicati.</p>`, ['Importa dati', 'data-a="openImportAny"']],
-  ['Esportare e fare il backup', `<p><b>Esporta in Excel</b> crea un file con tutti i dati: movimenti, conti, categorie, spese fisse, salvadanai, investimenti, PAC, impostazioni e foto. Puoi leggerlo con Excel e reimportarlo in EFU Budget su qualsiasi telefono. Il periodo che scegli vale solo per i fogli da leggere: i dati per reimportare sono sempre completi.</p><p>Il <b>CSV</b> contiene solo i movimenti del periodo, per usarli in altre app. Il <b>Backup completo</b> è un file .json con tutto, alternativo all'Excel.</p><p>Prima di cancellare tutti i dati, o di sostituirli importando un file, l'app ti propone di esportarli: basta salvare il file e poi confermare.</p><p>Esporta almeno una volta al mese e salva il file in File o su iCloud Drive.</p>`, ['Esporta', 'data-a="openExport"']],
-  ['Privacy e sicurezza', `<p>Con il <b>codice di blocco</b> l'app chiede un codice a ogni apertura, o dopo il tempo che scegli.</p><p>L'<b>occhio</b> in alto nella Home nasconde tutti gli importi; con <b>Nascondi gli importi all'apertura</b> l'app parte sempre coperta.</p><p>I tuoi dati non escono mai dal telefono: a internet vengono chiesti solo i cambi delle valute e i prezzi dei titoli, senza informazioni personali.</p>`, ['Codice di blocco', 'data-a="setPage" data-p="security"']],
-  ['Valuta principale', `<p>È la valuta di saldi, budget e statistiche. Si cambia in Impostazioni → Valuta principale: puoi convertire tutti gli importi al cambio di oggi, proposto in automatico, oppure cambiare solo il simbolo se all'inizio avevi scelto la valuta sbagliata.</p>`, ['Valuta principale', 'data-a="openBaseCur"']],
-  ['Annullare un errore', `<p>Dopo ogni modifica compare un messaggio con <b>Annulla</b>. Se è già sparito, in Impostazioni c'è <b>Annulla l'ultima modifica</b>, che torna indietro fino a 12 passi.</p><p>Quando chiudi l'app la cronologia degli annullamenti si azzera.</p>`],
-  ["Aggiornare l'app", `<p>Dal PC estrai il nuovo zip, apri il repository su GitHub, fai clic su Add file → Upload files e trascina tutto il contenuto della cartella EFU-Budget sopra quello vecchio, compresa la cartella <b>v1</b> con la versione precedente; poi Commit changes.</p><p>Dopo un paio di minuti riapri l'app: si aggiorna da sola e i dati restano. Se non vedi le novità, chiudila dal multitasking e riaprila.</p>`],
-  ['Cambiare telefono o reinstallare', `<p>Prima esporta tutto in Excel e salva il file su iCloud Drive. Sul nuovo telefono installa l'app da Safari, poi nella schermata di benvenuto tocca <b>Importa i tuoi dati</b> e scegli il file: torna tutto com'era.</p><p>Non eliminare mai l'icona senza aver salvato prima i dati: togliendo l'app si possono perdere.</p>`],
-  ['Problemi frequenti', `<p><b>L'app non mostra le novità.</b> Aspetta due minuti dopo il caricamento su GitHub, poi chiudi l'app dal multitasking e riaprila. Controlla che index.html sia nella radice del repository, non in una cartella.</p><p><b>In Safari vedo dati diversi.</b> Safari e l'app installata hanno memorie separate: usa sempre l'icona.</p><p><b>Ho perso i dati.</b> Ripristinali con Importa dati, scegliendo l'ultimo file esportato o il backup.</p><p><b>Il file esportato non si reimporta.</b> I file esportati prima della versione 1.6 contengono solo i movimenti: esporta di nuovo con la versione attuale.</p><p><b>Il cambio non si scarica.</b> Controlla la connessione; la BCE pubblica i cambi nei giorni lavorativi. Intanto scrivilo a mano.</p><p><b>I prezzi non si aggiornano.</b> Servono simbolo e quote: tocca Aggiorna ora in Investimenti e leggi il messaggio.</p><p><b>L'addebito della carta non torna.</b> Controlla i giorni di chiusura e di addebito, poi correggi il movimento dell'addebito.</p><p><b>Il promemoria degli investimenti ricompare.</b> Salva i valori oppure tocca Ricordamelo domani; puoi cambiarne la frequenza o sceglierne Mai.</p><p><b>L'import non riconosce le colonne.</b> Scegli tu quale colonna contiene la data e quale l'importo, poi controlla formato delle date e segno degli importi.</p><p><b>Ho dimenticato il codice di blocco.</b> Nella schermata di blocco puoi cancellare i dati e ripartire: per questo è importante esportarli ogni tanto.</p>`]
-];
-const guideNorm = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-SETTINGS.guide = () => {
-  let h = sheetHead('Guida e soluzioni', { back: true, grab: false }) + '<div class="sheet-body">';
-  h += '<label class="fld guide-q"><span>Cerca nella guida</span><input data-in="guideFind" placeholder="Es. carta, PAC, backup" autocomplete="off"></label>';
-  h += `<div class="guide">${GUIDE.map(([t, body, act]) => `<details><summary>${esc(t)}${ic('right', 16)}</summary><div class="g-b">${body}${act ? `<button class="link g-go" ${act[1]}>${esc(act[0])}</button>` : ''}</div></details>`).join('')}<p class="muted sm guide-none" hidden>Nessun argomento trovato: prova con un'altra parola.</p></div>`;
-  return h + `<p class="foot-note">EFU Budget versione ${APP_VERSION}.</p></div>`;
-};
-INP.guideFind = el => {
-  const q = guideNorm(el.value.trim()), box = el.closest('.sheet-body');
-  let shown = 0;
-  for (const d of box.querySelectorAll('.guide details')) {
-    const hit = !q || guideNorm(d.textContent).includes(q);
-    d.hidden = !hit;
-    d.open = hit && q.length >= 3;
-    if (hit) shown++;
-  }
-  const none = box.querySelector('.guide-none');
-  if (none) none.hidden = shown > 0;
-};
-
-/* =========================================================
-   Patrimonio netto
-   Conti e contanti + salvadanai + investimenti − debito delle carte
-   ± crediti e debiti con le persone, a una data e mese per mese.
-   ========================================================= */
-function personBalanceAt(pid, d) {
-  let b = 0;
-  for (const m of D.movements) {
-    if (m.date > d) continue;
-    if (m.type === 'out' && m.split) {
-      if (!m.paidBy) b += (m.split.shares && m.split.shares[pid]) || 0;
-      else if (m.paidBy === pid) b -= m.split.mine;
-    } else if (m.type === 'settle' && m.personId === pid) b += m.dir === 'in' ? -m.amount : m.amount;
-  }
-  return b;
-}
-// valore degli investimenti a una data: l'ultimo valore noto di ogni posizione
-function invValueAt(d) {
-  let v = 0;
-  for (const p of D.invest) {
-    let last = null;
-    for (const h of (p.hist || [])) { if (h.d <= d) last = h; else break; }
-    if (last) v += last.v;
-    else if (!(p.hist || []).length && (p.created || '0000') <= d) v += p.invested || 0;
-  }
-  return v;
-}
-function nwAt(d) {
-  const b = balancesAt(d);
-  let cash = 0, cards = 0, goalsV = 0, invAcc = 0;
-  for (const a of D.accounts) {
-    if (a.archived) continue;
-    const v = b[a.id] || 0;
-    if (a.kind === 'goal') goalsV += v;
-    else if (a.kind === 'invest') invAcc += v;
-    else if (a.kind === 'card') cards += v;
-    else cash += v;
-  }
-  // con le posizioni registrate conta il loro valore; il conto «Investimenti» ne rispecchia solo i versamenti
-  const inv = D.invest.length ? invValueAt(d) : invAcc;
-  const ppl = (D.people || []).reduce((s, p) => s + personBalanceAt(p.id, d), 0);
-  const r = { cash: r2(cash), cards: r2(cards), goals: r2(goalsV), inv: r2(inv), ppl: r2(ppl) };
-  r.tot = r2(r.cash + r.cards + r.goals + r.inv + r.ppl);
-  return r;
-}
-// primo mese con dati: il più vecchio tra movimenti e saldi iniziali dei conti
-function nwStartMk() {
-  let d = today();
-  for (const m of D.movements) if (m.date < d) d = m.date;
-  for (const a of D.accounts) if (a.initialDate && a.initialDate < d) d = a.initialDate;
-  for (const p of D.invest) for (const h of (p.hist || []).slice(0, 1)) if (h.d < d) d = h.d;
-  return mk(d);
-}
-// valori a fine mese (per il mese in corso: oggi) degli n mesi che finiscono con k
-function nwSeries(k, n = 12) {
-  return memo('nw' + k + ':' + n, () => {
-    const ck = curMk(), start = nwStartMk(), out = [];
-    for (let i = n - 1; i >= 0; i--) {
-      const m = addM(k, -i);
-      if (m < start || m > ck) continue;
-      const d = m === ck ? today() : endOf(m);
-      out.push(Object.assign({ k: m, d }, nwAt(d)));
-    }
-    return out;
-  });
-}
-const nwMonth = k => MESI[Number(k.slice(5)) - 1];
-function nwChart(ser, h = 120, labels = true) {
-  if (ser.length < 2) return '<p class="muted sm">Il grafico compare dal secondo mese con dei movimenti.</p>';
-  const W = 340, H = h, pt = 10, pb = labels ? 20 : 6, px = 6;
-  const vals = ser.map(s => s.tot);
-  let lo = Math.min(...vals), hi = Math.max(...vals);
-  const pad = (hi - lo) * 0.15 || Math.abs(hi) * 0.05 || 1; lo -= pad; hi += pad;
-  const X = i => (px + i / (ser.length - 1) * (W - 2 * px)).toFixed(1), Y = v => (pt + (hi - v) / (hi - lo) * (H - pt - pb)).toFixed(1);
-  const line = ser.map((s, i) => (i ? 'L' : 'M') + X(i) + ' ' + Y(s.tot)).join(' ');
-  const area = line + ` L${X(ser.length - 1)} ${H - pb} L${X(0)} ${H - pb} Z`;
-  const last = ser[ser.length - 1];
-  let s = `<svg class="chart nw-ch" viewBox="0 0 ${W} ${H}" role="img" aria-label="Patrimonio netto a fine mese, da ${nwMonth(ser[0].k)} a ${nwMonth(last.k)}: da ${esc(eur(ser[0].tot))} a ${esc(eur(last.tot))}">`;
-  s += `<path d="${area}" style="fill:var(--accent);opacity:.08"/>`;
-  if (lo < 0 && hi > 0) s += `<line class="zero" x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}"/>`;
-  s += `<path class="ln" d="${line}"/>`;
-  ser.forEach((p, i) => { s += `<circle class="dot" cx="${X(i)}" cy="${Y(p.tot)}" r="${i === ser.length - 1 ? 4 : 2.5}"/>`; });
-  if (labels) {
-    s += `<text class="ax" x="${X(0)}" y="${H - 4}">${MESI_S[Number(ser[0].k.slice(5)) - 1]} ${ser[0].k.slice(2, 4)}</text>`;
-    s += `<text class="ax" x="${X(ser.length - 1)}" y="${H - 4}" text-anchor="end">${MESI_S[Number(last.k.slice(5)) - 1]} ${last.k.slice(2, 4)}</text>`;
-  }
-  return s + '</svg>';
-}
-function nwParts(v) {
-  return [['🏦', 'Conti e contanti', v.cash], ['🐷', 'Salvadanai', v.goals], ['📈', 'Investimenti', v.inv], ['💳', v.cards < 0 ? 'Debito delle carte' : 'Carte', v.cards], ['👥', v.ppl >= 0 ? 'Ti devono' : 'Devi ad altri', v.ppl]]
-    .filter(p => Math.abs(p[2]) >= 0.005);
-}
-const nwDeltaHTML = (a, b, k) => {
-  if (!a) return '';
-  const d = r2(b.tot - a.tot);
-  return `<span class="inv-g ${d >= 0 ? 'pos' : 'neg'}"><b class="num">${eur(d, { sign: true })}</b><small>rispetto a fine ${nwMonth(a.k).toLowerCase()}</small></span>`;
-};
-// sezione nelle Statistiche del mese
-function nwBlock(k) {
-  const ser = nwSeries(k), cur = ser[ser.length - 1];
-  if (!cur) return '';
-  const prev = ser.length > 1 ? ser[ser.length - 2] : null;
-  return section('Patrimonio netto', `<button class="inv-card nw-card" data-a="nwOpen" data-k="${k}"><span class="inv-top"><span><span class="muted sm">${k === curMk() ? 'Oggi' : 'A fine ' + nwMonth(k).toLowerCase()}</span><b class="num nw-v">${eur(cur.tot)}</b></span>${nwDeltaHTML(prev, cur, k)}</span>${nwChart(ser, 110)}<span class="nw-parts">${nwParts(cur).map(p => `<span>${p[0]} ${p[1]} <b class="num">${eur(p[2])}</b></span>`).join('')}</span></button>`);
-}
-// sezione nelle Statistiche dell'anno
-function nwYearBlock(y) {
-  const ck = curMk(), endK = y + '-12' < ck ? y + '-12' : ck;
-  if (endK < y + '-01') return '';
-  const ser = nwSeries(endK, Number(endK.slice(5))).filter(s => s.k.startsWith(y));
-  if (!ser.length) return '';
-  const first = nwSeries(y + '-01', 2), before = first.length === 2 ? first[0] : null;
-  const cur = ser[ser.length - 1];
-  const delta = before ? `<span class="inv-g ${cur.tot - before.tot >= 0 ? 'pos' : 'neg'}"><b class="num">${eur(r2(cur.tot - before.tot), { sign: true })}</b><small>da inizio ${y}</small></span>` : '';
-  return section('Patrimonio netto', `<button class="inv-card nw-card" data-a="nwOpen" data-k="${endK}"><span class="inv-top"><span><span class="muted sm">${endK === ck ? 'Oggi' : 'A fine ' + y}</span><b class="num nw-v">${eur(cur.tot)}</b></span>${delta}</span>${nwChart(ser, 110)}</button>`);
-}
-// riga nella Home, sotto il disponibile: solo se aggiunge qualcosa (salvadanai, investimenti, carte, persone)
-function nwHomeLink() {
-  if (!D.accounts.some(a => !a.archived && (a.kind === 'goal' || a.kind === 'card')) && !D.invest.length && !(D.people || []).length) return '';
-  const v = nwAt(today());
-  return `<button class="nw-link" data-a="nwOpen" data-k="${curMk()}">Patrimonio netto <b class="num">${eur(v.tot)}</b>${ic('right', 14)}</button>`;
-}
-ACT.nwOpen = el => openSheet('netWorth', { k: (el && el.dataset.k) || curMk() });
-SHEETS.netWorth = {
-  cls: 'tall',
-  render(st, sh) {
-    const k = sh.props.k, ser = nwSeries(k, 13), cur = ser[ser.length - 1];
-    let h = sheetHead('Patrimonio netto');
-    h += '<div class="sheet-body">';
-    if (!cur) return h + '<p class="muted">Ancora nessun dato.</p></div>';
-    const show = ser.slice(-12), prev = ser.length > 1 ? ser[ser.length - 2] : null;
-    h += `<div class="nw-top"><p class="muted sm">${k === curMk() ? 'Oggi' : 'A fine ' + nwMonth(k).toLowerCase() + ' ' + k.slice(0, 4)}</p><p class="hero-n">${bigAmount(cur.tot)}</p><p>${nwDeltaHTML(prev, cur, k)}</p></div>`;
-    h += nwChart(show, 160);
-    h += section('Com\'è composto', `<div class="list">${nwParts(cur).map(p => `<div class="row static"><span class="row-ic av-e">${p[0]}</span><span class="rt">${p[1]}</span><b class="num ${p[2] < 0 ? 'neg' : ''}">${eur(p[2])}</b></div>`).join('')}</div>`);
-    h += section('Mese per mese', `<div class="list nw-table">${show.slice().reverse().map((s, i, a) => { const p = a[i + 1]; const d = p ? r2(s.tot - p.tot) : null; return `<div class="row static"><span class="rt">${nwMonth(s.k)} ${s.k.slice(0, 4)}${s.k === curMk() ? '<small>fino a oggi</small>' : ''}</span><span class="nw-tr"><b class="num">${eur(s.tot)}</b>${d == null ? '' : `<small class="${d >= 0 ? 'pos' : 'neg'}">${eur(d, { sign: true })}</small>`}</span></div>`; }).join('')}</div>`);
-    h += `<p class="muted sm gap-t">Somma di conti e contanti, salvadanai e valore degli investimenti, meno il debito delle carte di credito, più o meno quello che tu e le persone vi dovete. Per gli investimenti conta l'ultimo valore noto a quella data.</p>`;
-    return h + '</div>';
-  }
-};
-
-/* =========================================================
-   Movimento (dalla 2.0)
-   Stato e strumenti condivisi: rispetto di «Riduci movimento»,
-   vibrazione, numeri che scorrono, grafici che si disegnano,
-   scorri per eliminare, collegamento alla versione 1.9.
-   Le transizioni vivono nelle funzioni che le usano:
-   render e goTab (ui.js), pressKey, movSave e movOpen (sheets.js).
-   ========================================================= */
-const MOTION = { prev: {}, first: true, entering: false, navDir: '', freshId: null };
-const TAB_ORDER = ['home', 'movs', 'invest', 'plan', 'stats'];
-const RM = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-const VT_OK = () => typeof document.startViewTransition === 'function' && !RM();
-
-/* ---------- vibrazione ---------- */
-function hap(kind = 'tick') {
-  try { if (navigator.vibrate) navigator.vibrate(kind === 'warn' ? [14, 50, 14] : kind === 'ok' ? [10, 40, 18] : 8); } catch (e) { }
-  const a = document.activeElement;
-  if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return; // non togliere il fuoco a un campo
-  let l = document.getElementById('efu-hap');
-  if (!l) {
-    l = document.createElement('label'); l.id = 'efu-hap'; l.className = 'hap'; l.setAttribute('aria-hidden', 'true');
-    l.innerHTML = '<input type="checkbox" switch tabindex="-1">';
-    document.body.appendChild(l);
-  }
-  l.click();
-  if (kind !== 'tick') setTimeout(() => l.click(), 90);
-}
-
-/* ---------- numeri che scorrono quando cambiano ---------- */
-// Si applica ai numeri principali già presenti nelle schermate, senza cambiarne l'aspetto.
-const COUNT_SEL = '.hero-n .big, .kpi b.num, .bud-n b.num, .bud-tot b.num, .k b.num, .fc b.num, .inv-big, .inv-v, .nw-v';
-const parseShown = t => strToNum(String(t).replace(/−/g, '-').replace(/[^\d,.+\-]/g, ''));
-function bigInner(n) {
-  const v = r2(n), [i, d] = NF2.format(Math.abs(v)).split(',');
-  return `${v < 0 ? '−' : ''}${i}<span class="big-d">,${d} ${esc(baseSym())}</span>`;
-}
-function countUp(root) {
-  if (!root || HIDE) return;
-  const seen = {};
-  $$(COUNT_SEL, root).forEach(el => {
-    const txt = el.textContent || '';
-    if (!txt.includes(baseSym()) || el.closest('.sheet')) return;
-    const kind = el.matches('.big') ? 'big' : txt.includes(',') ? 'eur' : 'eur0';
-    const sign = /^\s*\+/.test(txt);
-    const to = parseShown(txt);
-    if (!isFinite(to)) return;
-    const box = el.closest('.kpi, .k, .inv-card, .fc'), lab = box && box.querySelector('.fc-l, span');
-    const base = UI.tab + ':' + (el.className || el.tagName) + ':' + (lab && lab !== el ? (lab.textContent || '').replace(/[\d.,€+\-−\s]/g, '').slice(0, 24) : '');
-    seen[base] = (seen[base] || 0) + 1;
-    const key = base + ':' + seen[base];
-    const from = MOTION.prev[key] == null ? 0 : MOTION.prev[key];
-    MOTION.prev[key] = to;
-    if (RM() || Math.abs(from - to) < 0.005) return;
-    const fmt = kind === 'big' ? bigInner : kind === 'eur' ? v => eur(v, { sign }) : v => eur0(v);
-    const t0 = performance.now(), dur = 760;
-    const step = now => {
-      if (!el.isConnected) return;
-      const q = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - q, 4);
-      el.innerHTML = fmt(q >= 1 ? to : from + (to - from) * e);
-      if (q < 1) requestAnimationFrame(step);
-    };
-    el.innerHTML = fmt(from);
-    requestAnimationFrame(step);
-  });
-}
-
-/* ---------- grafici e barre che si disegnano, riga nuova evidenziata ---------- */
-function decorate(root) {
-  $$('.chart .ln:not(.dash)', root).forEach(p => { p.setAttribute('pathLength', '1'); p.classList.add('draw'); });
-  $$('.chart .bgrp', root).forEach((g, i) => $$('rect.b-in, rect.b-out', g).forEach(r => { r.style.animationDelay = (i * 35) + 'ms'; }));
-  $$('.brows .brow, .bud-tot, .bud-hero, .gcard, .gbig', root).forEach((r, i) => { const b = r.querySelector('.bar i'); if (b) b.style.animationDelay = (80 + i * 45) + 'ms'; });
-  if (MOTION.freshId) {
-    const r = root.querySelector(`.mrow[data-id="${MOTION.freshId}"]`);
-    if (r) r.classList.add('fresh');
-    MOTION.freshId = null;
-  }
-}
-
-/* ---------- scorri per eliminare ---------- */
-const SW = { p: null, open: null, block: 0 };
-function wrapSwipe(row) {
-  if (row.parentNode.classList.contains('mswipe')) return row.parentNode;
-  const w = document.createElement('div');
-  w.className = 'mswipe';
-  row.parentNode.insertBefore(w, row);
-  w.innerHTML = `<button class="mdel" data-a="swDel" tabindex="-1" aria-label="Elimina">${ic('trash', 22)}<span>Elimina</span></button>`;
-  w.appendChild(row);
-  return w;
-}
-function closeSwipe(row = SW.open) {
-  if (!row) return;
-  row.style.transform = '';
-  if (SW.open === row) SW.open = null;
-}
-function deleteMovement(m) {
-  D.movements = D.movements.filter(x => x !== m);
-  if (m.cardDebit) { const ca = acc(m.cardDebit); if (ca) ca.skipDebits = (ca.skipDebits || []).concat(m.cycle); }
-  if (m.pacOf) pacUndo(m);
-  if (m.interestOf) { const ia = acc(m.interestOf); if (ia && ia.interest) ia.interest.skip = (ia.interest.skip || []).concat(m.period); }
-  save(); refresh();
-  toast('Movimento eliminato', (m.pacOf || m.cardDebit || m.interestOf) ? undefined : { label: 'Annulla', fn: () => { D.movements.push(m); MOTION.freshId = m.id; save(); refresh(); hap(); } });
-  if (m.photoId) setTimeout(() => { if (!D || !D.movements.some(x => x.photoId === m.photoId)) PhotoDB.del(m.photoId).catch(() => { }); }, 8000);
-}
-function swipeDelete(row) {
-  const m = D.movements.find(x => x.id === row.dataset.id);
-  if (!m) return closeSwipe(row);
-  hap('warn');
-  SW.open = null;
-  const w = row.parentNode;
-  w.style.height = w.offsetHeight + 'px';
-  row.style.transform = 'translateX(-110%)';
-  requestAnimationFrame(() => w.classList.add('gone'));
-  setTimeout(() => deleteMovement(m), RM() ? 0 : 300);
-}
-ACT.swDel = el => { const r = el.parentNode.querySelector('.mrow'); if (r) swipeDelete(r); };
-document.addEventListener('pointerdown', e => {
-  const row = e.target.closest && e.target.closest('#view .mrow[data-a="movOpen"]');
-  if (SW.open && SW.open !== row && !(e.target.closest && e.target.closest('.mdel'))) closeSwipe();
-  if (!row || e.button > 0) return;
-  SW.p = { row, x: e.clientX, y: e.clientY, dx: 0, moved: false, base: row === SW.open ? -88 : 0, id: e.pointerId, hap: false };
-}, { passive: true });
-document.addEventListener('pointermove', e => {
-  const p = SW.p;
-  if (!p || e.pointerId !== p.id) return;
-  const dx = e.clientX - p.x, dy = e.clientY - p.y;
-  if (!p.moved) {
-    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.3) { p.moved = true; wrapSwipe(p.row).classList.add('drag'); }
-    else { if (Math.abs(dy) > 10) SW.p = null; return; }
-  }
-  let x = p.base + dx;
-  if (x > 0) x *= 0.2;
-  if (x < -170) x = -170 + (x + 170) * 0.3;
-  if (!p.hap && x < -120) { p.hap = true; hap(); } else if (p.hap && x > -120) p.hap = false;
-  p.dx = x;
-  p.row.style.transform = `translateX(${x}px)`;
-}, { passive: true });
-function swipeEnd(e) {
-  const p = SW.p;
-  if (!p || (e && e.pointerId !== p.id)) return;
-  SW.p = null;
-  if (!p.moved) return;
-  SW.block = Date.now();
-  const w = p.row.parentNode;
-  if (w) w.classList.remove('drag');
-  if (e && e.type === 'pointercancel') { closeSwipe(p.row); return; }
-  if (p.dx < -120) swipeDelete(p.row);
-  else if (p.dx < -44) { p.row.style.transform = 'translateX(-88px)'; SW.open = p.row; }
-  else closeSwipe(p.row);
-}
-document.addEventListener('pointerup', swipeEnd);
-document.addEventListener('pointercancel', swipeEnd);
-document.addEventListener('click', e => {
-  if (Date.now() - SW.block < 400) { e.stopPropagation(); e.preventDefault(); return; }
-  if (SW.open && !(e.target.closest && e.target.closest('.mdel'))) {
-    const r = SW.open, row = e.target.closest && e.target.closest('.mrow');
-    closeSwipe(r);
-    if (row === r) { e.stopPropagation(); e.preventDefault(); }
-  }
-}, true);
-
-/* ---------- versione precedente come copia di sicurezza ---------- */
-ACT.openV1 = () => {
-  if (!IS_PACKAGE) { toast("La versione 1.9 si apre dall'app installata sul telefono", null); return; }
-  location.href = 'v1/';
-};
-
-/* ---------- impostazioni da applicare all'avvio ---------- */
-function bootExtras() {
-  try { HIDE = !!(D && D.settings.hideOnOpen) || localStorage.getItem(HIDE_KEY) === '1'; } catch (e) { }
-  if (D && syncAuto()) save({ undo: false });
-}
+ACT.invRangeSet = el => { UI.invRange = el.dataset.v; render(); };
+ACT.invOpen = () => { UI.sheets.slice().reverse().forEach(s => closeSheet(s)); goTab('invest'); };
+ACT.invFreq = el => { D.settings.invRemind = Number(el.dataset.v); save({ undo: false }); const sh = sheetOf(el); if (sh) drawSheet(sh); else render(); };
 
 /* =========================================================
    Avvio
@@ -5627,7 +5065,7 @@ function boot() {
   hideSplash();
   setTimeout(invReminderCheck, 1800);
   setTimeout(() => autoPrices(false), 2600);
-  if (IS_PACKAGE && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => { });
+  if (IS_PACKAGE && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) void 0;
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => { }); } catch (e) { }
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

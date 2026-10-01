@@ -1,8 +1,10 @@
-EFU BUDGET - web app per iPhone, versione 1.9
+EFU BUDGET - web app per iPhone, versione 2.1
 
 COSA C'È IN QUESTA CARTELLA
 index.html, sw.js, manifest.webmanifest e le icone: sono i file dell'app.
-Vanno caricati tutti insieme, senza cambiarne i nomi.
+La cartella v1 contiene la versione 1.9 come copia di sicurezza: si apre da
+Impostazioni > Aiuto > Versione precedente 1.9 e usa gli stessi dati.
+Vanno caricati tutti insieme, cartella v1 compresa, senza cambiarne i nomi.
 
 INSTALLAZIONE (una volta sola, circa 10 minuti)
 Si può fare anche solo dall'iPhone: tocca lo zip nell'app File per estrarlo.
@@ -32,7 +34,9 @@ oppure «Inizia da zero». Da Impostazioni puoi attivare il codice di blocco.
 
 AGGIORNAMENTI
 Quando ricevi una nuova versione, su GitHub carica i nuovi file sopra i vecchi
-(Add file > Upload files > Commit changes). L'app si aggiorna da sola alla
+(Add file > Upload files > Commit changes). Trascina tutto il contenuto della
+cartella EFU-Budget, compresa la cartella v1: GitHub la carica con il suo nome.
+Se la cartella v1 manca, l'app funziona lo stesso: manca solo la copia 1.9. L'app si aggiorna da sola alla
 riapertura successiva; se non succede, chiudila dal multitasking e riaprila.
 I dati restano.
 
@@ -48,6 +52,11 @@ Il file ponte-prezzi.js serve solo per aggiornare da soli i prezzi di ETF e azio
    e tocca Prova e salva.
 6. In ogni investimento scrivi il simbolo (per esempio VWCE.DE) e le quote.
 
+Se il ponte l'hai già creato con una versione precedente, dalla 2.1 conviene
+aggiornarlo: apri il Worker su Cloudflare, Edit code, sostituisci tutto con il
+nuovo ponte-prezzi.js e tocca Deploy. L'indirizzo resta lo stesso. Così l'app
+riceve anche le chiusure di borsa e i grafici di settimana e mese sono completi.
+
 ATTENZIONE AI DATI
 - I dati stanno solo dentro l'app, su questo iPhone. Fai un backup ogni tanto
   (Impostazioni > Backup completo) e salvalo in File o su iCloud Drive.
@@ -55,3 +64,14 @@ ATTENZIONE AI DATI
   togliendo l'app puoi perdere anche i dati.
 - Usa sempre l'icona, non il link in Safari: Safari e l'app installata
   hanno memorie separate.
+
+NOVITÀ DELLA 2.1
+Patrimonio netto in Home e in Statistiche, categorie suggerite che imparano
+dalle tue scelte, grafici degli investimenti completi (con il ponte aggiornato).
+
+NOVITÀ DELLA 2.0
+Stesso aspetto e stesse funzioni della 1.9, con movimento dove aiuta:
+transizioni tra le sezioni, numeri che scorrono quando cambiano, barre e
+grafici che si disegnano, righe dei movimenti da far scorrere a sinistra per
+eliminarle, attese visibili mentre l'app lavora, leggera vibrazione dove il
+telefono lo permette. L'app rispetta «Riduci movimento» dell'iPhone.
