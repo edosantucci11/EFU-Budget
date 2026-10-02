@@ -1,4 +1,4 @@
-EFU BUDGET - web app per iPhone, versione 2.1
+EFU BUDGET - web app per iPhone, versione 2.2
 
 COSA C'È IN QUESTA CARTELLA
 index.html, sw.js, manifest.webmanifest e le icone: sono i file dell'app.
@@ -64,6 +64,10 @@ ATTENZIONE AI DATI
   togliendo l'app puoi perdere anche i dati.
 - Usa sempre l'icona, non il link in Safari: Safari e l'app installata
   hanno memorie separate.
+
+NOVITÀ DELLA 2.2
+Intestazione fissa e traslucida; in Home, toccando un conto, il riepilogo del
+mese con saldo a inizio mese, entrate, uscite, trasferimenti e rimanenza.
 
 NOVITÀ DELLA 2.1
 Patrimonio netto in Home e in Statistiche, categorie suggerite che imparano
