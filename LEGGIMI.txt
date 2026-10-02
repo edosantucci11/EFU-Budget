@@ -1,10 +1,8 @@
-EFU BUDGET - web app per iPhone, versione 2.2
+EFU BUDGET - web app per iPhone, versione 2.2.2
 
 COSA C'È IN QUESTA CARTELLA
 index.html, sw.js, manifest.webmanifest e le icone: sono i file dell'app.
-La cartella v1 contiene la versione 1.9 come copia di sicurezza: si apre da
-Impostazioni > Aiuto > Versione precedente 1.9 e usa gli stessi dati.
-Vanno caricati tutti insieme, cartella v1 compresa, senza cambiarne i nomi.
+Vanno caricati tutti insieme, senza cambiarne i nomi.
 
 INSTALLAZIONE (una volta sola, circa 10 minuti)
 Si può fare anche solo dall'iPhone: tocca lo zip nell'app File per estrarlo.
@@ -34,9 +32,9 @@ oppure «Inizia da zero». Da Impostazioni puoi attivare il codice di blocco.
 
 AGGIORNAMENTI
 Quando ricevi una nuova versione, su GitHub carica i nuovi file sopra i vecchi
-(Add file > Upload files > Commit changes). Trascina tutto il contenuto della
-cartella EFU-Budget, compresa la cartella v1: GitHub la carica con il suo nome.
-Se la cartella v1 manca, l'app funziona lo stesso: manca solo la copia 1.9. L'app si aggiorna da sola alla
+(Add file > Upload files > Commit changes). Trascina tutti i file della cartella
+EFU-Budget: non ci sono sottocartelle. Se nel repository sono rimasti il file
+v1.html o la cartella v1 di versioni precedenti, cancellali: non servono più. L'app si aggiorna da sola alla
 riapertura successiva; se non succede, chiudila dal multitasking e riaprila.
 I dati restano.
 
