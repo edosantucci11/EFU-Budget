@@ -1,0 +1,17 @@
+[
+ "core.js",
+ "ui.js",
+ "views.js",
+ "sheets.js",
+ "io.js",
+ "extra.js",
+ "carte.js",
+ "investimenti.js",
+ "automatici.js",
+ "spese-fisse.js",
+ "esportazione.js",
+ "guida.js",
+ "patrimonio.js",
+ "movimento.js",
+ "main.js"
+]

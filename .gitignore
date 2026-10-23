@@ -1,0 +1,4 @@
+dist/
+tests/schermate/
+__pycache__/
+.DS_Store

@@ -1,4 +1,4 @@
-EFU BUDGET - web app per iPhone, versione 2.2.2
+EFU BUDGET - web app per iPhone, versione 2.3
 
 COSA C'È IN QUESTA CARTELLA
 index.html, sw.js, manifest.webmanifest e le icone: sono i file dell'app.
@@ -62,6 +62,13 @@ ATTENZIONE AI DATI
   togliendo l'app puoi perdere anche i dati.
 - Usa sempre l'icona, non il link in Safari: Safari e l'app installata
   hanno memorie separate.
+
+NOVITÀ DELLA 2.3
+Calcoli nel tastierino (12+8,50), «Salva subito come» con le spese abituali,
+tieni premuto il + per ripetere una spesa, scorri una riga a destra per
+duplicarla, Home con sezioni a scelta (Impostazioni > Sezioni della Home),
+numero sull'icona, promemoria delle voci fisse nel calendario, ricerche salvate,
+contrasti migliorati.
 
 NOVITÀ DELLA 2.2
 Intestazione fissa e traslucida; in Home, toccando un conto, il riepilogo del
