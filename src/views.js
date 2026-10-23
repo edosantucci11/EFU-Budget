@@ -35,12 +35,13 @@ VIEWS.home = () => {
     <p class="hero-l">${isCur ? 'Disponibile oggi' : k < ck ? 'Disponibile a fine ' + mName : 'Disponibile con i movimenti già inseriti'}</p>
     <p class="hero-n">${bigAmount(avail)}</p>
     ${heroSub(gs.length, inGoals)}
+    ${isCur && homeOn('forecast') ? summaryRow() : ''}
     ${isCur && homeOn('nw') ? nwHomeLink() : ''}
     ${homeOn('pills') ? accountPills(bal) : ''}
     ${homeOn('strip') ? spendStrip(ms) : ''}
     ${homeOn('kpis') ? `<div class="kpis">
       <div class="kpi"><span>Entrate</span><b class="num pos">${eur(ms.inc)}</b></div>
-      <div class="kpi"><span>Uscite</span><b class="num neg">${eur(ms.out)}</b></div>
+      <div class="kpi"><span>Uscite</span><b class="num out">${eur(ms.out)}</b></div>
       <div class="kpi"><span>Risultato</span><b class="num">${eur(ms.net, { sign: true })}</b></div>
     </div>` : ''}
     ${ms.rate != null && homeOn('kpis') ? `<p class="hero-rate">${ms.rate >= 0 ? 'Hai risparmiato il ' + pct(ms.rate) + ' delle entrate' : 'Hai speso più di quanto è entrato'}${ms.saved > 0 ? ', e messo ' + eur(ms.saved) + ' nei salvadanai' : ''}.</p>` : ''}
@@ -51,9 +52,8 @@ VIEWS.home = () => {
   return h;
 };
 /* ---------- Home: sezioni da mostrare e loro ordine ---------- */
-const HOME_HERO = [['pills', 'Saldi dei conti'], ['nw', 'Patrimonio netto'], ['strip', 'Spese per categoria'], ['kpis', 'Entrate, uscite e risultato']];
+const HOME_HERO = [['forecast', 'Previsione e spesa al giorno'], ['pills', 'Saldi dei conti'], ['nw', 'Patrimonio netto'], ['strip', 'Spese per categoria'], ['kpis', 'Entrate, uscite e risultato']];
 const HOME_BLOCKS = [
-  ['forecast', 'Previsione a fine mese', c => c.isCur ? forecastBlock() : ''],
   ['alerts', 'Avvisi su budget e scadenze', c => c.isCur ? alertsBlock() : ''],
   ['pending', 'Voci fisse da registrare', c => c.isCur ? pendingBlock() : ''],
   ['inbox', 'Pagamenti Apple Pay da controllare', c => c.isCur ? inboxBlock() : ''],
@@ -136,7 +136,7 @@ function notices() {
 function accountPills(bal) {
   const la = liquidAccounts();
   if (la.length < 2) return '';
-  return `<div class="pills">${la.map(a => `<button class="pill acc-pill" data-a="accSum" data-id="${a.id}" aria-label="Riepilogo di ${esc(a.name)}"><span class="pe" aria-hidden="true">${esc(a.emoji || '🏦')}</span>${esc(a.name)} <b class="num ${bal[a.id] < 0 ? 'neg' : ''}">${eur(bal[a.id])}</b></button>`).join('')}</div>`;
+  return `<div class="accgrid">${la.map(a => `<button class="acc-tile" data-a="accSum" data-id="${a.id}" aria-label="Riepilogo di ${esc(a.name)}, ${esc(eur(bal[a.id]))}"><span class="pe" aria-hidden="true">${esc(a.emoji || '🏦')}</span><span class="acc-t"><span class="acc-n">${esc(a.name)}</span><b class="num ${bal[a.id] < 0 ? 'neg' : ''}">${eur(bal[a.id])}</b></span></button>`).join('')}</div>`;
 }
 function spendParts(ms, type = 'out') {
   return Object.entries(ms.byCat).map(([id, v]) => ({ c: cat(id), v })).filter(p => p.c && p.c.type === type && p.v > 0).sort((a, b) => b.v - a.v);
@@ -147,18 +147,45 @@ function spendStrip(ms) {
   return `<div class="strip" role="img" aria-label="${esc('Uscite per categoria: ' + parts.slice(0, 4).map(p => p.c.name + ' ' + pct(p.v / tot)).join(', ') + (parts.length > 4 ? ' e altre ' + (parts.length - 4) : ''))}">${parts.map(p => `<i style="flex-grow:${p.v};background:${p.c.color}" title="${esc(p.c.name)}"></i>`).join('')}</div>
   <div class="strip-l">${parts.slice(0, 3).map(p => `<span><i style="background:${p.c.color}"></i>${esc(p.c.name)} ${pct(p.v / tot)}</span>`).join('')}${parts.length > 3 ? `<span class="muted">e altre ${parts.length - 3}</span>` : ''}</div>`;
 }
-function forecastBlock() {
-  const f = forecast();
-  return `<button class="fc" data-a="planGo" data-p="fixed"><span class="fc-t"><span class="fc-l">Previsione a fine mese</span><span class="fc-s">${f.count ? `Tiene conto di ${f.count} ${f.count === 1 ? 'voce fissa' : 'voci fisse'} ancora da registrare` : 'Tutte le voci fisse del mese sono registrate'}</span></span><b class="num ${f.end < 0 ? 'neg' : ''}">${eur(f.end)}</b>${ic('right', 18)}</button>`;
+/* riassunto sotto il disponibile: come finisce il mese e quanto si può spendere al giorno */
+function dailyInfo() {
+  const ck = curMk(), t = today(), left = dim(ck) - Number(t.slice(8)) + 1;
+  const cs = activeCats('out').filter(c => c.budget > 0);
+  if (cs.length) {
+    const ms = monthStats(ck), rest = r2(sum(cs.map(c => c.budget)) - sum(cs.map(c => ms.byCat[c.id] || 0)));
+    if (rest < 0) return { v: 'Superato', cls: 'neg', s: 'di ' + eur0(-rest) + ' questo mese', p: 'budget' };
+    return { v: '≈ ' + eur0(rest / left), cls: '', s: 'restano ' + eur0(rest) + ' in ' + left + (left === 1 ? ' giorno' : ' giorni'), p: 'budget' };
+  }
+  const end = forecast().end;
+  return { v: '≈ ' + eur0(Math.max(0, end) / left), cls: end < 0 ? 'neg' : '', s: 'per finire il mese sopra zero', p: 'fixed' };
+}
+function summaryRow() {
+  const f = forecast(), d = dailyInfo();
+  return `<div class="sumrow"><button class="sum-c" data-a="planGo" data-p="fixed"><span>A fine mese</span><b class="num ${f.end < 0 ? 'neg' : ''}">${eur(f.end)}</b><small>${f.count ? `con ${f.count} ${f.count === 1 ? 'voce fissa' : 'voci fisse'} da registrare` : 'voci fisse tutte registrate'}</small></button><button class="sum-c" data-a="planGo" data-p="${d.p}"><span>${d.p === 'budget' ? 'Budget al giorno' : 'Al giorno'}</span><b class="num ${d.cls}">${d.v}</b><small>${d.s}</small></button></div>`;
 }
 function alertsBlock() {
   const al = alerts(), t = today();
   const late = pendingFixed(curMk()).filter(p => p.due < t);
   if (!al.length && !late.length) return '';
-  let h = '<div class="alerts">';
+  const n = al.length + (late.length ? 1 : 0);
+  if (n > 1) {
+    // più avvisi: un solo riquadro, che si apre con un tocco
+    const over = al.filter(a => a.kind === 'over').length, kinds = [];
+    if (late.length) kinds.push(late.length === 1 ? '1 voce fissa scaduta' : late.length + ' voci fisse scadute');
+    if (over) kinds.push(over === 1 ? '1 budget superato' : over + ' budget superati');
+    if (al.length - over) kinds.push((al.length - over) === 1 ? '1 budget quasi finito' : (al.length - over) + ' budget quasi finiti');
+    let h = `<div class="alerts"><button class="alert ${over || late.length ? 'over' : 'near'} al-sum" data-a="alertsTog" aria-expanded="${!!UI.alertsOpen}">${ic('alert', 20)}<span class="al-t"><b>${n} cose da sistemare</b><small>${esc(cap(kinds.join(', ')))}</small></span>${ic(UI.alertsOpen ? 'up' : 'down', 18)}</button>`;
+    if (UI.alertsOpen) h += `<div class="al-list">${alertItems(al, late)}</div>`;
+    return h + '</div>';
+  }
+  return '<div class="alerts">' + alertItems(al, late) + '</div>';
+}
+ACT.alertsTog = () => { UI.alertsOpen = !UI.alertsOpen; hap(); render(); };
+function alertItems(al, late) {
+  let h = '';
   if (late.length) h += `<button class="alert late" data-a="planGo" data-p="fixed">${ic('repeat', 20)}<span>${late.length === 1 ? `«${esc(late[0].f.name)}» è scaduta e non è ancora registrata` : `${late.length} voci fisse scadute da registrare`}</span></button>`;
-  for (const a of al.slice(0, 3)) h += `<button class="alert ${a.kind}" data-a="catEdit" data-id="${a.c.id}">${ic('alert', 20)}<span>${a.kind === 'over' ? `${esc(a.c.name)}: budget superato di ${eur(a.s - a.c.budget)}` : `${esc(a.c.name)}: hai già usato il ${pct(a.p)} del budget`}</span></button>`;
-  return h + '</div>';
+  for (const a of al) h += `<button class="alert ${a.kind}" data-a="catEdit" data-id="${a.c.id}">${ic('alert', 20)}<span>${a.kind === 'over' ? `${esc(a.c.name)}: budget superato di ${eur(a.s - a.c.budget)}` : `${esc(a.c.name)}: hai già usato il ${pct(a.p)} del budget`}</span></button>`;
+  return h;
 }
 function pendingCard(p) {
   if (p.sink) return sinkCard(p);
@@ -167,7 +194,7 @@ function pendingCard(p) {
   const status = late ? `Scaduta il ${shortDate(p.due)}` : isToday ? 'Scade oggi' : `Scade ${relDays(p.due)}, il ${shortDate(p.due)}`;
   const amt = estimateAmount(f);
   const sign = f.type === 'in' ? 1 : f.type === 'out' ? -1 : 0;
-  return `<div class="pcard"><div class="pc-top">${avatar(t ? t.emoji : '🔁', t ? t.color : null)}<div class="pc-t"><b>${esc(f.name)}</b><span class="${late ? 'neg' : isToday ? 'acc' : 'muted'}">${status}${f.count ? `, rata ${p.n} di ${f.count}` : ''}</span></div><b class="num ${sign > 0 ? 'pos' : sign < 0 ? 'neg' : ''}">${f.variable ? '≈ ' : ''}${sign ? eur(sign * amt, { sign: sign > 0 }) : eur(amt)}</b></div>
+  return `<div class="pcard"><div class="pc-top">${avatar(t ? t.emoji : '🔁', t ? t.color : null)}<div class="pc-t"><b>${esc(f.name)}</b><span class="${late ? 'neg' : isToday ? 'acc' : 'muted'}">${status}${f.count ? `, rata ${p.n} di ${f.count}` : ''}</span></div><b class="num ${sign > 0 ? 'pos' : sign < 0 ? 'out' : ''}">${f.variable ? '≈ ' : ''}${sign ? eur(sign * amt, { sign: sign > 0 }) : eur(amt)}</b></div>
   <div class="pc-act"><button class="link sm" data-a="fxSkip" data-id="${f.id}" data-k="${p.k}">Salta questo mese</button><button class="btn dark sm" data-a="fxConfirm" data-id="${f.id}" data-k="${p.k}">${f.variable ? 'Inserisci importo' : 'Registra'}</button></div></div>`;
 }
 function pendingBlock() {
@@ -236,8 +263,8 @@ function movRow(m) {
     if (m.description) sub.push(esc(c ? c.name : 'Senza categoria'));
     if (m.accountId && m.accountId !== D.settings.defaultAccount && !m.paidBy && liquidAccounts().length > 1) sub.push(esc(accName(m.accountId)));
     if (m.type === 'in') { amt = eur(m.amount, { sign: true }); cls = 'pos'; }
-    else if (m.paidBy) { amt = eur(-m.split.mine); cls = 'neg'; small = 'pagato da ' + esc(person(m.paidBy) ? person(m.paidBy).name : '?'); }
-    else { amt = eur(-m.amount); cls = 'neg'; if (m.split) small = 'tua parte ' + eur(m.split.mine); }
+    else if (m.paidBy) { amt = eur(-m.split.mine); cls = 'out'; small = 'pagato da ' + esc(person(m.paidBy) ? person(m.paidBy).name : '?'); }
+    else { amt = eur(-m.amount); cls = 'out'; if (m.split) small = 'tua parte ' + eur(m.split.mine); }
     if (m.cur && m.cur !== baseCur()) small = fmtCur(m.orig, m.cur) + (small ? ', ' + small : '');
   }
   if (m.by && D.settings.partners && D.settings.partners[m.by]) sub.push(esc(D.settings.partners[m.by]));
@@ -340,7 +367,7 @@ function movListHTML() {
   if (!list.length) return `<div class="empty sm"><h3>Nessun movimento</h3><p>${any ? 'Nessun risultato: prova a cambiare la ricerca o i filtri.' : 'In questo periodo non ci sono movimenti.'}</p>${any ? '<button class="btn outline sm" data-a="resetFilters">Azzera ricerca e filtri</button>' : ''}</div>`;
   let inc = 0, out = 0;
   for (const m of list) { if (m.type === 'in') inc += m.amount; else if (m.type === 'out') out += eff(m); }
-  let h = `<div class="mv-sum"><span>${list.length} ${list.length === 1 ? 'movimento' : 'movimenti'}</span><span class="num pos">${eur(inc, { sign: true })}</span><span class="num neg">${eur(-out)}</span></div>`;
+  let h = `<div class="mv-sum"><span>${list.length} ${list.length === 1 ? 'movimento' : 'movimenti'}</span><span class="num pos">${eur(inc, { sign: true })}</span><span class="num out">${eur(-out)}</span></div>`;
   const lim = UI.limit || 250;
   let day = null, buf = [];
   const flush = () => {
@@ -367,7 +394,7 @@ function fixedRow(f) {
   if (f.variable) sub += ', importo variabile';
   if (f.sink) sub += ', accantonata ogni mese';
   const next = nx ? `Prossima il ${shortDate(nx.due)}${f.count ? `, rata ${nx.n} di ${f.count}` : ''}` : (f.paused ? 'In pausa' : 'Conclusa');
-  return `<button class="mrow" data-a="fxEdit" data-id="${f.id}">${avatar(t ? t.emoji : '🔁', t ? t.color : null)}<span class="mrow-m"><span class="mt">${esc(f.name)}</span><span class="ms">${esc(sub)}</span><span class="ms">${next}</span></span><span class="ma num ${sign > 0 ? 'pos' : sign < 0 ? 'neg' : 'neu'}">${f.variable ? '≈ ' : ''}${sign ? eur(sign * amt, { sign: sign > 0 }) : eur(amt)}</span></button>`;
+  return `<button class="mrow" data-a="fxEdit" data-id="${f.id}">${avatar(t ? t.emoji : '🔁', t ? t.color : null)}<span class="mrow-m"><span class="mt">${esc(f.name)}</span><span class="ms">${esc(sub)}</span><span class="ms">${next}</span></span><span class="ma num ${sign > 0 ? 'pos' : sign < 0 ? 'out' : 'neu'}">${f.variable ? '≈ ' : ''}${sign ? eur(sign * amt, { sign: sign > 0 }) : eur(amt)}</span></button>`;
 }
 function planFixedOld() {
   const ck = curMk();
@@ -378,7 +405,7 @@ function planFixedOld() {
   const active = D.fixed.filter(f => !fixedEnded(f)), ended = D.fixed.filter(fixedEnded);
   active.sort((a, b) => { const x = nextOcc(a), y = nextOcc(b); return (x ? x.due : '9') .localeCompare(y ? y.due : '9'); });
   const mName = MESI[Number(ck.slice(5)) - 1];
-  let h = `<div class="kgrid two"><div class="k"><span>Ancora da pagare a ${mName}</span><b class="num neg">${eur(outSum)}</b></div><div class="k"><span>Ancora da incassare</span><b class="num pos">${eur(inSum)}</b></div></div>`;
+  let h = `<div class="kgrid two"><div class="k"><span>Ancora da pagare a ${mName}</span><b class="num out">${eur(outSum)}</b></div><div class="k"><span>Ancora da incassare</span><b class="num pos">${eur(inSum)}</b></div></div>`;
   h += pend.length ? section('Da registrare', `<div class="pcards">${pend.map(pendingCard).join('')}</div>`) : `<p class="ok-line">${ic('check', 18)} Tutte le voci fisse di ${mName} sono registrate.</p>`;
   h += section('Tutte le voci fisse', `<div class="mlist">${active.map(fixedRow).join('')}</div><button class="btn outline w gap-t" data-a="fxNew">${ic('plus', 18)} Nuova voce fissa</button>`);
   if (ended.length) h += section('Concluse', `<div class="mlist dim">${ended.map(fixedRow).join('')}</div>`);
@@ -434,7 +461,7 @@ function legendRows(parts, tot, month) {
 }
 function statsMonth(k) {
   const ms = monthStats(k);
-  let h = kpiGrid([['Entrate', eur(ms.inc), 'pos'], ['Uscite', eur(ms.out), 'neg'], ['Risultato', eur(ms.net, { sign: true })], ['Tasso di risparmio', ms.rate == null ? '–' : pct(ms.rate)]]);
+  let h = kpiGrid([['Entrate', eur(ms.inc), 'pos'], ['Uscite', eur(ms.out), 'out'], ['Risultato', eur(ms.net, { sign: true })], ['Tasso di risparmio', ms.rate == null ? '–' : pct(ms.rate)]]);
   h += nwBlock(k);
   const parts = spendParts(ms), tot = sum(parts.map(p => p.v));
   h += section('Spese per categoria', parts.length ? `<div class="donut-wrap">${donut(parts.map(p => ({ v: p.v, color: p.c.color })), tot, eur0(tot), 'di uscite').replace('aria-label="Spese per categoria"', `aria-label="${esc('Spese per categoria, ' + eur0(tot) + ' in tutto: ' + parts.slice(0, 4).map(p => p.c.name + ' ' + eur0(p.v)).join(', '))}"`)}</div>${legendRows(parts, tot, k)}` : '<p class="muted">Nessuna spesa in questo mese.</p>');
@@ -449,13 +476,13 @@ function statsYear(y) {
   const months = Array.from({ length: 12 }, (_, i) => y + '-' + pad(i + 1));
   const st = months.map(monthStats);
   const inc = sum(st.map(s => s.inc)), out = sum(st.map(s => s.out)), saved = sum(st.map(s => s.saved));
-  let h = kpiGrid([['Entrate', eur(inc), 'pos'], ['Uscite', eur(out), 'neg'], ['Risultato', eur(inc - out, { sign: true })], ['Nei salvadanai', eur(saved)]]);
+  let h = kpiGrid([['Entrate', eur(inc), 'pos'], ['Uscite', eur(out), 'out'], ['Risultato', eur(inc - out, { sign: true })], ['Nei salvadanai', eur(saved)]]);
   h += nwYearBlock(y);
   h += section('Entrate e uscite per mese', yearBars(months, st) + `<div class="lg-inline"><span><i class="k-in"></i>Entrate</span><span><i class="k-out"></i>Uscite</span></div>`, null, 'Tocca un mese per vederne il dettaglio.');
   const ck = curMk(), t = today();
   const rows = months.map((k, i) => {
     const s = st[i], future = k > ck;
-    return `<tr class="${k === ck ? 'cur' : ''}" data-a="goMonth" data-k="${k}"><td>${cap(MESI_S[i])}</td><td class="num pos">${future && !s.n ? '' : eur0(s.inc)}</td><td class="num neg">${future && !s.n ? '' : eur0(s.out)}</td><td class="num">${future && !s.n ? '' : eur0(s.net)}</td><td class="num">${future ? '' : eur0(availAt(k === ck ? t : endOf(k)))}</td></tr>`;
+    return `<tr class="${k === ck ? 'cur' : ''}" data-a="goMonth" data-k="${k}"><td>${cap(MESI_S[i])}</td><td class="num pos">${future && !s.n ? '' : eur0(s.inc)}</td><td class="num out">${future && !s.n ? '' : eur0(s.out)}</td><td class="num">${future && !s.n ? '' : eur0(s.net)}</td><td class="num">${future ? '' : eur0(availAt(k === ck ? t : endOf(k)))}</td></tr>`;
   }).join('');
   h += section('Riepilogo mese per mese', `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Mese</th><th>Entrate</th><th>Uscite</th><th>Netto</th><th>Saldo</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td>Totale</td><td class="num pos">${eur0(inc)}</td><td class="num neg">${eur0(out)}</td><td class="num">${eur0(inc - out)}</td><td></td></tr></tfoot></table></div>`, null, 'Saldo: disponibile a fine mese, senza i salvadanai.');
   const catTot = {};

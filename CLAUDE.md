@@ -1,6 +1,6 @@
 # EFU Budget — istruzioni per Claude Code
 
-Web app di budget personale per iPhone, sviluppata con Claude. Versione attuale: **2.3**.
+Web app di budget personale per iPhone, sviluppata con Claude. Versione attuale: **2.4**.
 
 ## Con chi lavori
 
@@ -103,3 +103,4 @@ Se cambia `src/ponte-prezzi.js`, l'utente deve incollarlo anche nel Worker su Cl
 | 2.1 | pulizia del codice, patrimonio netto, categorie che imparano, storico prezzi dal ponte |
 | 2.2 | intestazione fissa traslucida, riepilogo del conto toccando il conto in Home; eliminata la copia 1.9 |
 | 2.3 | calcoli nel tastierino, «Salva subito come», ripeti con pressione lunga sul +, scorri a destra per duplicare, Home personalizzabile, numero sull'icona, scadenze nel calendario (.ics), ricerche salvate, contrasti, VoiceOver sui grafici |
+| 2.4 | uscite in nero (rosso solo per gli avvisi), schede uniformi, nome sotto l'icona attiva, avvisi raggruppati, conti a griglia, «A fine mese» e «Al giorno» in cima alla Home, Oggi/Ieri nel tastierino, nomi categorie non spezzati |

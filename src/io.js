@@ -81,7 +81,7 @@ SHEETS.recap = {
     const diff = pm.out > 0 ? (ms.out - pm.out) / pm.out : null;
     let h = sheetHead(cap(mName) + ' in breve') + '<div class="sheet-body recap-b">';
     h += `<div class="rc hero-rc"><span>Risultato del mese</span><b class="num">${eur(ms.net, { sign: true })}</b><p>${ms.rate == null ? 'Nessuna entrata registrata nel mese.' : ms.rate >= 0 ? `Hai tenuto il ${pct(ms.rate)} di quello che è entrato.` : 'Hai speso più di quanto è entrato.'}</p></div>`;
-    h += `<div class="rc-row"><div class="rc"><span>Entrate</span><b class="num pos">${eur(ms.inc)}</b></div><div class="rc"><span>Uscite</span><b class="num neg">${eur(ms.out)}</b></div></div>`;
+    h += `<div class="rc-row"><div class="rc"><span>Entrate</span><b class="num pos">${eur(ms.inc)}</b></div><div class="rc"><span>Uscite</span><b class="num out">${eur(ms.out)}</b></div></div>`;
     if (outs.length) h += `<div class="rc"><span>Dove sono andati i soldi</span><div class="rc-top">${avatar(outs[0].c.emoji, outs[0].c.color, 'lg')}<div><b>${esc(outs[0].c.name)}</b><p class="muted">${eur(outs[0].v)}, il ${pct(outs[0].v / tot)} delle uscite</p></div></div>${outs.slice(1, 3).map(p => `<p class="rc-l"><i style="background:${p.c.color}"></i>${esc(p.c.name)}<span class="num">${eur(p.v)}</span></p>`).join('')}</div>`;
     if (big) h += `<div class="rc"><span>La spesa più grande</span><b>${esc(big.description || (cat(big.categoryId) || {}).name || 'Spesa')}</b><p class="muted"><span class="num">${eur(eff(big))}</span>, ${esc(dayTitle(big.date).toLowerCase())}</p></div>`;
     const cards = [];

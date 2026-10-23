@@ -142,6 +142,7 @@ function movAmountHTML(st) {
       ${st.type !== 'transfer' ? `<button class="chip cur" data-a="movCur">${ic('globe', 16)} ${esc(st.cur === baseCur() ? curName(st.cur) : st.cur)} ${ic('down', 14)}</button>` : ''}
       ${st.type !== 'transfer' && st.cur !== baseCur() ? `<div class="fxrow"><span>1 ${esc(st.cur)} =</span><input class="fx-in" inputmode="decimal" data-in="movRate" value="${esc(numStr(st.rate, 5))}" aria-label="Cambio in euro"><span>${esc(baseSym())}</span></div><p class="fx-eq">${fxEq(st)}</p>${fxNoteHTML(st, st.rate)}` : ''}
     </div>
+    ${st.mode === 'new' && !st.cameFromDetails ? `<div class="amt-date">${dateChips(st.date, 'date')}</div>` : ''}
     ${quickPicksHTML(st)}
     <div class="keypad calc">${['1', '2', '3', '+', '4', '5', '6', '-', '7', '8', '9', '*', ',', '0', 'del', '/'].map(k => `<button class="key ${AMT_OPS.includes(k) ? 'op' : ''}" data-a="key" data-k="${k}" aria-label="${k === 'del' ? 'Cancella' : k === ',' ? 'Virgola' : { '+': 'Più', '-': 'Meno', '*': 'Per', '/': 'Diviso' }[k] || k}">${k === 'del' ? ic('backspace', 26) : AMT_SYM[k] || k}</button>`).join('')}</div>
   </div>
@@ -769,7 +770,7 @@ SHEETS.accSum = {
     // entrate e uscite a confronto
     const mx = Math.max(r.inc + r.tin, r.out + r.tout, 1);
     h += `<div class="as-bars" aria-hidden="true"><div><span>Entrate</span><i class="in" style="width:${((r.inc + r.tin) / mx * 100).toFixed(1)}%"></i></div><div><span>Uscite</span><i class="out" style="width:${((r.out + r.tout) / mx * 100).toFixed(1)}%"></i></div></div>`;
-    const row = (label, v, cls = '', sign = true) => `<div class="as-row ${cls}"><span>${label}</span><b class="num ${sign && v < 0 ? 'neg' : sign && v > 0 ? 'pos' : ''}">${eur(v, { sign })}</b></div>`;
+    const row = (label, v, cls = '', sign = true) => `<div class="as-row ${cls}"><span>${label}</span><b class="num ${sign && v < 0 ? 'out' : sign && v > 0 ? 'pos' : ''}">${eur(v, { sign })}</b></div>`;
     let led = r.opened ? row('Saldo iniziale inserito il ' + shortDate(r.opened), r.initial, 'as-sub', false) : row('Saldo a inizio ' + mLow, r.opening, 'as-sub', false);
     led += row('Entrate', r.inc);
     led += row('Uscite', -r.out);

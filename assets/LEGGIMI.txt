@@ -63,6 +63,12 @@ ATTENZIONE AI DATI
 - Usa sempre l'icona, non il link in Safari: Safari e l'app installata
   hanno memorie separate.
 
+NOVITÀ DELLA 2.4
+Uscite in nero e rosso solo per gli avvisi; in Home sotto il disponibile la
+previsione a fine mese e quanto puoi spendere al giorno; avvisi riuniti in un
+solo riquadro; conti in griglia; data (Oggi/Ieri) già sul tastierino; barra in
+basso più leggibile con il nome della sezione; riquadri tutti dello stesso stile.
+
 NOVITÀ DELLA 2.3
 Calcoli nel tastierino (12+8,50), «Salva subito come» con le spese abituali,
 tieni premuto il + per ripetere una spesa, scorri una riga a destra per

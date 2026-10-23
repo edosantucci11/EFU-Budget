@@ -94,7 +94,8 @@ function renderTabbar() {
     const b = btns[i], on = UI.tab === t;
     b.classList.toggle('on', on);
     if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
-    const h = ic(icon, 24) + (t === 'plan' && n ? `<i class="badge">${n}</i>` : '') + (t === 'invest' && due ? '<i class="fdot"></i>' : '');
+    const l = tabs[i][2];
+    const h = ic(icon, 22) + `<span class="fl" aria-hidden="true">${l}</span>` + (t === 'plan' && n ? `<i class="badge">${n}</i>` : '') + (t === 'invest' && due ? '<i class="fdot"></i>' : '');
     if (b.dataset.h !== h) { b.innerHTML = h; b.dataset.h = h; }
   });
   pill.style.setProperty('--ti', Math.max(0, TAB_ORDER.indexOf(UI.tab)));
