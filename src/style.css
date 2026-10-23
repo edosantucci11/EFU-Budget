@@ -789,3 +789,14 @@ html.scrolled .view:not(.onb-view)>.ph:first-child{border-bottom-color:var(--gla
 .amt-date .chips{justify-content:center}
 /* nomi delle categorie senza parole spezzate a metà */
 .cg button>span:last-child{font-size:11.5px;word-break:normal;overflow-wrap:normal;-webkit-hyphens:auto;hyphens:auto}
+/* barra in basso: la voce attiva si allarga col nome accanto, le altre si stringono */
+.find{display:none}
+.fpill{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none}
+.ftab{flex:1 1 0;flex-direction:row;gap:5px;padding:0 4px;color:var(--ink-2);transition:flex-grow .45s var(--spring),background-color .25s,color .25s,transform .12s}
+.ftab svg{flex:none}
+.ftab.on{flex-grow:4.2;background:var(--accent-soft);color:var(--accent)}
+.ftab .fl{display:block;max-width:0;opacity:0;overflow:hidden;font-size:12.5px;font-weight:650;letter-spacing:-.015em;transition:max-width .45s var(--ease),opacity .2s}
+.ftab.on .fl{max-width:90px;opacity:1;transition:max-width .45s var(--ease),opacity .3s .12s}
+.ftab.on .badge{left:auto;right:4px;top:3px}
+.ftab.on .fdot{left:auto;right:8px;top:8px}
+@media (prefers-reduced-motion:reduce){.ftab,.ftab .fl,.ftab.on .fl{transition:none}}
