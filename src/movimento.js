@@ -7,7 +7,7 @@
    render e goTab (ui.js), pressKey, movSave e movOpen (sheets.js).
    ========================================================= */
 const MOTION = { prev: {}, first: true, entering: false, navDir: '', freshId: null };
-const TAB_ORDER = ['home', 'movs', 'invest', 'plan', 'stats'];
+const TAB_ORDER = ['home', 'movs', 'plan', 'stats', 'invest'];
 const RM = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 const VT_OK = () => typeof document.startViewTransition === 'function' && !RM();
 

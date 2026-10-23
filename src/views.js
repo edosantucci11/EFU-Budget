@@ -36,7 +36,7 @@ VIEWS.home = () => {
     <p class="hero-n">${bigAmount(avail)}</p>
     ${heroSub(gs.length, inGoals)}
     ${isCur && homeOn('forecast') ? summaryRow() : ''}
-    ${isCur && homeOn('nw') ? nwHomeLink() : ''}
+    ${isCur && homeOn('alerts') ? alertsBlock() : ''}
     ${homeOn('pills') ? accountPills(bal) : ''}
     ${homeOn('strip') ? spendStrip(ms) : ''}
     ${homeOn('kpis') ? `<div class="kpis">
@@ -52,17 +52,15 @@ VIEWS.home = () => {
   return h;
 };
 /* ---------- Home: sezioni da mostrare e loro ordine ---------- */
-const HOME_HERO = [['forecast', 'Previsione e spesa al giorno'], ['pills', 'Saldi dei conti'], ['nw', 'Patrimonio netto'], ['strip', 'Spese per categoria'], ['kpis', 'Entrate, uscite e risultato']];
+const HOME_HERO = [['forecast', 'Previsione e spesa al giorno'], ['alerts', 'Avvisi su budget e scadenze'], ['pills', 'Saldi dei conti'], ['strip', 'Spese per categoria'], ['kpis', 'Entrate, uscite e risultato']];
 const HOME_BLOCKS = [
-  ['alerts', 'Avvisi su budget e scadenze', c => c.isCur ? alertsBlock() : ''],
   ['pending', 'Voci fisse da registrare', c => c.isCur ? pendingBlock() : ''],
   ['inbox', 'Pagamenti Apple Pay da controllare', c => c.isCur ? inboxBlock() : ''],
   ['cards', 'Carta di credito', c => c.isCur ? cardsBlock() : ''],
   ['budget', 'Budget del mese', c => budgetBlock(c.k)],
-  ['goals', 'Salvadanai', c => c.gs.length || c.isCur ? goalsBlock(c.bal) : ''],
-  ['invest', 'Investimenti', c => c.isCur ? investBlock() : ''],
   ['recap', 'Il mese in breve', c => c.ms.n ? recapCard(c.k) : ''],
   ['recent', 'Ultimi movimenti', c => recentBlock(c.k)],
+  ['wealth', 'Patrimonio, salvadanai e investimenti', c => c.isCur ? wealthBlock() : ''],
 ];
 const homeOn = id => !((D.settings.homeOff || []).includes(id));
 function homeSaved() {
@@ -72,7 +70,6 @@ function homeSaved() {
 }
 function homeUrgent() {
   const t = today(), u = [];
-  if (alerts().length || pendingFixed(curMk()).some(p => p.due < t)) u.push('alerts');
   if (pendingFixed(curMk()).some(p => p.due <= t && !p.f.auto)) u.push('pending');
   if ((D.inbox || []).length) u.push('inbox');
   return u;

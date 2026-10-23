@@ -82,8 +82,8 @@ function render() {
 /* barra in basso: la scheda attiva scivola al suo posto */
 function renderTabbar() {
   const bar = $('#tabbar');
-  const n = dueBadge(), due = D && D.invest && invDue();
-  const tabs = [['home', 'home', 'Home'], ['movs', 'list', 'Movimenti'], ['invest', 'trend', 'Investimenti'], ['plan', 'plan', 'Pianifica'], ['stats', 'chart', 'Statistiche']];
+  const n = dueBadge();
+  const tabs = [['home', 'home', 'Home'], ['movs', 'list', 'Movimenti'], ['plan', 'plan', 'Pianifica'], ['stats', 'chart', 'Statistiche']];
   let pill = bar.querySelector('.fpill');
   if (!pill) {
     bar.innerHTML = `<div class="fbar"><nav class="fpill"><span class="find" aria-hidden="true"></span>${tabs.map(([t, , l]) => `<button class="ftab" data-a="tab" data-t="${t}" aria-label="${l}" title="${l}"></button>`).join('')}</nav><button class="ffab" data-a="add" aria-label="Aggiungi movimento">${ic('plus', 28)}</button></div>`;
@@ -95,7 +95,7 @@ function renderTabbar() {
     b.classList.toggle('on', on);
     if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     const l = tabs[i][2];
-    const h = ic(icon, 22) + `<span class="fl" aria-hidden="true">${l}</span>` + (t === 'plan' && n ? `<i class="badge">${n}</i>` : '') + (t === 'invest' && due ? '<i class="fdot"></i>' : '');
+    const h = ic(icon, 22) + `<span class="fl" aria-hidden="true">${l}</span>` + (t === 'plan' && n ? `<i class="badge">${n}</i>` : '');
     if (b.dataset.h !== h) { b.innerHTML = h; b.dataset.h = h; }
   });
   pill.style.setProperty('--ti', Math.max(0, TAB_ORDER.indexOf(UI.tab)));

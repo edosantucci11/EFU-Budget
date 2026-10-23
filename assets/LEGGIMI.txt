@@ -67,7 +67,9 @@ NOVITÀ DELLA 2.4
 Uscite in nero e rosso solo per gli avvisi; in Home sotto il disponibile la
 previsione a fine mese e quanto puoi spendere al giorno; avvisi riuniti in un
 solo riquadro; conti in griglia; data (Oggi/Ieri) già sul tastierino; barra in
-basso più leggibile con il nome della sezione; riquadri tutti dello stesso stile.
+basso a quattro voci, con la sezione attiva più grande; riquadri tutti dello
+stesso stile; Home riordinata, con salvadanai e investimenti nel riquadro
+Patrimonio in fondo.
 
 NOVITÀ DELLA 2.3
 Calcoli nel tastierino (12+8,50), «Salva subito come» con le spese abituali,

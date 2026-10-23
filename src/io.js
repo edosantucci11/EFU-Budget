@@ -4,7 +4,7 @@
 ACT.month = el => { UI.month = addM(UI.month, Number(el.dataset.d)); render(); };
 ACT.pickMonth = () => openSheet('monthPick', {});
 ACT.settings = () => openSheet('settings', {});
-ACT.planGo = el => { UI.planTab = el.dataset.p; if (UI.tab === 'plan') { render(); window.scrollTo(0, 0); } else goTab('plan'); };
+ACT.planGo = el => { if (el && el.closest && el.closest('.sheet-wrap')) UI.sheets.slice().reverse().forEach(s => closeSheet(s)); UI.planTab = el.dataset.p; if (UI.tab === 'plan') { render(); window.scrollTo(0, 0); } else goTab('plan'); };
 ACT.planTab = el => { UI.planTab = el.dataset.k; render(); };
 ACT.seeMonth = el => { UI.filters = blankFilters(); UI.filters.period = 'm:' + el.dataset.k; UI.q = ''; UI.limit = 0; goTab('movs'); };
 ACT.catMovs = el => { UI.filters = blankFilters(); UI.filters.cats = [el.dataset.id]; UI.filters.period = 'm:' + el.dataset.k; UI.q = ''; UI.limit = 0; goTab('movs'); };

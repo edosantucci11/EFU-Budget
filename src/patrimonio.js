@@ -114,10 +114,12 @@ function nwYearBlock(y) {
   return section('Patrimonio netto', `<button class="inv-card nw-card" data-a="nwOpen" data-k="${endK}"><span class="inv-top"><span><span class="muted sm">${endK === ck ? 'Oggi' : 'A fine ' + y}</span><b class="num nw-v">${eur(cur.tot)}</b></span>${delta}</span>${nwChart(ser, 110)}</button>`);
 }
 // riga nella Home, sotto il disponibile: solo se aggiunge qualcosa (salvadanai, investimenti, carte, persone)
-function nwHomeLink() {
-  if (!D.accounts.some(a => !a.archived && (a.kind === 'goal' || a.kind === 'card')) && !D.invest.length && !(D.people || []).length) return '';
-  const v = nwAt(today());
-  return `<button class="nw-link" data-a="nwOpen" data-k="${curMk()}">Patrimonio netto <b class="num">${eur(v.tot)}</b>${ic('right', 14)}</button>`;
+// in Home: una sola riga col patrimonio; salvadanai e investimenti sono nel dettaglio
+function wealthBlock() {
+  const v = nwAt(today()), gs = goals(), bal = balancesAt(today()), parts = [];
+  if (gs.length) parts.push(`<span>Salvadanai <b class="num">${eur(sum(gs.map(g => bal[g.id] || 0)))}</b></span>`);
+  if (D.invest.length) { const t = invTotals(); parts.push(`<span>Investimenti <b class="num">${eur(t.v)}</b> <small class="${t.g >= 0 ? 'pos' : 'neg'}">${t.g >= 0 ? '+' : '−'}${eur(Math.abs(t.g))}</small></span>`); }
+  return section('Patrimonio', `<button class="nw-tile" data-a="nwOpen" data-k="${curMk()}"><span class="nw-tl"><span class="muted sm">Patrimonio netto</span><b class="num nw-tv">${eur(v.tot)}</b><span class="nw-tp">${parts.length ? parts.join('') : '<span>Qui trovi salvadanai e investimenti</span>'}</span>${invDue() ? '<span class="inv-due">Investimenti da aggiornare</span>' : ''}</span>${ic('right', 18)}</button>`);
 }
 ACT.nwOpen = el => openSheet('netWorth', { k: (el && el.dataset.k) || curMk() });
 SHEETS.netWorth = {
@@ -130,6 +132,7 @@ SHEETS.netWorth = {
     const show = ser.slice(-12), prev = ser.length > 1 ? ser[ser.length - 2] : null;
     h += `<div class="nw-top"><p class="muted sm">${k === curMk() ? 'Oggi' : 'A fine ' + nwMonth(k).toLowerCase() + ' ' + k.slice(0, 4)}</p><p class="hero-n">${bigAmount(cur.tot)}</p><p>${nwDeltaHTML(prev, cur, k)}</p></div>`;
     h += nwChart(show, 160);
+    if (k === curMk()) h += goalsBlock(balancesAt(today())) + investBlock();
     h += section('Com\'è composto', `<div class="list">${nwParts(cur).map(p => `<div class="row static"><span class="row-ic av-e">${p[0]}</span><span class="rt">${p[1]}</span><b class="num ${p[2] < 0 ? 'neg' : ''}">${eur(p[2])}</b></div>`).join('')}</div>`);
     h += section('Mese per mese', `<div class="list nw-table">${show.slice().reverse().map((s, i, a) => { const p = a[i + 1]; const d = p ? r2(s.tot - p.tot) : null; return `<div class="row static"><span class="rt">${nwMonth(s.k)} ${s.k.slice(0, 4)}${s.k === curMk() ? '<small>fino a oggi</small>' : ''}</span><span class="nw-tr"><b class="num">${eur(s.tot)}</b>${d == null ? '' : `<small class="${d >= 0 ? 'pos' : 'neg'}">${eur(d, { sign: true })}</small>`}</span></div>`; }).join('')}</div>`);
     h += `<p class="muted sm gap-t">Somma di conti e contanti, salvadanai e valore degli investimenti, meno il debito delle carte di credito, più o meno quello che tu e le persone vi dovete. Per gli investimenti conta l'ultimo valore noto a quella data.</p>`;
