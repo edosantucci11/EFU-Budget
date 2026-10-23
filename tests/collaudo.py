@@ -115,15 +115,14 @@ async def main():
         # ---- Home riordinata (2.4): 4 voci in basso, patrimonio in fondo che apre salvadanai e investimenti
         await pg.evaluate("goTab('home')"); await pg.wait_for_timeout(900)
         r = await pg.evaluate("[$$('.ftab').length, !!$('#view .hero .alerts'), !!$('#view .nw-tile')]")
-        ok(r == [4, True, True], f'barra a 4 voci, avvisi in alto, riquadro patrimonio: {r}')
+        ok(r == [5, True, True], f'barra a 5 voci con Investimenti, avvisi in alto, riquadro patrimonio: {r}')
         await pg.click('.nw-tile'); await pg.wait_for_timeout(600)
         r = await pg.evaluate("[!!$('#sheets .gcard'), !!$('#sheets [data-a=\"invOpen\"]')]")
         ok(r == [True, True], f'patrimonio con salvadanai e investimenti: {r}')
         await pg.click('#sheets [data-a="invOpen"]'); await pg.wait_for_timeout(900)
         r = await pg.evaluate("[UI.tab, UI.sheets.length]")
         ok(r == ['invest', 0], f'investimenti aperti dal patrimonio: {r}')
-        await pg.click('.ph-back .icon-btn'); await pg.wait_for_timeout(900)
-        ok(await pg.evaluate("UI.tab") == 'home', 'freccia indietro dagli investimenti')
+        ok(await pg.evaluate("$('.ftab[data-t=\"invest\"]').classList.contains('on')"), 'Investimenti attivo nella barra')
         # ---- Home personalizzabile
         await pg.evaluate("UI.q=''; UI.filters=blankFilters(); goTab('home')"); await pg.wait_for_timeout(1200)
         await pg.evaluate("openSheet('settings',{})"); await pg.wait_for_timeout(400)

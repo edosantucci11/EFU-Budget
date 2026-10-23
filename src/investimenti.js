@@ -1,7 +1,7 @@
 /* =========================================================
    Investimenti
    Posizioni, valore nel tempo, grafici per periodo, promemoria,
-   pagina Investimenti, aperta dal Patrimonio in Home.
+   pagina Investimenti nella barra in basso.
    ========================================================= */
 
 /* ---------- investimenti ---------- */
@@ -269,7 +269,7 @@ function demoInvest() {
 /* ---------- pagina Investimenti ---------- */
 if (!UI.invRange) UI.invRange = 'all';
 VIEWS.invest = () => {
-  let h = `<header class="ph ph-back"><button class="icon-btn" data-a="tab" data-t="home" aria-label="Torna alla Home">${ic('left', 22)}</button><h1>Investimenti</h1></header>`;
+  let h = '<header class="ph"><h1>Investimenti</h1></header>';
   if (!D.invest.length) return h + `<div class="empty"><div class="empty-art">${ic('trend', 30)}</div><h3>Nessun investimento</h3><p>Segna quanto hai investito in ETF, azioni, fondi o altro e segui come vanno: guadagno o perdita, grafico, PAC e prezzi automatici.</p><button class="btn primary" data-a="invNew">${ic('plus', 18)} Aggiungi il primo investimento</button></div>`;
   const t = invTotals(), due = invDue();
   h += `<div class="inv-sum"><p class="muted sm">Valore attuale</p><p class="inv-big num">${eur(t.v)}</p><p class="inv-gl ${t.g >= 0 ? 'pos' : 'neg'}">${invGainHTML(t.g, t.pct)} <span class="muted">su ${eur(t.i)} investiti</span></p></div>`;

@@ -67,7 +67,7 @@ NOVITÀ DELLA 2.4
 Uscite in nero e rosso solo per gli avvisi; in Home sotto il disponibile la
 previsione a fine mese e quanto puoi spendere al giorno; avvisi riuniti in un
 solo riquadro; conti in griglia; data (Oggi/Ieri) già sul tastierino; barra in
-basso a quattro voci, con la sezione attiva più grande; riquadri tutti dello
+basso con la sezione attiva più grande; riquadri tutti dello
 stesso stile; Home riordinata, con salvadanai e investimenti nel riquadro
 Patrimonio in fondo.
 

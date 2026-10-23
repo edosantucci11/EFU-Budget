@@ -802,8 +802,6 @@ html.scrolled .view:not(.onb-view)>.ph:first-child{border-bottom-color:var(--gla
 @media (prefers-reduced-motion:reduce){.ftab,.ftab .fl,.ftab.on .fl{transition:none}}
 /* Home riordinata: avvisi in alto, patrimonio in fondo */
 .hero .alerts{margin-top:14px}
-.ph-back{justify-content:flex-start;gap:6px}
-.ph-back .icon-btn{margin-left:-8px}
 .nw-tile{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:16px;color:var(--ink-2)}
 .nw-tile:active{transform:scale(.98)}
 .nw-tl{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
