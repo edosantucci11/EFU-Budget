@@ -24,6 +24,7 @@ Web app di budget personale per iPhone, sviluppata con Claude. Versione attuale:
 python3 build.py                                   # compone dist/ dai sorgenti
 python3 tests/collaudo.py                          # collaudo completo su dist/Budget.html
 python3 tests/confronto.py vecchia.html dist/Budget.html   # differenze visibili tra due versioni
+python3 tests/aggiornamento.py cartella-online dist/EFU-Budget   # nessuno perde i dati passando alla nuova versione
 ```
 
 - I test usano Playwright per Python: `pip install playwright && python3 -m playwright install chromium`.
@@ -67,7 +68,8 @@ python3 tests/confronto.py vecchia.html dist/Budget.html   # differenze visibili
    - Della Premium è entrata solo l'intestazione fissa traslucida.
 5. **Movimento:** rispetta sempre «Riduci movimento» (`RM()`, `prefers-reduced-motion`).
 6. **Nessuna funzione** che mandi i dati dell'utente a un server senza una richiesta esplicita.
-7. **Doppia verifica:** ogni modifica va provata in tema chiaro e scuro, a 390 px di larghezza (iPhone).
+7. **Dati intoccabili:** la chiave `budget.iphone.v1`, l'archivio foto `budget-foto` e l'indirizzo del sito non cambiano mai. **Prima di ogni pubblicazione** esegui `tests/aggiornamento.py` con la versione online (es. `git show origin/main:...` dei file pubblicati) e la nuova: deve finire con «TUTTO OK».
+8. **Doppia verifica:** ogni modifica va provata in tema chiaro e scuro, a 390 px di larghezza (iPhone).
 
 ## Pubblicazione (automatica)
 
