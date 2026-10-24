@@ -278,7 +278,7 @@ function importMapHTML(st) {
   h += `<p class="lead sm">${esc(st.name)}: ${ok.length} ${ok.length === 1 ? 'movimento' : 'movimenti'}${dates.length ? ` dal ${shortDate(dates[0])} al ${shortDate(dates[dates.length - 1])}` : ''}.</p>`;
   if (st.note) h += `<p class="warn-t">${esc(st.note)}</p>`;
   if (st.warn && !ok.length) h += `<p class="warn-t">${esc(st.warn)}</p>`;
-  h += `<div class="kgrid two"><div class="k"><span>Entrate</span><b class="num pos">${eur(inc)}</b></div><div class="k"><span>Uscite</span><b class="num neg">${eur(out)}</b></div></div>`;
+  h += `<div class="kgrid two"><div class="k"><span>Entrate</span><b class="num pos">${eur(inc)}</b></div><div class="k"><span>Uscite</span><b class="num out">${eur(out)}</b></div></div>`;
   if (skipped) h += `<p class="muted sm gap-t">${skipped} trasferimenti tra conti verranno saltati.</p>`;
   h += fieldLabel('Colonne del file') + sel('cDate', 'Data') + sel('cAmt', 'Importo') + sel('cIn', 'Entrate, se in una colonna a parte') + sel('cOut', 'Uscite, se in una colonna a parte') + sel('cDesc', 'Descrizione') + sel('cCat', 'Categoria') + sel('cType', 'Tipo (entrata o uscita)') + sel('cNote', 'Note');
   h += fieldLabel('Le date sono scritte come') + chips('order', [['dmy', 'Giorno/mese/anno'], ['mdy', 'Mese/giorno/anno']]);
@@ -294,7 +294,7 @@ function importMapHTML(st) {
   if (ok.length) h += fieldLabel('Anteprima') + `<div class="mlist">${ok.slice(0, 5).map(r => {
     const t = r.cat ? (st.catMap[r.type + '|' + r.cat] || 'new') : 'guess';
     const cn = t === 'new' ? r.cat : t === 'guess' ? 'categoria dalla descrizione' : t.slice(2);
-    return `<div class="mrow static"><span class="mrow-m"><span class="mt">${esc(r.desc || 'Senza descrizione')}</span><span class="ms">${esc(shortDate(r.date))}, ${esc(cn)}</span></span><span class="ma num ${r.type === 'in' ? 'pos' : 'neg'}">${eur(r.type === 'in' ? r.amount : -r.amount, { sign: true })}</span></div>`;
+    return `<div class="mrow static"><span class="mrow-m"><span class="mt">${esc(r.desc || 'Senza descrizione')}</span><span class="ms">${esc(shortDate(r.date))}, ${esc(cn)}</span></span><span class="ma num ${r.type === 'in' ? 'pos' : 'out'}">${eur(r.type === 'in' ? r.amount : -r.amount, { sign: true })}</span></div>`;
   }).join('')}</div>`;
   if (!D || !liquidAccounts().length) h += '<p class="muted sm gap-t">Creerò un «Conto principale» con saldo iniziale zero: potrai correggerlo nelle impostazioni.</p>';
   h += '<p class="muted sm gap-t">I movimenti già presenti, con stessa data, descrizione e importo, non verranno duplicati.</p>';
@@ -534,7 +534,7 @@ function inboxBlock() {
   if (!list.length) return '';
   const cards = list.slice(0, 4).map(x => {
     const c = cat(guessCategory(x.merchant || '', 'out'));
-    return `<div class="pcard"><button class="pc-top" data-a="inboxEdit" data-id="${x.id}">${avatar(c ? c.emoji : '💳', c ? c.color : null)}<span class="pc-t"><b>${esc(x.merchant || 'Pagamento')}</b><span class="muted">${esc(shortDate(x.date))}${x.card ? ', ' + esc(x.card) : ''}${c ? ', ' + esc(c.name) : ''}</span></span><b class="num neg">${eur(-x.amount)}</b></button><div class="pc-act"><button class="link sm" data-a="inboxSkip" data-id="${x.id}">Ignora</button><button class="btn dark sm" data-a="inboxDo" data-id="${x.id}">${c ? 'Registra' : 'Scegli categoria'}</button></div></div>`;
+    return `<div class="pcard"><button class="pc-top" data-a="inboxEdit" data-id="${x.id}">${avatar(c ? c.emoji : '💳', c ? c.color : null)}<span class="pc-t"><b>${esc(x.merchant || 'Pagamento')}</b><span class="muted">${esc(shortDate(x.date))}${x.card ? ', ' + esc(x.card) : ''}${c ? ', ' + esc(c.name) : ''}</span></span><b class="num out">${eur(-x.amount)}</b></button><div class="pc-act"><button class="link sm" data-a="inboxSkip" data-id="${x.id}">Ignora</button><button class="btn dark sm" data-a="inboxDo" data-id="${x.id}">${c ? 'Registra' : 'Scegli categoria'}</button></div></div>`;
   }).join('');
   const withG = list.filter(x => guessCategory(x.merchant || '', 'out')).length;
   return section('Pagamenti da controllare', `<div class="pcards">${cards}</div>${list.length > 4 ? `<p class="muted sm gap-t">E altri ${list.length - 4}.</p>` : ''}${withG > 1 ? `<button class="btn outline w gap-t" data-a="inboxAll">Registra i ${withG} con la categoria suggerita</button>` : ''}`);

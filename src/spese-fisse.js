@@ -34,7 +34,7 @@ function fxMonthRow(r) {
   }
   const tap = r.m ? `data-a="fxMovOpen" data-id="${r.m.id}"` : `data-a="fxEdit" data-id="${f.id}"`;
   const val = ty === 'in' ? eur(amt, { sign: true }) : ty === 'out' ? eur(-amt) : eur(amt);
-  return `<div class="fxm${r.skipped ? ' dim' : ''}"><button class="fxm-top" ${tap}>${avatar(em, tg && tg.color)}<span class="fxm-t"><b>${esc(title)}</b>${st}</span><b class="num fxm-v ${ty === 'in' ? 'pos' : ty === 'out' ? 'neg' : ''}">${approx ? '≈ ' : ''}${val}</b></button>${act ? `<div class="fxm-act">${act}</div>` : ''}</div>`;
+  return `<div class="fxm${r.skipped ? ' dim' : ''}"><button class="fxm-top" ${tap}>${avatar(em, tg && tg.color)}<span class="fxm-t"><b>${esc(title)}</b>${st}</span><b class="num fxm-v ${ty === 'in' ? 'pos' : ty === 'out' ? 'out' : ''}">${approx ? '≈ ' : ''}${val}</b></button>${act ? `<div class="fxm-act">${act}</div>` : ''}</div>`;
 }
 function fxTotals(rows, k) {
   const t = today(), s = { in: 0, out: 0, save: 0, fund: 0, leftOut: 0, leftIn: 0, done: 0, n: 0 };
@@ -55,7 +55,7 @@ function fxTotals(rows, k) {
   }
   const diff = s.in - (s.out - s.fund) - s.save, mn = monthName(k).toLowerCase(), row = (l, v, cls = '') => `<div class="r ${cls}"><span>${l}</span><b class="num">${v}</b></div>`;
   let h = `<div class="fx-tot"><p class="fx-tot-h">Totale di ${esc(mn)}</p>`;
-  h += row('Entrate fisse', eur(s.in, { sign: true }), 'pos') + row('Uscite fisse', eur(-s.out), 'neg');
+  h += row('Entrate fisse', eur(s.in, { sign: true }), 'pos') + row('Uscite fisse', eur(-s.out), 'out');
   if (s.fund > 0.004) h += `<p class="muted sm fx-note2">di cui ${eur(s.fund)} pagati con gli accantonamenti</p>`;
   if (s.save > 0.004) h += row('Risparmi, accantonamenti e PAC', eur(-s.save));
   h += row('Differenza', eur(diff, { sign: true }), 'sum ' + (diff >= 0 ? 'pos' : 'neg'));
@@ -85,7 +85,7 @@ function cardDebitRow(r) {
   else if (open) st = `<span class="st">Speso finora: il ciclo chiude il ${esc(shortDate(r.close))}, addebito il ${esc(shortDate(r.dd))}${su}</span>`;
   else st = `<span class="st">Estratto chiuso il ${esc(shortDate(r.close))}, addebito il ${esc(shortDate(r.dd))}${su}</span>`;
   const tap = r.m ? `data-a="fxMovOpen" data-id="${r.m.id}"` : `data-a="accEdit" data-id="${r.a.id}"`;
-  return `<div class="fxm"><button class="fxm-top" ${tap}>${avatar(r.a.emoji || '💳')}<span class="fxm-t"><b>Addebito ${esc(r.a.name)}</b>${st}</span><b class="num fxm-v neg">${open ? '≈ ' : ''}${eur(-r.amt)}</b></button></div>`;
+  return `<div class="fxm"><button class="fxm-top" ${tap}>${avatar(r.a.emoji || '💳')}<span class="fxm-t"><b>Addebito ${esc(r.a.name)}</b>${st}</span><b class="num fxm-v out">${open ? '≈ ' : ''}${eur(-r.amt)}</b></button></div>`;
 }
 function cardDebitSection(k) {
   const rows = cardDebitRows(k);

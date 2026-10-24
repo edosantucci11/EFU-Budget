@@ -1,6 +1,6 @@
 # EFU Budget — istruzioni per Claude Code
 
-Web app di budget personale per iPhone, sviluppata con Claude. Versione attuale: **2.3**.
+Web app di budget personale per iPhone, sviluppata con Claude. Versione attuale: **2.4**.
 
 ## Con chi lavori
 
@@ -24,6 +24,7 @@ Web app di budget personale per iPhone, sviluppata con Claude. Versione attuale:
 python3 build.py                                   # compone dist/ dai sorgenti
 python3 tests/collaudo.py                          # collaudo completo su dist/Budget.html
 python3 tests/confronto.py vecchia.html dist/Budget.html   # differenze visibili tra due versioni
+python3 tests/aggiornamento.py cartella-online dist/EFU-Budget   # nessuno perde i dati passando alla nuova versione
 ```
 
 - I test usano Playwright per Python: `pip install playwright && python3 -m playwright install chromium`.
@@ -67,7 +68,8 @@ python3 tests/confronto.py vecchia.html dist/Budget.html   # differenze visibili
    - Della Premium è entrata solo l'intestazione fissa traslucida.
 5. **Movimento:** rispetta sempre «Riduci movimento» (`RM()`, `prefers-reduced-motion`).
 6. **Nessuna funzione** che mandi i dati dell'utente a un server senza una richiesta esplicita.
-7. **Doppia verifica:** ogni modifica va provata in tema chiaro e scuro, a 390 px di larghezza (iPhone).
+7. **Dati intoccabili:** la chiave `budget.iphone.v1`, l'archivio foto `budget-foto` e l'indirizzo del sito non cambiano mai. **Prima di ogni pubblicazione** esegui `tests/aggiornamento.py` con la versione online (es. `git show origin/main:...` dei file pubblicati) e la nuova: deve finire con «TUTTO OK».
+8. **Doppia verifica:** ogni modifica va provata in tema chiaro e scuro, a 390 px di larghezza (iPhone).
 
 ## Pubblicazione (automatica)
 
@@ -103,3 +105,4 @@ Se cambia `src/ponte-prezzi.js`, l'utente deve incollarlo anche nel Worker su Cl
 | 2.1 | pulizia del codice, patrimonio netto, categorie che imparano, storico prezzi dal ponte |
 | 2.2 | intestazione fissa traslucida, riepilogo del conto toccando il conto in Home; eliminata la copia 1.9 |
 | 2.3 | calcoli nel tastierino, «Salva subito come», ripeti con pressione lunga sul +, scorri a destra per duplicare, Home personalizzabile, numero sull'icona, scadenze nel calendario (.ics), ricerche salvate, contrasti, VoiceOver sui grafici |
+| 2.4 | uscite in nero (rosso solo per gli avvisi), schede uniformi, nome sotto l'icona attiva, avvisi raggruppati, conti a griglia, «A fine mese» e «Al giorno» in cima alla Home, Oggi/Ieri nel tastierino, nomi categorie non spezzati; barra con la voce attiva più larga; Home riordinata, salvadanai e investimenti raggiunti anche dal riquadro Patrimonio. **Investimenti resta una voce della barra** (l'utente non vuole toglierla) |
