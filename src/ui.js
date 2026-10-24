@@ -37,6 +37,7 @@ const ICONS = {
   share: '<path d="M12 3.5v11M8 7.5l4-4 4 4"/><path d="M7 11H5.5v9.5h13V11H17"/>',
   info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8h.01"/>',
   spark: '<path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4M6 6l2.6 2.6M15.4 15.4 18 18M6 18l2.6-2.6M15.4 8.6 18 6"/>',
+  palette: '<path d="M12 3a9 9 0 1 0 0 18c1.3 0 1.8-1 1.3-2-.6-1.1 0-2.5 1.4-2.5H17a4 4 0 0 0 4-4C21 7 17 3 12 3Z"/><circle cx="7.5" cy="11.5" r="1.1"/><circle cx="10.5" cy="7.5" r="1.1"/><circle cx="15.5" cy="8" r="1.1"/>',
   eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
   eyeOff: '<path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c6.5 0 10 8 10 8a17.4 17.4 0 0 1-2.2 3.2"/><path d="M6.6 6.6C3.9 8.4 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m2 2 20 20"/>',
   trend: '<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
@@ -59,6 +60,7 @@ const ACT = {}, INP = {}, CHG = {}, VIEWS = {}, SHEETS = {};
 
 /* ---------- rendering principale ---------- */
 function render() {
+  applyStyle();
   const view = $('#view'), bar = $('#tabbar');
   if (!D) { bar.hidden = true; view.innerHTML = VIEWS.onboarding(); view.className = 'view onb-view'; return; }
   bar.hidden = false;

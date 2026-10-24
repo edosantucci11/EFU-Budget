@@ -5,7 +5,7 @@
    I dati restano sul dispositivo: localStorage per i dati,
    IndexedDB per le foto degli scontrini.
    ========================================================= */
-const APP_VERSION = '2.4';
+const APP_VERSION = '2.5';
 const IS_PACKAGE = true; // la build installabile imposta true
 const DATA_KEY = 'budget.iphone.v1';
 
