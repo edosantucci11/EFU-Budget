@@ -63,6 +63,13 @@ ATTENZIONE AI DATI
 - Usa sempre l'icona, non il link in Safari: Safari e l'app installata
   hanno memorie separate.
 
+NOVITÀ DELLA 2.5.2
+Piccole correzioni: nell'importazione due spese identiche dello stesso giorno
+non vengono più perse come doppioni; il calendario delle voci fisse mostra
+gli importi anche se nascosti nell'app; «Avanti» del tastierino resta spento
+con un risultato negativo; Movimenti e Statistiche passano al mese nuovo se
+l'app resta aperta a cavallo del mese; altri ritocchi.
+
 NOVITÀ DELLA 2.5
 Sei temi tra cui scegliere in Impostazioni > Tema: Nativo (di partenza),
 Inchiostro, Petrolio, Bento, Sera e Vetro. Con la 2.5.1 la Home torna come
