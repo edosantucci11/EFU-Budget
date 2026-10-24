@@ -1,6 +1,6 @@
 # EFU Budget — istruzioni per Claude Code
 
-Web app di budget personale per iPhone, sviluppata con Claude. Versione attuale: **2.5.1**.
+Web app di budget personale per iPhone, sviluppata con Claude. Versione attuale: **2.5.2**.
 
 ## Con chi lavori
 
@@ -109,3 +109,4 @@ Se cambia `src/ponte-prezzi.js`, l'utente deve incollarlo anche nel Worker su Cl
 | 2.4 | uscite in nero (rosso solo per gli avvisi), schede uniformi, nome sotto l'icona attiva, avvisi raggruppati, conti a griglia, «A fine mese» e «Al giorno» in cima alla Home, Oggi/Ieri nel tastierino, nomi categorie non spezzati; barra con la voce attiva più larga; Home riordinata, salvadanai e investimenti raggiunti anche dal riquadro Patrimonio. **Investimenti resta una voce della barra** (l'utente non vuole toglierla) |
 | 2.5 | Home a carte (puoi spendere, disponibile, fine mese) e sei temi: Nativo predefinito, Inchiostro, Petrolio, Bento, Sera, Vetro |
 | 2.5.1 | tolta la Home a carte, torna la disposizione della 2.4; i temi restano |
+| 2.5.2 | correzioni: doppioni nell'import, importi nascosti nel calendario, Avanti con risultato negativo, apostrofi, cambio mese, annulla dopo le impostazioni |
