@@ -64,10 +64,9 @@ ATTENZIONE AI DATI
   hanno memorie separate.
 
 NOVITÀ DELLA 2.5
-Home a carte: in alto quanto puoi ancora spendere nel mese, il disponibile con
-i conti e come finirà il mese, da scorrere di lato. Sei temi tra cui scegliere
-in Impostazioni > Tema: Nativo (di partenza), Inchiostro, Petrolio, Bento, Sera
-e Vetro.
+Sei temi tra cui scegliere in Impostazioni > Tema: Nativo (di partenza),
+Inchiostro, Petrolio, Bento, Sera e Vetro. Con la 2.5.1 la Home torna come
+nella 2.4.
 
 NOVITÀ DELLA 2.4
 Uscite in nero e rosso solo per gli avvisi; in Home sotto il disponibile la
