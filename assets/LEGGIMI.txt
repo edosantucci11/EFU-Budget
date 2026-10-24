@@ -63,6 +63,12 @@ ATTENZIONE AI DATI
 - Usa sempre l'icona, non il link in Safari: Safari e l'app installata
   hanno memorie separate.
 
+NOVITÀ DELLA 2.5
+Home a carte: in alto quanto puoi ancora spendere nel mese, il disponibile con
+i conti e come finirà il mese, da scorrere di lato. Sei temi tra cui scegliere
+in Impostazioni > Tema: Nativo (di partenza), Inchiostro, Petrolio, Bento, Sera
+e Vetro.
+
 NOVITÀ DELLA 2.4
 Uscite in nero e rosso solo per gli avvisi; in Home sotto il disponibile la
 previsione a fine mese e quanto puoi spendere al giorno; avvisi riuniti in un

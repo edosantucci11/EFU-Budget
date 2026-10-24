@@ -1,6 +1,6 @@
 # EFU Budget — istruzioni per Claude Code
 
-Web app di budget personale per iPhone, sviluppata con Claude. Versione attuale: **2.4**.
+Web app di budget personale per iPhone, sviluppata con Claude. Versione attuale: **2.5**.
 
 ## Con chi lavori
 
@@ -63,9 +63,10 @@ python3 tests/aggiornamento.py cartella-online dist/EFU-Budget   # nessuno perde
 1. **Versione:** si cambia solo in `src/core.js` (`APP_VERSION`); `build.py` aggiorna da sé la cache di `sw.js` e la prima riga di `LEGGIMI.txt`.
 2. **Ogni nuova versione** aggiunge la voce «Novità della versione X» in `src/guida.js`, come seconda voce della guida, e un paragrafo «NOVITÀ DELLA X» in `assets/LEGGIMI.txt`.
 3. **`dist/EFU-Budget/` resta piatta:** nessuna sottocartella e **mai un secondo `index.html`**. Una vecchia copia di sicurezza in `v1/` ha sostituito l'app durante il caricamento su GitHub; ora vale solo l'ultima versione.
-4. **Aspetto:** resta quello della 1.9 (bianco, corallo `#FF385C`, font di sistema, barra in basso a pillola) con il movimento aggiunto dalla 2.0.
-   - La direzione grafica «Tattile» e la variante «Premium» sono state accantonate: non reintrodurle senza richiesta.
-   - Della Premium è entrata solo l'intestazione fissa traslucida.
+4. **Aspetto (dalla 2.5):** sei temi scelti dall'utente in Impostazioni → Tema: **Nativo** (predefinito), Inchiostro, Petrolio, Bento, Sera, Vetro. Elenco in `src/temi.js`, stile in `style.css` sotto `:root[data-style="…"]` (ogni tema con chiaro e scuro). Il vecchio corallo resta solo nell'icona e nel marchio.
+   - Ogni modifica grafica va provata in tutti e sei i temi, chiaro e scuro.
+   - In cima alla Home del mese in corso ci sono tre carte da scorrere (`deckBlock()` in views.js): quanto puoi ancora spendere, disponibile con i conti, fine mese. I colori delle carte sono le variabili `--dc1`, `--dc2`, `--dc3` di ogni tema.
+   - Le direzioni «Tattile», «Premium», «Registro» e «Contrasto» sono state scartate: non reintrodurle senza richiesta.
 5. **Movimento:** rispetta sempre «Riduci movimento» (`RM()`, `prefers-reduced-motion`).
 6. **Nessuna funzione** che mandi i dati dell'utente a un server senza una richiesta esplicita.
 7. **Dati intoccabili:** la chiave `budget.iphone.v1`, l'archivio foto `budget-foto` e l'indirizzo del sito non cambiano mai. **Prima di ogni pubblicazione** esegui `tests/aggiornamento.py` con la versione online (es. `git show origin/main:...` dei file pubblicati) e la nuova: deve finire con «TUTTO OK».
@@ -106,3 +107,4 @@ Se cambia `src/ponte-prezzi.js`, l'utente deve incollarlo anche nel Worker su Cl
 | 2.2 | intestazione fissa traslucida, riepilogo del conto toccando il conto in Home; eliminata la copia 1.9 |
 | 2.3 | calcoli nel tastierino, «Salva subito come», ripeti con pressione lunga sul +, scorri a destra per duplicare, Home personalizzabile, numero sull'icona, scadenze nel calendario (.ics), ricerche salvate, contrasti, VoiceOver sui grafici |
 | 2.4 | uscite in nero (rosso solo per gli avvisi), schede uniformi, nome sotto l'icona attiva, avvisi raggruppati, conti a griglia, «A fine mese» e «Al giorno» in cima alla Home, Oggi/Ieri nel tastierino, nomi categorie non spezzati; barra con la voce attiva più larga; Home riordinata, salvadanai e investimenti raggiunti anche dal riquadro Patrimonio. **Investimenti resta una voce della barra** (l'utente non vuole toglierla) |
+| 2.5 | Home a carte (puoi spendere, disponibile, fine mese) e sei temi: Nativo predefinito, Inchiostro, Petrolio, Bento, Sera, Vetro |
