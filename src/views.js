@@ -31,19 +31,20 @@ VIEWS.home = () => {
   const mName = MESI[Number(k.slice(5)) - 1];
   let h = `<header class="ph home-h">${monthSwitcher()}<span class="h-acts"><button class="icon-btn" data-a="hideToggle" aria-label="${HIDE ? 'Mostra gli importi' : 'Nascondi gli importi'}">${ic(HIDE ? 'eyeOff' : 'eye', 22)}</button><button class="icon-btn" data-a="settings" aria-label="Impostazioni">${ic('settings', 22)}</button></span></header>`;
   h += notices();
-  if (isCur) h += `<section class="hero hero-deck">${deckBlock()}${homeOn('alerts') ? alertsBlock() : ''}${homeOn('strip') ? spendStrip(ms) : ''}</section>`;
-  else h += `<section class="hero">
+  h += `<section class="hero">
     <p class="hero-l">${isCur ? 'Disponibile oggi' : k < ck ? 'Disponibile a fine ' + mName : 'Disponibile con i movimenti già inseriti'}</p>
     <p class="hero-n">${bigAmount(avail)}</p>
     ${heroSub(gs.length, inGoals)}
-    ${accountPills(bal)}
+    ${isCur && homeOn('forecast') ? summaryRow() : ''}
+    ${isCur && homeOn('alerts') ? alertsBlock() : ''}
+    ${homeOn('pills') ? accountPills(bal) : ''}
     ${homeOn('strip') ? spendStrip(ms) : ''}
-    <div class="kpis">
+    ${homeOn('kpis') ? `<div class="kpis">
       <div class="kpi"><span>Entrate</span><b class="num pos">${eur(ms.inc)}</b></div>
       <div class="kpi"><span>Uscite</span><b class="num out">${eur(ms.out)}</b></div>
       <div class="kpi"><span>Risultato</span><b class="num">${eur(ms.net, { sign: true })}</b></div>
-    </div>
-    ${ms.rate != null ? `<p class="hero-rate">${ms.rate >= 0 ? 'Hai risparmiato il ' + pct(ms.rate) + ' delle entrate' : 'Hai speso più di quanto è entrato'}${ms.saved > 0 ? ', e messo ' + eur(ms.saved) + ' nei salvadanai' : ''}.</p>` : ''}
+    </div>` : ''}
+    ${ms.rate != null && homeOn('kpis') ? `<p class="hero-rate">${ms.rate >= 0 ? 'Hai risparmiato il ' + pct(ms.rate) + ' delle entrate' : 'Hai speso più di quanto è entrato'}${ms.saved > 0 ? ', e messo ' + eur(ms.saved) + ' nei salvadanai' : ''}.</p>` : ''}
   </section>`;
   const ctx = { k, isCur, bal, gs, ms };
   h += homeOrder(isCur).map(id => { const b = HOME_BLOCKS.find(x => x[0] === id); return b ? b[2](ctx) : ''; }).join('');
@@ -51,7 +52,7 @@ VIEWS.home = () => {
   return h;
 };
 /* ---------- Home: sezioni da mostrare e loro ordine ---------- */
-const HOME_HERO = [['alerts', 'Avvisi su budget e scadenze'], ['strip', 'Spese per categoria']];
+const HOME_HERO = [['forecast', 'Previsione e spesa al giorno'], ['alerts', 'Avvisi su budget e scadenze'], ['pills', 'Saldi dei conti'], ['strip', 'Spese per categoria'], ['kpis', 'Entrate, uscite e risultato']];
 const HOME_BLOCKS = [
   ['pending', 'Voci fisse da registrare', c => c.isCur ? pendingBlock() : ''],
   ['inbox', 'Pagamenti Apple Pay da controllare', c => c.isCur ? inboxBlock() : ''],
@@ -143,34 +144,22 @@ function spendStrip(ms) {
   return `<div class="strip" role="img" aria-label="${esc('Uscite per categoria: ' + parts.slice(0, 4).map(p => p.c.name + ' ' + pct(p.v / tot)).join(', ') + (parts.length > 4 ? ' e altre ' + (parts.length - 4) : ''))}">${parts.map(p => `<i style="flex-grow:${p.v};background:${p.c.color}" title="${esc(p.c.name)}"></i>`).join('')}</div>
   <div class="strip-l">${parts.slice(0, 3).map(p => `<span><i style="background:${p.c.color}"></i>${esc(p.c.name)} ${pct(p.v / tot)}</span>`).join('')}${parts.length > 3 ? `<span class="muted">e altre ${parts.length - 3}</span>` : ''}</div>`;
 }
-/* ---------- Home (2.5): carte in alto da scorrere di lato ----------
-   1) quanto puoi ancora spendere  2) disponibile e conti  3) fine mese */
-function deckData() {
-  const k = curMk(), t = today(), bal = balancesAt(t), la = liquidAccounts(), ms = monthStats(k);
-  const cs = activeCats('out').filter(c => c.budget > 0), tb = sum(cs.map(c => c.budget)), ts = sum(cs.map(c => ms.byCat[c.id] || 0));
-  const day = Number(t.slice(8)), dm = dim(k), gs = goals();
-  return { k, bal, la, ms, tb, ts, rest: r2(tb - ts), day, dm, left: dm - day + 1, f: forecast(), avail: sum(la.map(a => bal[a.id])), inG: sum(gs.map(g => bal[g.id] || 0)), mName: MESI[Number(k.slice(5)) - 1] };
+/* riassunto sotto il disponibile: come finisce il mese e quanto si può spendere al giorno */
+function dailyInfo() {
+  const ck = curMk(), t = today(), left = dim(ck) - Number(t.slice(8)) + 1;
+  const cs = activeCats('out').filter(c => c.budget > 0);
+  if (cs.length) {
+    const ms = monthStats(ck), rest = r2(sum(cs.map(c => c.budget)) - sum(cs.map(c => ms.byCat[c.id] || 0)));
+    if (rest < 0) return { v: 'Superato', cls: 'neg', s: 'di ' + eur0(-rest) + ' questo mese', p: 'budget' };
+    return { v: '≈ ' + eur0(rest / left), cls: '', s: 'restano ' + eur0(rest) + ' in ' + left + (left === 1 ? ' giorno' : ' giorni'), p: 'budget' };
+  }
+  const end = forecast().end;
+  return { v: '≈ ' + eur0(Math.max(0, end) / left), cls: end < 0 ? 'neg' : '', s: 'per finire il mese sopra zero', p: 'fixed' };
 }
-function deckBlock() {
-  const d = deckData(), hasB = d.tb > 0, over = d.rest < 0, pace = hasB ? d.ts / d.tb : 0, time = d.day / d.dm, fast = !over && pace > time + 0.05;
-  const end = `<button class="dcard dc-3" data-a="planGo" data-p="fixed"><span class="dc-l">A fine ${d.mName} avrai</span><p class="hero-n dc-big">${bigAmount(d.f.end)}</p><span class="dc-s">${d.f.count ? `con ${d.f.count} ${d.f.count === 1 ? 'voce fissa' : 'voci fisse'} ancora da registrare` : 'voci fisse tutte registrate'}</span><span class="dc-kpi"><span>Entrate<b class="num">${eur0(d.ms.inc)}</b></span><span>Uscite<b class="num">${eur0(d.ms.out)}</b></span><span>Risultato<b class="num">${eur0(d.ms.net)}</b></span></span></button>`;
-  const spend = hasB ? `<button class="dcard dc-1" data-a="planGo" data-p="budget"><span class="dc-l">${over ? 'Budget di ' + d.mName + ' superato di' : 'Puoi ancora spendere'}</span><p class="hero-n dc-big">${bigAmount(Math.abs(d.rest))}</p>
-    <span class="dc-s">${over ? 'Da qui a fine mese ogni spesa va oltre il budget' : `circa <b>${eur0(d.rest / d.left)}</b> al giorno per ${d.left} ${d.left === 1 ? 'giorno' : 'giorni'}`}</span>
-    <span class="dc-track" role="img" aria-label="${esc('Spesi ' + eur0(d.ts) + ' su ' + eur0(d.tb) + ', oggi è il giorno ' + d.day + ' di ' + d.dm)}"><i style="width:${Math.min(100, pace * 100)}%"></i><em style="left:${time * 100}%"></em></span>
-    <span class="dc-foot"><span class="dc-sp">Spesi ${eur0(d.ts)} di ${eur0(d.tb)}</span><span class="dc-chip ${over || fast ? 'hot' : ''}">${over ? 'Oltre il budget' : fast ? 'Più veloce del mese' : 'In linea'}</span></span></button>`
-    : `<div class="dcard dc-1"><span class="dc-l">Quanto puoi spendere</span><p class="dc-s dc-empty">Imposta un budget per le categorie di spesa e qui vedrai ogni giorno quanto ti resta, e se stai spendendo più in fretta del mese.</p><button class="dc-btn" data-a="planGo" data-p="budget">Imposta il budget</button></div>`;
-  const shown = d.la.slice(0, 3), more = d.la.length - shown.length;
-  const money = `<div class="dcard dc-2"><span class="dc-l">Disponibile oggi</span><p class="hero-n dc-big">${bigAmount(d.avail)}</p><span class="dc-rows">${shown.map(a => `<button class="dc-row" data-a="accSum" data-id="${a.id}"><span>${esc(a.emoji || '🏦')} ${esc(a.name)}</span><b class="num">${eur(d.bal[a.id])}</b></button>`).join('')}${more > 0 ? `<button class="dc-row" data-a="nwOpen" data-k="${d.k}"><span>e altri ${more} conti</span>${ic('right', 16)}</button>` : ''}${d.inG ? `<button class="dc-row" data-a="planGo" data-p="goals"><span>🐷 Nei salvadanai</span><b class="num">${eur(d.inG)}</b></button>` : ''}</span></div>`;
-  const cards = hasB ? [spend, money, end] : [money, end, spend];
-  return `<div class="deck" role="group" aria-label="Riepilogo del mese: scorri per le altre carte">${cards.join('')}</div><div class="ddots" aria-hidden="true">${cards.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>`;
+function summaryRow() {
+  const f = forecast(), d = dailyInfo();
+  return `<div class="sumrow"><button class="sum-c" data-a="planGo" data-p="fixed"><span>A fine mese</span><b class="num ${f.end < 0 ? 'neg' : ''}">${eur(f.end)}</b><small>${f.count ? `con ${f.count} ${f.count === 1 ? 'voce fissa' : 'voci fisse'} da registrare` : 'voci fisse tutte registrate'}</small></button><button class="sum-c" data-a="planGo" data-p="${d.p}"><span>${d.p === 'budget' ? 'Budget al giorno' : 'Al giorno'}</span><b class="num ${d.cls}">${d.v}</b><small>${d.s}</small></button></div>`;
 }
-// i puntini seguono la carta visibile
-document.addEventListener('scroll', e => {
-  const t = e.target;
-  if (!t.classList || !t.classList.contains('deck')) return;
-  const w = t.firstElementChild ? t.firstElementChild.offsetWidth + 10 : 1, i = Math.round(t.scrollLeft / w);
-  t.parentNode.querySelectorAll('.ddots i').forEach((x, j) => x.classList.toggle('on', j === i));
-}, true);
 function alertsBlock() {
   const al = alerts(), t = today();
   const late = pendingFixed(curMk()).filter(p => p.due < t);

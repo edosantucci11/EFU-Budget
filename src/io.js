@@ -108,7 +108,7 @@ const SETTINGS = {
   home() {
     let h = sheetHead('Sezioni della Home', { back: true, grab: false }) + '<div class="sheet-body">';
     h += swRow('Prima ciò che è urgente', 'homeUrgent', D.settings.homeUrgent !== false, 'Voci fisse scadute, budget superati e pagamenti da controllare vanno in cima, solo quando ci sono', 'homeUrgentTog');
-    h += `<h3 class="set-h">Sotto le carte in alto</h3><div class="list">${HOME_HERO.map(([id, l]) => `<div class="row static hm-row"><span class="rt">${l}</span>${homeSw(id, homeOn(id), l)}</div>`).join('')}</div>`;
+    h += `<h3 class="set-h">Nel riquadro in alto</h3><div class="list">${HOME_HERO.map(([id, l]) => `<div class="row static hm-row"><span class="rt">${l}</span>${homeSw(id, homeOn(id), l)}</div>`).join('')}</div>`;
     const o = homeSaved();
     h += `<h3 class="set-h">Sotto, in questo ordine</h3><div class="list">${o.map((id, i) => { const b = HOME_BLOCKS.find(x => x[0] === id), on = homeOn(id); return `<div class="row static hm-row ${on ? '' : 'dim'}"><span class="rt">${b[1]}</span><button class="icon-btn sm" data-a="homeMove" data-k="${id}" data-d="-1" aria-label="Sposta su ${esc(b[1])}" ${i ? '' : 'disabled'}>${ic('up', 18)}</button><button class="icon-btn sm" data-a="homeMove" data-k="${id}" data-d="1" aria-label="Sposta giù ${esc(b[1])}" ${i < o.length - 1 ? '' : 'disabled'}>${ic('down', 18)}</button>${homeSw(id, on, b[1])}</div>`; }).join('')}</div>`;
     h += '<p class="foot-note">Le sezioni vuote non compaiono comunque: per esempio «Carta di credito» si vede solo se hai una carta.</p>';
