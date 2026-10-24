@@ -356,19 +356,19 @@ ACT.anyGo = el => {
   invalidate();
   const accId = acc(st.accountId) && !isGoal(acc(st.accountId)) ? st.accountId : defaultAccountId();
   const sig = m => [m.date, String(m.description != null ? m.description : m.desc || '').trim().toLowerCase(), r2(m.amount).toFixed(2)].join('|');
-  const seen = new Set(D.movements.map(sig));
+  const isDup = sigCounter(D.movements, sig);
   const byName = (type, name) => D.categories.find(c => !c.archived && c.type === type && c.name.toLowerCase() === name.toLowerCase());
   let added = 0, dup = 0;
   const now = Date.now();
   for (const r of recs) {
-    if (seen.has(sig(r))) { dup++; continue; }
+    if (isDup(sig(r))) { dup++; continue; }
     const t = r.cat ? (st.catMap[r.type + '|' + r.cat] || defaultMap(r.type, r.cat)) : 'guess';
     let c = null;
     if (t === 'guess') c = cat(guessCategory(r.desc, r.type));
     else { const name = t === 'new' ? r.cat : t.slice(2); c = byName(r.type, name); if (!c) { c = newCategory(name, r.type, 0); D.categories.push(c); } }
     if (!c) c = fallbackCat(r.type);
     D.movements.push({ id: uid(), ts: now + added, type: r.type, date: r.date, amount: r.amount, description: r.desc, note: r.note, tags: [], accountId: accId, categoryId: c.id });
-    seen.add(sig(r)); added++;
+    added++;
   }
   save(); closeSheet(sh);
   UI.tab = 'home'; UI.month = curMk();

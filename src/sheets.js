@@ -111,7 +111,7 @@ function amtKey(sh, k) {
   const el = sheetEl(sh);
   $$('.qp-c', el).forEach(b => { b.disabled = !(strToNum(st.amt) > 0); });
   $('.amt', el).innerHTML = amtDisplay(st);
-  const b = $('.amt-next', el); if (b) b.disabled = !(strToNum(s) > 0);
+  const b = $('.amt-next', el); if (b) b.disabled = !(strToNum(st.amt) > 0);
   const eq = $('.fx-eq', el); if (eq) eq.textContent = fxEq(st);
 }
 // tastierino: la cifra salta, l'importo trema se il tasto non si può usare
@@ -825,7 +825,7 @@ ACT.goalDelete = el => {
   const sh = sheetOf(el), g = acc(sh.st.id), v = balancesAt(today())[g.id] || 0;
   const n = D.movements.filter(m => m.accountId === g.id || m.toAccountId === g.id).length;
   if (Math.abs(v) >= 0.01 && n) return toast(`Prima riporta i ${eur(v)} su un conto con «Preleva»`);
-  confirmBox(`Eliminare «${g.name}»?`, n ? 'I movimenti restano nello storico.' : 'Il salvadanaio è vuoto.', 'Elimina', () => {
+  confirmBox(`Eliminare «${g.name}»?`, n ? 'I movimenti restano nello storico.' : Math.abs(v) >= 0.01 ? `Dentro ci sono ${eur(v)} del saldo iniziale: non verranno più contati.` : 'Il salvadanaio è vuoto.', 'Elimina', () => {
     if (n) g.archived = true; else D.accounts = D.accounts.filter(x => x !== g);
     D.fixed = D.fixed.filter(f => f.toAccountId !== g.id || f.type !== 'transfer');
     save(); UI.sheets.filter(s => s.type === 'goalView' || s.type === 'goal').forEach(s => closeSheet(s)); refresh(); toast('Salvadanaio eliminato');
@@ -878,7 +878,7 @@ ACT.personDelete = el => {
   const sh = sheetOf(el), p = person(sh.st.id);
   const used = D.movements.some(m => (m.split && m.split.shares && m.split.shares[p.id] != null) || m.paidBy === p.id || m.personId === p.id);
   if (used) return toast(`${p.name} compare in alcune spese divise: non si può eliminare.`);
-  confirmBox(`Eliminare ${esc(p.name)}?`, '', 'Elimina', () => { D.people = D.people.filter(x => x !== p); save(); UI.sheets.filter(s => s.type === 'personView' || s.type === 'person').forEach(s => closeSheet(s)); refresh(); });
+  confirmBox(`Eliminare ${p.name}?`, '', 'Elimina', () => { D.people = D.people.filter(x => x !== p); save(); UI.sheets.filter(s => s.type === 'personView' || s.type === 'person').forEach(s => closeSheet(s)); refresh(); });
 };
 ACT.personOpen = el => openSheet('personView', { id: el.dataset.id });
 function balanceText(b, name) {

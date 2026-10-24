@@ -5,7 +5,7 @@
    I dati restano sul dispositivo: localStorage per i dati,
    IndexedDB per le foto degli scontrini.
    ========================================================= */
-const APP_VERSION = '2.5.1';
+const APP_VERSION = '2.5.2';
 const IS_PACKAGE = true; // la build installabile imposta true
 const DATA_KEY = 'budget.iphone.v1';
 
@@ -505,6 +505,12 @@ function allTags() {
     for (const m of D.movements) for (const t of (m.tags || [])) n[t] = (n[t] || 0) + 1;
     return Object.keys(n).sort((a, b) => n[b] - n[a] || a.localeCompare(b));
   });
+}
+// movimenti già presenti per firma, contati: due spese uguali nello stesso file restano due
+function sigCounter(list, sig) {
+  const n = new Map();
+  for (const m of list) { const k = sig(m); n.set(k, (n.get(k) || 0) + 1); }
+  return k => { const c = n.get(k) || 0; if (c) n.set(k, c - 1); return c > 0; };
 }
 const normTag = t => String(t || '').trim().replace(/^#+/, '').toLowerCase().replace(/[\s,]+/g, '-').replace(/[^\p{L}\p{N}_-]/gu, '').slice(0, 24);
 

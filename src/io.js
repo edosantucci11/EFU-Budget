@@ -22,7 +22,7 @@ ACT.statsMode = el => { UI.statsMode = el.dataset.k; if (UI.statsMode === 'year'
 ACT.statsYear = el => { UI.statsYear += Number(el.dataset.d); render(); };
 ACT.goMonth = el => { UI.month = el.dataset.k; UI.statsMode = 'month'; if (UI.tab !== 'stats') goTab('stats'); else { render(); window.scrollTo(0, 0); } };
 ACT.demoExit = () => confirmBox('Iniziare con i tuoi dati?', 'I dati di esempio verranno cancellati da questo dispositivo.', "Cancella l'esempio", () => { wipeStorage(); D = null; UI.tab = 'home'; UI.month = curMk(); UI.filters = blankFilters(); render(); });
-ACT.installClose = () => { D.settings.installHintClosed = true; save(); render(); };
+ACT.installClose = () => { D.settings.installHintClosed = true; save({ undo: false }); render(); };
 ACT.recap = el => openSheet('recap', { k: el.dataset.k });
 ACT.onbStart = () => openSheet('start', {});
 ACT.onbImport = () => openSheet('importAny', {});
@@ -146,7 +146,7 @@ const SETTINGS = {
     return h + '</div>';
   }
 };
-ACT.lockAfter = el => { D.settings.lockAfter = Number(el.dataset.v); save(); refresh(); };
+ACT.lockAfter = el => { D.settings.lockAfter = Number(el.dataset.v); save({ undo: false }); refresh(); };
 ACT.openExport = () => openSheet('export', {});
 ACT.openImport = () => openSheet('import', {});
 ACT.backup = () => openSheet('backup', {});
@@ -412,11 +412,11 @@ function applyImport(res, opts = {}) {
     D.accounts.push(a); D.settings.defaultAccount = a.id; accId = a.id;
   }
   const sig = m => [m.date, (m.description || '').trim().toLowerCase(), r2(m.amount).toFixed(2)].join('|');
-  const seen = new Set(D.movements.map(sig));
+  const isDup = sigCounter(D.movements, sig);
   let added = 0, dup = 0, unknown = 0, toGoal = 0;
   const now = Date.now();
   for (const x of res.movs) {
-    if (seen.has(sig(x))) { dup++; continue; }
+    if (isDup(sig(x))) { dup++; continue; }
     const m = { id: uid(), ts: now + added, date: x.date, amount: r2(x.amount), description: x.description, note: '', tags: [], accountId: accId };
     if (isSav(x.category) && (!byName.get(x.category.toLowerCase()) || byName.get(x.category.toLowerCase()).type === 'out')) {
       goal = goal || ensureGoal(x.category);
@@ -431,7 +431,7 @@ function applyImport(res, opts = {}) {
       }
       Object.assign(m, { type: c.type, categoryId: c.id });
     }
-    D.movements.push(m); seen.add(sig(x)); added++;
+    D.movements.push(m); added++;
   }
   save();
   return { added, dup, unknown, toGoal };

@@ -124,7 +124,7 @@ function fixedIcs() {
     for (const o of occurrences(f, ck, to)) {
       if (o.due < t) continue;
       L.push('BEGIN:VEVENT', 'UID:' + f.id + '-' + o.k + '@efu-budget', 'DTSTAMP:' + stamp, 'DTSTART;VALUE=DATE:' + d8(o.due), 'DTEND;VALUE=DATE:' + d8(addDays(o.due, 1)),
-        'SUMMARY:' + e(f.name + ' · ' + (f.variable ? 'circa ' : '') + eur(amt)), 'DESCRIPTION:' + e(what + ' fissa di EFU Budget. Quando arriva registrala dall\'app.'), 'TRANSP:TRANSPARENT',
+        'SUMMARY:' + e(f.name + ' · ' + (f.variable ? 'circa ' : '') + eur(amt, { show: true })), 'DESCRIPTION:' + e(what + ' fissa di EFU Budget. Quando arriva registrala dall\'app.'), 'TRANSP:TRANSPARENT',
         'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + e(f.name), 'TRIGGER:PT9H', 'END:VALARM', 'END:VEVENT');
       n++;
     }

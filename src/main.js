@@ -12,6 +12,8 @@ function onVis() {
     UI.day = today();
     invalidate();
     if (UI.month === old) UI.month = curMk();
+    if (UI.filters.period === 'm:' + old) UI.filters.period = 'm:' + curMk();
+    if (UI.statsYear === Number(old.slice(0, 4))) UI.statsYear = Number(curMk().slice(0, 4));
     if (D) { if (syncAuto()) save({ undo: false }); INV_ASKED = false; refresh(); setTimeout(invReminderCheck, 800); }
   }
 }
